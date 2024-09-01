@@ -1,10 +1,10 @@
 import { useState } from "react";
-import FormField from "../components/form_field";
 import { field_errors } from "../utils/constants";
 import { useForm } from "react-hook-form";
 import { BackendError, LoginFormSubmit } from "../utils/types";
 import { useNavigate } from "react-router-dom";
-import { login_user, parse_errors } from "../utils/functions";
+import { login_user} from "../utils/functions/user";
+import { parse_errors } from "../utils/functions/functions";
 import { isAxiosError } from "axios";
 import ErrorPopup from "../components/error_modal";
 

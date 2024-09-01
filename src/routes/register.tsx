@@ -3,14 +3,13 @@ import { field_errors, field_patterns } from "../utils/constants";
 import { useState } from "react";
 import {
 	BackendError,
-	ErrorResult,
-	HttpError,
 	RegisterFormSubmit,
 } from "../utils/types";
-import { parse_errors, register_user } from "../utils/functions";
+import { register_user } from "../utils/functions/user";
+import { parse_errors } from "../utils/functions";
 import { useNavigate } from "react-router-dom";
 import ErrorPopup from "../components/error_modal";
-import { AxiosError, isAxiosError } from "axios";
+import { isAxiosError } from "axios";
 
 function Register() {
 	const {
@@ -42,7 +41,8 @@ function Register() {
 							console.log(err);
 							if (isAxiosError(err) && err.response && err.response.data.errors) {
 								let contains_username_error = false;
-								err.response.data.errors.forEach(
+								const errors_obj = err.response.data.errors
+								errors_obj.forEach(
 									(err: BackendError) => {
 										if (err.path === "username")
 											contains_username_error = true;
@@ -57,7 +57,7 @@ function Register() {
 
 								// unknown error
 								setUnknownErrorMessage(
-									parse_errors(err.errors),
+									parse_errors(errors_obj),
 								);
 							}
 						}
