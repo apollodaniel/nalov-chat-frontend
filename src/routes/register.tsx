@@ -1,12 +1,12 @@
 import { useForm } from "react-hook-form";
-import { field_errors, field_patterns } from "../utils/constants";
+import { field_errors, field_patterns, modal_errors } from "../utils/constants";
 import { useState } from "react";
 import {
 	BackendError,
 	RegisterFormSubmit,
 } from "../utils/types";
 import { register_user } from "../utils/functions/user";
-import { parse_errors } from "../utils/functions";
+import { parse_errors } from "../utils/functions/functions";
 import { useNavigate } from "react-router-dom";
 import ErrorPopup from "../components/error_modal";
 import { isAxiosError } from "axios";
@@ -141,7 +141,7 @@ function Register() {
 			</div>
 			<ErrorPopup
 				visible={unknownErrorMessage ? true : false}
-				title="A error occurred when trying to register in"
+				title={modal_errors.register.title}
 				content={unknownErrorMessage || ""}
 			/>
 		</main>

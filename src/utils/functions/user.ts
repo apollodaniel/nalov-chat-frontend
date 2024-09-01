@@ -1,6 +1,6 @@
 import axios from "axios";
 import { get_current_host } from "./functions";
-import { HttpError, HttpResult, LoginResult, RefreshAuthTokenResult, UserCredentials } from "../types";
+import { HttpError, HttpResult, LoginResult, RefreshAuthTokenResult, User, UserCredentials, UserTemplate } from "../types";
 
 export async function register_user(user: UserTemplate) {
 	const result = await axios.post(
@@ -41,7 +41,7 @@ export async function login_user(user: UserCredentials) {
 	window.sessionStorage.setItem("auth_token", _login_result.auth_token);
 }
 
-export async function refresh_user_token() {
+export async function refresh_user_token(): Promise<string> {
 	const refresh_token = window.localStorage.getItem("refresh_token");
 	if (!refresh_token) {
 		window.sessionStorage.clear();
@@ -63,6 +63,8 @@ export async function refresh_user_token() {
 
 	const refresh_token_result = result.data as RefreshAuthTokenResult;
 	window.sessionStorage.setItem("auth_token", refresh_token_result.auth_token);
+
+	return refresh_token_result.auth_token;
 }
 
 
@@ -81,12 +83,16 @@ export async function check_user_logged_in(){
 		await refresh_user_token();
 	}
 }
-export async function get_auth_token(){
+export async function get_auth_token(): Promise<string>{
 	let auth_token = window.sessionStorage.getItem("auth_token");
-	const refresh_token = window.localStorage.getItem("refresh_token");
-	if(auth_token && refresh_token)
-		return;
-	await refresh_user_token();
+	if(!auth_token)
+		await refresh_user_token();
+	auth_token = window.sessionStorage.getItem("auth_token");
+	if(!auth_token){
+		throw new Error("error while trying to get user auth token");
+	}
+
+	return auth_token;
 }
 
 export async function verify_token(token: string, type: "Refresh" | "Auth"): Promise<boolean>{
@@ -98,4 +104,25 @@ export async function verify_token(token: string, type: "Refresh" | "Auth"): Pro
 		}
 	);
 	return result.status >= 200 && result.status < 300;
+}
+
+
+export async function get_available_users(): Promise<User[]>{
+	const token = await get_auth_token();
+
+	const response = await axios.get(
+		get_current_host("/api/users"),
+		{
+			headers: {
+				Authorization: `Bearer ${token}`
+			}
+		}
+	);
+
+	const result = new HttpResult(response);
+	if(result.sucess){
+		return result.data.users as User[];
+	}
+
+	throw new HttpError(result);
 }

@@ -1,5 +1,7 @@
 import { AxiosResponse } from "axios";
 
+
+// templates
 export type UserTemplate = {
 	id?: string,
 	name: string,
@@ -7,11 +9,19 @@ export type UserTemplate = {
 	password: string,
 };
 
+export type User = {
+	id: string,
+	name: string,
+	username: string
+};
+
 export type UserCredentials = {
 	username: string,
 	password: string
 };
 
+
+// errors
 export class HttpError extends Error{
 	data: any;
 	status_code: number;
@@ -22,13 +32,18 @@ export class HttpError extends Error{
 	}
 }
 
-
 export type BackendError = {type: string, path: string, location: string, msg: string};
 
 export type ErrorResult = {
 	errors: BackendError[]
 }
 
+export type FieldError = {
+	error_msg: string,
+	check?: RegExp
+};
+
+// result
 export class HttpResult {
 	sucess: boolean;
 	data: any;
@@ -40,7 +55,6 @@ export class HttpResult {
 	}
 }
 
-
 export type LoginResult = {
 	refresh_token: string,
 	auth_token: string
@@ -49,11 +63,9 @@ export type RefreshAuthTokenResult = {
 	auth_token: string
 };
 
-export type FieldError = {
-	error_msg: string,
-	check?: RegExp
-};
 
+
+// forms
 export type RegisterFormSubmit = {
 	name: string,
 	username: string,
@@ -65,3 +77,7 @@ export type LoginFormSubmit = {
 	username: string,
 	password: string
 }
+
+export type ChatResult = {
+	chats: string[]
+};

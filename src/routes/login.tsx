@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { field_errors } from "../utils/constants";
+import { field_errors, modal_errors } from "../utils/constants";
 import { useForm } from "react-hook-form";
 import { BackendError, LoginFormSubmit } from "../utils/types";
 import { useNavigate } from "react-router-dom";
@@ -66,7 +66,7 @@ function Login() {
 				</form>
 				<ErrorPopup
 					visible={!Object.is(unknownError, undefined)}
-					title="A error occurred when trying to register in"
+					title={modal_errors.login.title}
 					content={unknownError || ""}
 				/>
 			</div>

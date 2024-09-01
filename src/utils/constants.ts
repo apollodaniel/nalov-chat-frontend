@@ -11,6 +11,18 @@ export const field_errors = {
 	unknown_username: "Nome de usuário desconhecido.",
 };
 
+export const modal_errors = {
+	register: {
+		title: "A error occurred when trying to register in"
+	},
+	login: {
+		title: "A error occurred when trying to login"
+	},
+	home: {
+		title: "A error occurred when trying to get chats"
+	}
+}
+
 export const field_patterns = {
 	username: /(^[a-zA-Z0-9]+([_ -]?[a-zA-Z0-9])*.{4,})$/,
 	name: /^[A-Z][a-z]+ [A-Z][a-z]+$/,
