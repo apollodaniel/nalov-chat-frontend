@@ -60,3 +60,8 @@ export type RegisterFormSubmit = {
 	password: string,
 	confirm_password: string
 }
+
+export type LoginFormSubmit = {
+	username: string,
+	password: string
+}

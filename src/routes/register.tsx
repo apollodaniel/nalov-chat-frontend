@@ -10,6 +10,7 @@ import {
 import { parse_errors, register_user } from "../utils/functions";
 import { useNavigate } from "react-router-dom";
 import ErrorPopup from "../components/error_modal";
+import { AxiosError, isAxiosError } from "axios";
 
 function Register() {
 	const {
@@ -39,7 +40,7 @@ function Register() {
 							navigate("/")
 						} catch (err: any) {
 							console.log(err);
-							if (err.response && err.response.data.errors) {
+							if (isAxiosError(err) && err.response && err.response.data.errors) {
 								let contains_username_error = false;
 								err.response.data.errors.forEach(
 									(err: BackendError) => {
@@ -97,7 +98,7 @@ function Register() {
 					<div className="form-floating m-0">
 						<input
 							className="form-control"
-							type="text"
+							type="password"
 							{...register("password", {
 								pattern: field_patterns.password,
 							})}
@@ -112,7 +113,7 @@ function Register() {
 					<div className="form-floating m-0">
 						<input
 							className="form-control"
-							type="text"
+							type="password"
 							{...register("confirm_password", {
 								validate: (val) => {
 									if (watch("password") != val) {
