@@ -3,7 +3,7 @@ import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css'
 import { Outlet, useLocation, useNavigate, useOutlet } from 'react-router-dom'
-import { get_auth_token } from './utils/functions'
+import { check_user_logged_in, get_auth_token } from './utils/functions'
 
 function App() {
 	const [loading, setLoading] = useState(true);
@@ -11,16 +11,21 @@ function App() {
 	const navigate = useNavigate();
 	useEffect(
 		()=>{
-			if(location.pathname === "/register" || location.pathname === "/login"){
-				setLoading(false);
-				return;
-			}
-			get_auth_token().catch((error: any) => {
-				navigate("/login");
-				setLoading(false);
-			}).then(()=>{
-				setLoading(false);
-			});
+			new Promise(async (r, rj) =>{
+				try{
+					setLoading(true);
+					await check_user_logged_in()
+					if(location.pathname === "/register" || location.pathname === "/login"){
+						navigate("/");
+					}
+					setLoading(false);
+				}catch(err: any){
+					if(location.pathname !== "/login" && location.pathname !== "/register"){
+						navigate("/login");
+					}
+					setLoading(false);
+				}
+			}).finally(()=>console.log("stoped"));
 		},
 		[location]
 	);
