@@ -2,18 +2,21 @@ import { useEffect, useState } from "react";
 import { get_user_chats } from "../utils/functions/chat";
 import { isAxiosError } from "axios";
 import { parse_errors } from "../utils/functions/functions";
-import { BackendError, Chat, User } from "../utils/types";
+import { BackendError,  ChatType, User } from "../utils/types";
 import ErrorPopup from "../components/error_modal";
 import { DATETIME_FORMATTER, modal_errors } from "../utils/constants";
 import { get_available_users } from "../utils/functions/user";
+import { useNavigate } from "react-router-dom";
 
 function Home(){
 	// main page
 
-	const [chats, setChats] = useState<Chat[]>([]);
+	const [chats, setChats] = useState<ChatType[]>([]);
 	const [users, setUsers] = useState<User[]>([]);
 	const [errorText, setErrorText] = useState<string | undefined>(undefined);
 	const [search, setSearch] = useState<string>("");
+
+	const navigate = useNavigate();
 
 	const get_users = async ()=>{
 		try{
@@ -65,7 +68,9 @@ function Home(){
 					// chats
 					chats.map(c=>
 						(
-							<li className="list-group-item d-flex flex-column">
+							<li className="list-group-item list-group-item-action d-flex flex-column" onClick={()=>{
+									navigate(`/chat/${c.user.id}`);
+								}}>
 								<div className="d-flex flex-row justify-content-between">
 									<div className="fw-bold h4">{c.user.name}</div>
 									<p>{c.user.username}</p>
@@ -81,7 +86,9 @@ function Home(){
 					// users
 					users.map((u)=>
 						(
-							<li className="list-group-item">
+							<li className="list-group-item list-group-item-action" onClick={()=>{
+									navigate(`/chat/${u.id}`);
+								}}>
 								<div className="fw-bold h4">{u.username}</div>
 								{u.name}
 							</li>

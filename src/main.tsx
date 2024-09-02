@@ -7,6 +7,7 @@ import Login from './routes/login.tsx'
 import NotFound from './routes/not_found.tsx'
 import Register from './routes/register.tsx'
 import Home from './routes/home.tsx'
+import Chat from './routes/chat.tsx'
 
 const router = createBrowserRouter([
 	{
@@ -17,6 +18,10 @@ const router = createBrowserRouter([
 			{
 				path: "/",
 				element: <Home />
+			},
+			{
+				path: "/chat/:id",
+				element: <Chat />
 			},
 			{
 				path: "/login",

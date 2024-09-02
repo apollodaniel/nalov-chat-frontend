@@ -89,11 +89,11 @@ export type Message = {
 };
 
 // chats
-export type Chat = {
+export type ChatType = {
 	user: User,
 	last_message: Message
 };
 
 export type ChatResult = {
-	chats: Chat[]
+	chats: ChatType[]
 };

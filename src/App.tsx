@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { check_user_logged_in } from "./utils/functions/user";
+import LoadingBar from "./components/loading_bar";
 
 function App() {
 	const [loading, setLoading] = useState(true);
@@ -32,21 +33,9 @@ function App() {
 	}, [location]);
 
 	return (
-		<main className="d-flex flex-column w-100 h-100 justify-content-center align-items-center">
+		<main className="d-flex flex-column w-100 h-100 px-4 justify-content-center align-items-center">
 			{loading ? (
-				<div>
-					<p className="text-white fs-3">Loading</p>
-					<div className="progress">
-						<div
-							className="progress-bar progress-bar-striped progress-bar-animated"
-							role="progressbar"
-							aria-valuenow={75}
-							aria-valuemin={0}
-							aria-valuemax={100}
-							style={{ width: "350px" }}
-						/>
-					</div>
-				</div>
+				<LoadingBar />
 			) : (
 				<Outlet />
 			)}

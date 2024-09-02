@@ -77,8 +77,8 @@ export async function check_user_logged_in(){
 		window.localStorage.clear();
 		throw new Error("no token");
 	}
-	const valid_token = (token && await verify_token(token, "Auth")) || token;
-	if(!valid_token){
+
+	if(!token || (token && (await verify_token(token, "Auth")))){
 		window.sessionStorage.clear();
 		await refresh_user_token();
 	}
@@ -125,4 +125,25 @@ export async function get_available_users(): Promise<User[]>{
 	}
 
 	throw new HttpError(result);
+}
+
+export async function get_user(id: string){
+	const token = await get_auth_token();
+
+	const response = await axios.get(
+		get_current_host(`/api/users/${id}`),
+		{
+			headers: {
+				Authorization: `Bearer ${token}`
+			}
+		}
+	);
+
+	const http_result = new HttpResult(response);
+
+	if(http_result.sucess){
+		return http_result.data as User;
+	}
+
+	throw new Error("could not retrieve user info");
 }
