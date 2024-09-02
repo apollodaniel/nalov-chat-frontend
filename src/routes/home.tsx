@@ -2,15 +2,15 @@ import { useEffect, useState } from "react";
 import { get_user_chats } from "../utils/functions/chat";
 import { isAxiosError } from "axios";
 import { parse_errors } from "../utils/functions/functions";
-import { BackendError, User } from "../utils/types";
+import { BackendError, Chat, User } from "../utils/types";
 import ErrorPopup from "../components/error_modal";
-import { modal_errors } from "../utils/constants";
+import { DATETIME_FORMATTER, modal_errors } from "../utils/constants";
 import { get_available_users } from "../utils/functions/user";
 
 function Home(){
 	// main page
 
-	const [chats, setChats] = useState<string[]>([]);
+	const [chats, setChats] = useState<Chat[]>([]);
 	const [users, setUsers] = useState<User[]>([]);
 	const [errorText, setErrorText] = useState<string | undefined>(undefined);
 	const [search, setSearch] = useState<string>("");
@@ -32,7 +32,7 @@ function Home(){
 	const get_chats = async ()=>{
 		try{
 			const chat_result = await get_user_chats();
-			setChats(chat_result.chats || []);
+			setChats(chat_result.chats);
 			setErrorText(undefined);
 		}catch(err: any){
 			if(isAxiosError(err) && err.response && err.response.data){
@@ -65,7 +65,16 @@ function Home(){
 					// chats
 					chats.map(c=>
 						(
-							<li className="list-group-item">{c}</li>
+							<li className="list-group-item d-flex flex-column">
+								<div className="d-flex flex-row justify-content-between">
+									<div className="fw-bold h4">{c.user.name}</div>
+									<p>{c.user.username}</p>
+								</div>
+								<div className="d-flex flex-row justify-content-between">
+									<p>{c.last_message.content.length > 15 ? c.last_message.content.substring(0,15) : c.last_message.content}</p>
+									<p>{DATETIME_FORMATTER.format(c.last_message.date)}</p>
+								</div>
+							</li>
 						)
 					)
 					:

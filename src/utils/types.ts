@@ -78,6 +78,22 @@ export type LoginFormSubmit = {
 	password: string
 }
 
+
+// Messages
+export type Message = {
+	id: string,
+	content: string,
+	date: number,
+	sender_id: string,
+	receiver_id: string
+};
+
+// chats
+export type Chat = {
+	user: User,
+	last_message: Message
+};
+
 export type ChatResult = {
-	chats: string[]
+	chats: Chat[]
 };
