@@ -3,7 +3,11 @@ import { ChatType, Message, User } from "../utils/types";
 import LoadingBar from "../components/loading_bar";
 import { get_user } from "../utils/functions/user";
 import { useNavigate, useParams } from "react-router-dom";
-import { isAxiosError } from "axios";
+import { AxiosError, isAxiosError } from "axios";
+import { get_messages, listen_messages } from "../utils/functions/chat";
+import { get_current_host } from "../utils/functions/functions";
+import { EventSourcePolyfill } from "event-source-polyfill";
+import { DATETIME_FORMATTER, SHORT_DATETIME_FORMATTER } from "../utils/constants";
 
 function Chat() {
 	const [messages, setMessages] = useState<Message[]>([]);
@@ -12,8 +16,20 @@ function Chat() {
 	const params = useParams();
 	const navigate = useNavigate();
 
-	const getMessages = async () => { };
-
+	const getMessages = async () => {
+		try {
+			const messages = await get_messages(params["id"]!);
+			setMessages(messages);
+			listen_messages(params["id"]!, (messages: Message[]) => {
+				setMessages(messages);
+			});
+		} catch (err: any) {
+			if (isAxiosError(err) && err.response) {
+				// errors
+				console.log(err.response.data);
+			}
+		}
+	};
 	const getUser = async () => {
 		try {
 			console.log(params["id"]);
@@ -49,7 +65,17 @@ function Chat() {
 				<div className="fs-5 fw-bold">{user.name}</div>
 				{user.username}
 			</div>
-			<div className="h-100 w-100 d-flex flex-column"></div>
+			<div className="h-100 w-100 d-flex flex-column gap-3 p-4">
+				{messages.map((msg) => (
+					<div
+						className={`card d-flex flex-column justify-content-between p-0 px-3 py-2 gap-1 ${params["id"]! === msg.sender_id ? "align-self-start":"align-self-end"}`}
+						style={{minHeight: "50px", minWidth: "150px"}}
+					>
+						{msg.content}
+						<p className="m-0 align-self-end" style={{fontSize: "10px"}}>{SHORT_DATETIME_FORMATTER.format(msg.date)}</p>
+					</div>
+				))}
+			</div>
 			<div className="w-100 bg-white ">
 				<div className="form-floating">
 					<input className="form-control rounded-0" type="text" />
