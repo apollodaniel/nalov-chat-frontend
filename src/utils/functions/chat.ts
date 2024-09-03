@@ -51,7 +51,28 @@ export async function listen_messages(receiver_id: string, callback: (messages: 
 			Authorization: `Bearer ${token}`
 		}
 	});
-	evt_src.addEventListener("data", (event) => {
-		callback(event.data.messages as Message[]);
-	});
+	evt_src.onmessage = (event)=>{
+		if(event.data){
+			console.log("Fui chamado")
+			callback(JSON.parse(event.data)["messages"] as Message[]);
+		}
+
+	}
+
+
+
 }
+
+export async function send_message(message: {receiver_id: string, content: string}){
+	const token = await get_auth_token();
+	await axios.put(
+		get_current_host("/api/messages"),
+		message,
+		{
+			headers: {
+				Authorization: `Bearer ${token}`
+			}
+		}
+	);
+}
+
