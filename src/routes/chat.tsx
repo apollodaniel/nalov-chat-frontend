@@ -1,10 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChatType, Message, User } from "../utils/types";
 import LoadingBar from "../components/loading_bar";
 import { get_user } from "../utils/functions/user";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { AxiosError, isAxiosError } from "axios";
-import { get_messages, listen_messages, send_message } from "../utils/functions/chat";
+import {
+	get_messages,
+	listen_messages,
+	send_message,
+} from "../utils/functions/chat";
 import { get_current_host } from "../utils/functions/functions";
 import { EventSourcePolyfill } from "event-source-polyfill";
 import {
@@ -15,16 +19,18 @@ import {
 function Chat() {
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [user, setUser] = useState<User | undefined>(undefined);
-
 	const [sendMessageContent, setSendMessageContent] = useState<string>("");
+	const bottomRef = useRef(null);
 
 	const params = useParams();
 	const navigate = useNavigate();
+	const location = useLocation();
 
 	const getMessages = async () => {
 		try {
 			const messages = await get_messages(params["id"]!);
 			setMessages(messages);
+
 			listen_messages(params["id"]!, (messages: Message[]) => {
 				setMessages(messages);
 			});
@@ -33,6 +39,7 @@ function Chat() {
 				// errors
 				console.log(err.response.data);
 			}
+			navigate(location.pathname);
 		}
 	};
 	const getUser = async () => {
@@ -50,15 +57,18 @@ function Chat() {
 		}
 	};
 
-	const sendMessage = async ()=>{
+	const sendMessage = async () => {
 		const message_content = sendMessageContent;
-		try{
-			await send_message({content: message_content, receiver_id: params["id"]!});
+		try {
+			await send_message({
+				content: message_content,
+				receiver_id: params["id"]!,
+			});
 			setSendMessageContent("");
-		}catch(err: any){
+		} catch (err: any) {
 			console.log(err.message);
 		}
-	}
+	};
 
 	useEffect(() => {
 		getUser().then(() => {
@@ -66,11 +76,15 @@ function Chat() {
 		});
 	}, []);
 
+	useEffect(() => {
+		bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+	}, [messages]);
+
 	return !user ? (
 		<LoadingBar />
 	) : (
 		<div
-			className="card w-100 h-100 d-flex flex-column gap-3"
+			className="card w-100 h-100 d-flex flex-column "
 			style={{ maxHeight: "90vh", maxWidth: "800px" }}
 		>
 			<div
@@ -80,34 +94,45 @@ function Chat() {
 				<div className="fs-5 fw-bold">{user.name}</div>
 				{user.username}
 			</div>
-			<div className="w-100 d-flex flex-column gap-3 p-4" style={{
+			<div
+				className="card w-100 h-100 d-flex flex-column gap-3 p-4"
+				style={{
 					overflowY: "auto"
-					}}>
-				{messages.map((msg) => (
-					<ul
-						className={`card d-flex flex-column justify-content-between p-0 px-3 py-3 gap-1 ${params["id"]! === msg.sender_id ? "align-self-start" : "align-self-end"}`}
-						style={{ minHeight: "50px", minWidth: "150px" }}
-					>
-						{msg.content}
-						<p
-							className="m-0 align-self-end"
-							style={{ fontSize: "10px" }}
+				}}
+			>
+				<div className="card-body d-flex flex-column align-items-start gap-2">
+					{messages.map((msg) => (
+						<div
+							className={`card d-flex flex-column justify-content-between p-0 px-3 py-3 gap-1 ${params["id"]! === msg.sender_id ? "align-self-start" : "align-self-end"}`}
+							style={{
+								minHeight: "50px",
+								minWidth: "150px",
+								maxWidth: "100%"
+							}}
 						>
-							{SHORT_DATETIME_FORMATTER.format(msg.date)}
-						</p>
-					</ul>
-				))}
+							{msg.content}
+							<p
+								className="m-0 align-self-end"
+								style={{ fontSize: "10px" }}
+							>
+								{SHORT_DATETIME_FORMATTER.format(msg.date)}
+							</p>
+						</div>
+					))}
+
+				<div ref={bottomRef}></div>
+				</div>
 			</div>
 			<div className="w-100 bg-white">
 				<div className="form-floating">
 					<input
 						className="form-control rounded-0"
 						type="text"
-						onChange={(event)=>{
+						onChange={(event) => {
 							setSendMessageContent(event.target.value);
 						}}
-						onKeyDownCapture={(event)=>{
-							if(event.key == 'Enter'){
+						onKeyDownCapture={(event) => {
+							if (event.key == "Enter") {
 								sendMessage();
 							}
 						}}

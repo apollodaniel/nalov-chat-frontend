@@ -1,8 +1,9 @@
-import axios from "axios";
+import axios, { isAxiosError } from "axios";
 import { get_auth_token } from "./user";
 import { ChatResult, HttpError, HttpResult, Message } from "../types";
 import { get_current_host } from "./functions";
 import { EventSourcePolyfill } from "event-source-polyfill";
+import { CallReceivedRounded } from "@mui/icons-material";
 
 
 export async function get_user_chats(): Promise<ChatResult> {
@@ -49,30 +50,42 @@ export async function listen_messages(receiver_id: string, callback: (messages: 
 	const evt_src = new EventSourcePolyfill(get_current_host(`/api/messages/listen?receiver_id=${receiver_id}`), {
 		headers: {
 			Authorization: `Bearer ${token}`
-		}
+		},
 	});
+
+
 	evt_src.onmessage = (event)=>{
 		if(event.data){
 			console.log("Fui chamado")
 			callback(JSON.parse(event.data)["messages"] as Message[]);
 		}
-
 	}
 
-
-
+	evt_src.onerror = (event)=>{
+		evt_src.close();
+		setTimeout(()=> listen_messages(receiver_id, callback), 1000);
+	}
 }
 
 export async function send_message(message: {receiver_id: string, content: string}){
-	const token = await get_auth_token();
-	await axios.put(
-		get_current_host("/api/messages"),
-		message,
-		{
-			headers: {
-				Authorization: `Bearer ${token}`
+	while(true){
+		try{
+			const token = await get_auth_token();
+			await axios.put(
+				get_current_host("/api/messages"),
+				message,
+				{
+					headers: {
+						Authorization: `Bearer ${token}`
+					}
+				}
+			);
+			break;
+		}catch(err: any){
+			if(isAxiosError(err) && err.status && err.status === 400){
+				break;
 			}
 		}
-	);
+	}
 }
 
