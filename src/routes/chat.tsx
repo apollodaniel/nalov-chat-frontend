@@ -31,7 +31,7 @@ function Chat() {
 			const messages = await get_messages(params["id"]!);
 			setMessages(messages);
 
-			listen_messages(params["id"]!, (messages: Message[]) => {
+			listen_messages(params["id"]!,(messages: Message[]) => {
 				setMessages(messages);
 			});
 		} catch (err: any) {

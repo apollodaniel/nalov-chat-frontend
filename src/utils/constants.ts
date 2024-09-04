@@ -15,13 +15,20 @@ export const field_errors = {
 
 export const modal_errors = {
 	register: {
-		title: "A error occurred when trying to register in"
+		title: "Ocorreu um erro ao tentar se registrar"
 	},
 	login: {
-		title: "A error occurred when trying to login"
+		title: "Ocorreu um erro ao tentar entrar na sua conta"
 	},
 	home: {
-		title: "A error occurred when trying to get chats"
+		title: "Ocorreu um erro ao buscar pela lista de chats"
+	}
+}
+
+export const confirmation_modals = {
+	logout: {
+		title: "Aviso!",
+		content: "Você realmente deseja sair da sua conta?"
 	}
 }
 

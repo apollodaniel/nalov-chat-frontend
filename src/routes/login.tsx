@@ -68,6 +68,9 @@ function Login() {
 					visible={!Object.is(unknownError, undefined)}
 					title={modal_errors.login.title}
 					content={unknownError || ""}
+					onConfirm={()=>{
+						navigate("/")
+					}}
 				/>
 			</div>
 		</main>

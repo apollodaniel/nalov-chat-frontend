@@ -143,6 +143,9 @@ function Register() {
 				visible={unknownErrorMessage ? true : false}
 				title={modal_errors.register.title}
 				content={unknownErrorMessage || ""}
+				onConfirm={()=>{
+					navigate("/register")
+				}}
 			/>
 		</main>
 	);

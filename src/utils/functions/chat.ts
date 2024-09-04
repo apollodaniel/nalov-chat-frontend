@@ -45,7 +45,7 @@ export async function get_messages(receiver_id: string): Promise<Message[]> {
 	throw new Error("unable to get messages");
 }
 
-export async function listen_messages(receiver_id: string, callback: (messages: Message[])=>void) {
+export async function listen_messages(receiver_id: string, callback: (messages: Message[])=>void){
 	const token = await get_auth_token();
 	const evt_src = new EventSourcePolyfill(get_current_host(`/api/messages/listen?receiver_id=${receiver_id}`), {
 		headers: {
