@@ -3,7 +3,6 @@ import { get_auth_token } from "./user";
 import { ChatResult, HttpError, HttpResult, Message } from "../types";
 import { get_current_host } from "./functions";
 import { EventSourcePolyfill } from "event-source-polyfill";
-import { CallReceivedRounded } from "@mui/icons-material";
 
 
 export async function get_user_chats(): Promise<ChatResult> {
@@ -49,19 +48,19 @@ export async function listen_messages(receiver_id: string, callback: (messages: 
 	const token = await get_auth_token();
 	const evt_src = new EventSourcePolyfill(get_current_host(`/api/messages/listen?receiver_id=${receiver_id}`), {
 		headers: {
-			Authorization: `Bearer ${token}`
+			Authorization: `Bearer ${token}`,
+			"Content-Type": "text/event-stream"
 		},
 	});
 
 
 	evt_src.onmessage = (event)=>{
 		if(event.data){
-			console.log("Fui chamado")
 			callback(JSON.parse(event.data)["messages"] as Message[]);
 		}
 	}
 
-	evt_src.onerror = (event)=>{
+	evt_src.onerror = ()=>{
 		evt_src.close();
 		setTimeout(()=> listen_messages(receiver_id, callback), 1000);
 	}

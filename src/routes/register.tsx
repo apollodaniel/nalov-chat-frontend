@@ -38,7 +38,7 @@ function Register() {
 							await register_user({ ...data });
 							navigate("/")
 						} catch (err: any) {
-							console.log(err);
+
 							if (isAxiosError(err) && err.response && err.response.data.errors) {
 								let contains_username_error = false;
 								const errors_obj = err.response.data.errors

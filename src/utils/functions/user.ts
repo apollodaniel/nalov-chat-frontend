@@ -14,9 +14,9 @@ import { NavigateFunction } from "react-router-dom";
 export async function register_user(user: UserTemplate) {
 	const result = await axios.post(get_current_host("/auth/register"), user);
 
-	console.log(result);
+
 	const register_result = new HttpResult(result);
-	console.log(register_result);
+
 	if (!register_result.sucess) {
 		throw new HttpError(register_result);
 	}

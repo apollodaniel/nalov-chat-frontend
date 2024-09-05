@@ -1,15 +1,11 @@
 import { useEffect, useState } from "react";
 import { get_user_chats } from "../utils/functions/chat";
 import { isAxiosError } from "axios";
-import { parse_errors } from "../utils/functions/functions";
-import { BackendError, ChatType, User } from "../utils/types";
-import ErrorPopup from "../components/error_modal";
-import { confirmation_modals, DATETIME_FORMATTER, modal_errors } from "../utils/constants";
+import { ChatType, User } from "../utils/types";
+import { confirmation_modals, DATETIME_FORMATTER } from "../utils/constants";
 import { get_available_users, logout_user } from "../utils/functions/user";
 import { useNavigate } from "react-router-dom";
 import ConfirmationPopup from "../components/confirmation_popup";
-import { Button, Modal } from "react-bootstrap";
-import { ModeOfTravelTwoTone } from "@mui/icons-material";
 
 function Home() {
 	// main page
@@ -29,9 +25,9 @@ function Home() {
 		} catch (err: any) {
 			if (isAxiosError(err) && err.response && err.response.data) {
 				// backend error
-				const parsed_error = parse_errors(
-					err.response.data.errors as BackendError[],
-				);
+				// const parsed_error = parse_errors(
+				// 	err.response.data.errors as BackendError[],
+				// );
 			}
 		}
 	};
@@ -43,9 +39,9 @@ function Home() {
 		} catch (err: any) {
 			if (isAxiosError(err) && err.response && err.response.data) {
 				// backend error
-				const parsed_error = parse_errors(
-					err.response.data.errors as BackendError[],
-				);
+				// const parsed_error = parse_errors(
+				// 	err.response.data.errors as BackendError[],
+				// );
 			}
 			if (isAxiosError(err) && err.response && err.response.status != 401) {
 				setTimeout(()=>get_chats(),1000);
@@ -70,7 +66,6 @@ function Home() {
 						type="search"
 						className="form-control"
 						onChange={(event) => {
-							console.log(search);
 							setSearch(event.target.value);
 						}}
 					/>

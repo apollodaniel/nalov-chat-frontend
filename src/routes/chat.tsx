@@ -1,18 +1,16 @@
 import { useEffect, useRef, useState } from "react";
-import { ChatType, Message, User } from "../utils/types";
+import { Message, User } from "../utils/types";
 import LoadingBar from "../components/loading_bar";
 import { get_user } from "../utils/functions/user";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { AxiosError, isAxiosError } from "axios";
+import { isAxiosError } from "axios";
 import {
 	get_messages,
 	listen_messages,
 	send_message,
 } from "../utils/functions/chat";
-import { get_current_host } from "../utils/functions/functions";
-import { EventSourcePolyfill } from "event-source-polyfill";
+
 import {
-	DATETIME_FORMATTER,
 	SHORT_DATETIME_FORMATTER,
 } from "../utils/constants";
 
@@ -37,14 +35,13 @@ function Chat() {
 		} catch (err: any) {
 			if (isAxiosError(err) && err.response) {
 				// errors
-				console.log(err.response.data);
+
 			}
 			navigate(location.pathname);
 		}
 	};
 	const getUser = async () => {
 		try {
-			console.log(params["id"]);
 			const user = await get_user(params["id"] || "");
 			setUser(user);
 		} catch (err: any) {
@@ -66,7 +63,7 @@ function Chat() {
 			});
 			setSendMessageContent("");
 		} catch (err: any) {
-			console.log(err.message);
+
 		}
 	};
 
@@ -77,7 +74,10 @@ function Chat() {
 	}, []);
 
 	useEffect(() => {
-		bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+		if(bottomRef.current){
+			(bottomRef.current as any).scrollIntoView({ behavior: "smooth" });
+		}
+
 	}, [messages]);
 
 	return !user ? (

@@ -20,6 +20,7 @@ function App() {
 					navigate("/");
 				}
 				setLoading(false);
+				r(undefined);
 			} catch (err: any) {
 				if (
 					location.pathname !== "/login" &&
@@ -28,8 +29,9 @@ function App() {
 					navigate("/login");
 				}
 				setLoading(false);
+				rj();
 			}
-		}).finally(() => console.log("stoped"));
+		});
 	}, [location]);
 
 	return (
