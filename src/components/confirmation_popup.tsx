@@ -12,6 +12,7 @@ function ConfirmationPopup({title, content, visible, onConfirm, onCancel}: Props
 	return (
 			<Modal
 				size="sm"
+				centered={true}
 				show={visible}
 			>
 				<Modal.Header>

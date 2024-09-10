@@ -7,6 +7,8 @@ import NotFound from './routes/not_found.tsx'
 import Register from './routes/register.tsx'
 import Home from './routes/home.tsx'
 import Chat from './routes/chat.tsx'
+import Config from './routes/config.tsx'
+import ProfileConfig from './routes/profile_config.tsx'
 
 const router = createBrowserRouter([
 	{
@@ -29,6 +31,14 @@ const router = createBrowserRouter([
 			{
 				path: "/register",
 				element: <Register />
+			},
+			{
+				path: "/config",
+				element: <Config />
+			},
+			{
+				path: "/config/profile",
+				element: <ProfileConfig />
 			}
 		]
 	},

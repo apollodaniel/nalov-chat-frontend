@@ -139,6 +139,25 @@ export async function get_user(id: string) {
 	throw new Error("could not retrieve user info");
 }
 
+
+export async function get_current_user() {
+	const token = await get_auth_token();
+
+	const response = await axios.get(get_current_host(`/api/users/current`), {
+		headers: {
+			Authorization: `Bearer ${token}`,
+		},
+	});
+
+	const http_result = new HttpResult(response);
+
+	if (http_result.sucess) {
+		return http_result.data as User;
+	}
+
+	throw new Error("could not retrieve user info");
+}
+
 export async function logout_user(navigate: NavigateFunction) {
 	const token = await get_auth_token();
 	await axios.post(

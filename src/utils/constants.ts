@@ -13,6 +13,15 @@ export const field_errors = {
 	unknown_username: "Nome de usuário desconhecido.",
 };
 
+export const field_patterns = {
+	username: /(^[a-zA-Z0-9]+([_ -]?[a-zA-Z0-9])*.{4,})$/,
+	name: /^[A-Z][a-z]+ [A-Z][a-z]+$/,
+	password: /((?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W]).{8,})/
+}
+
+
+// modal messages
+
 export const modal_errors = {
 	register: {
 		title: "Ocorreu um erro ao tentar se registrar"
@@ -32,8 +41,10 @@ export const confirmation_modals = {
 	}
 }
 
-export const field_patterns = {
-	username: /(^[a-zA-Z0-9]+([_ -]?[a-zA-Z0-9])*.{4,})$/,
-	name: /^[A-Z][a-z]+ [A-Z][a-z]+$/,
-	password: /((?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W]).{8,})/
-}
+export const more_actions_modal = {
+	title: "Mais ações",
+	content: {
+		open_config_button: "Abrir configurações",
+		logout_button: "Logout"
+	}
+};

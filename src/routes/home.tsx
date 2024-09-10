@@ -6,6 +6,7 @@ import { confirmation_modals, DATETIME_FORMATTER } from "../utils/constants";
 import { get_available_users, logout_user } from "../utils/functions/user";
 import { useNavigate } from "react-router-dom";
 import ConfirmationPopup from "../components/confirmation_popup";
+import HomeTreeDotsPopup from "../components/home_three_dots_popup";
 
 function Home() {
 	// main page
@@ -14,7 +15,7 @@ function Home() {
 	const [users, setUsers] = useState<User[]>([]);
 	const [search, setSearch] = useState<string>("");
 
-	const [logoutPopupVisible, setLogoutPopupVisible] = useState(false);
+	const [moreActionsPopupVisible, setMoreActionsPopupVisible] = useState(false);
 
 	const navigate = useNavigate();
 
@@ -60,18 +61,23 @@ function Home() {
 			className="card w-100 d-flex flex-column my-5 gap-3 p-3"
 			style={{ maxWidth: "1200px", height: "90vh" }}
 		>
-			<div className="d-flex flex-row gap-3">
-				<div className="form-floating w-75">
+			<div
+				className="d-flex flex-row gap-3 align-items-center justify-content-center"
+				style={{
+					height: "60px"
+				}}
+			>
+				<div className="form-floating w-100 h-100">
 					<input
 						type="search"
-						className="form-control"
+						className="form-control h-100"
 						onChange={(event) => {
 							setSearch(event.target.value);
 						}}
 					/>
 					<label>Search</label>
 				</div>
-				<button onClick={()=> setLogoutPopupVisible(true)} className="btn btn-danger w-25">Logout</button>
+				<button onClick={()=> setMoreActionsPopupVisible(true)} className="btn btn-primary h-100">More actions</button>
 			</div>
 			<ul className="list-group">
 				{search.length === 0
@@ -119,15 +125,10 @@ function Home() {
 							</li>
 						))}
 			</ul>
-			<ConfirmationPopup
-				title={confirmation_modals.logout.title}
-				content={confirmation_modals.logout.content}
-				visible={logoutPopupVisible}
-				onConfirm={async ()=>{
-					setLogoutPopupVisible(false);
-					await logout_user(navigate);
-				}}
-				onCancel={()=>setLogoutPopupVisible(false)}
+			<HomeTreeDotsPopup
+				onCancel={()=>setMoreActionsPopupVisible(false)}
+				show={moreActionsPopupVisible}
+				navigate={navigate}
 			/>
 		</div>
 	);
