@@ -1,3 +1,6 @@
+import event from 'events';
+
+export const EVENT_EMITTER = new event.EventEmitter();
 
 export const DATETIME_FORMATTER = Intl.DateTimeFormat('pt-BR', {dateStyle: "medium", timeStyle: "short"});
 export const SHORT_DATETIME_FORMATTER = Intl.DateTimeFormat('pt-BR', {dateStyle: "short", timeStyle: "medium"});
