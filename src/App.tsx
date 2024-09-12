@@ -3,11 +3,13 @@ import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { check_user_logged_in } from "./utils/functions/user";
 import LoadingBar from "./components/loading_bar";
+import { get_current_host } from "./utils/functions/functions";
 
 function App() {
 	const [loading, setLoading] = useState(true);
 	const location = useLocation();
 	const navigate = useNavigate();
+
 	useEffect(() => {
 		new Promise(async (r, rj) => {
 			try {

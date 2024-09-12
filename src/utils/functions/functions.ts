@@ -2,7 +2,9 @@ import { BackendError, FieldError } from "../types";
 
 export function get_current_host(args?: string): string {
 	let location = window.location.href;
-	return location.substring(0, location.lastIndexOf(":") + 1).replace(/:(?!.\/)/, ":8751") + (args || "");
+	const ports = location.match(/:([0-9]+)\//)![0];
+	// .substring(0, location.lastIndexOf(":") + 1)
+	return location.substring(0, location.indexOf(ports)) + ":8751" + (args || "");
 }
 
 export function parse_errors(errors: BackendError[]): string {

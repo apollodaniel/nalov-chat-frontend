@@ -13,6 +13,7 @@ import {
 import {
 	SHORT_DATETIME_FORMATTER,
 } from "../utils/constants";
+import { get_current_host } from "../utils/functions/functions";
 
 function Chat() {
 	const [messages, setMessages] = useState<Message[]>([]);
@@ -88,11 +89,24 @@ function Chat() {
 			style={{ maxHeight: "90vh", maxWidth: "800px" }}
 		>
 			<div
-				className="card rounded-0 w-100 p-3"
+				className="card rounded-0 w-100 p-3 d-flex flex-row gap-3"
 				style={{ height: "100px" }}
 			>
-				<div className="fs-5 fw-bold">{user.name}</div>
-				{user.username}
+
+				<img
+					className="ratio-1x1 rounded-circle"
+					src={get_current_host(user.profile_picture)}
+					style={{
+						height: "50px",
+						aspectRatio: 1/1,
+						objectFit: "cover"
+					}}
+					alt={`${user.name} profile picture`}
+				/>
+				<div className="d-flex flex-column align-items-start justify-content-start">
+					<div className="fs-5 fw-bold">{user.name}</div>
+					{user.username}
+				</div>
 			</div>
 			<div
 				className="card w-100 h-100 d-flex flex-column gap-3 p-4"

@@ -7,6 +7,8 @@ import { get_available_users, logout_user } from "../utils/functions/user";
 import { useNavigate } from "react-router-dom";
 import ConfirmationPopup from "../components/confirmation_popup";
 import HomeTreeDotsPopup from "../components/home_three_dots_popup";
+import ChatListItem from "../components/chat_list_item";
+import UserListItem from "../components/user_list_item";
 
 function Home() {
 	// main page
@@ -83,50 +85,11 @@ function Home() {
 				<button onClick={()=> setMoreActionsPopupVisible(true)} className="btn btn-primary h-100">More actions</button>
 			</div>
 			<ul className="list-group">
-				{!focusedSearch
+				{!focusedSearch && search.length === 0
 					? // chats
-						chats.map((c) => (
-							<li
-								className="list-group-item list-group-item-action d-flex flex-column"
-								onClick={() => {
-									navigate(`/chat/${c.user.id}`);
-								}}
-							>
-								<div className="d-flex flex-row justify-content-between">
-									<div className="fw-bold h4">
-										{c.user.name}
-									</div>
-									<p>{c.user.username}</p>
-								</div>
-								<div className="d-flex flex-row justify-content-between">
-									<p>
-										{c.last_message.content.length > 15
-											? c.last_message.content.substring(
-													0,
-													15,
-												)
-											: c.last_message.content}
-									</p>
-									<p>
-										{DATETIME_FORMATTER.format(
-											c.last_message.date,
-										)}
-									</p>
-								</div>
-							</li>
-						))
+						chats.map((c) => <ChatListItem key={c.user.id} navigate={navigate} chat={c} />)
 					: // users
-						users.map((u) => (
-							<li
-								className="list-group-item list-group-item-action"
-								onClick={() => {
-									navigate(`/chat/${u.id}`);
-								}}
-							>
-								<div className="fw-bold h4">{u.username}</div>
-								{u.name}
-							</li>
-						))}
+						users.map((u) => <UserListItem key={u.id} navigate={navigate} user={u} />)}
 			</ul>
 			<HomeTreeDotsPopup
 				onCancel={()=>setMoreActionsPopupVisible(false)}
