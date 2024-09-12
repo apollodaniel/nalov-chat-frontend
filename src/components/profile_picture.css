@@ -1,0 +1,23 @@
+
+
+#edit-icon, #profile-image{
+	transition-property: opacity;
+	transition-duration: 200ms;
+	transition-timing-function: ease-out;
+}
+
+#profile-picture #edit-icon{
+	opacity: 0;
+}
+
+#profile-picture #profile-image{
+	opacity: 1;
+}
+
+#profile-picture:hover #edit-icon{
+	opacity: 1;
+}
+
+#profile-picture:hover #profile-image{
+	opacity: 0.2;
+}

@@ -7,12 +7,14 @@ export type UserTemplate = {
 	name: string,
 	username: string,
 	password: string,
+	profile_picture: string
 };
 
 export type User = {
 	id: string,
 	name: string,
 	username: string
+	profile_picture: string
 };
 
 export type UserCredentials = {

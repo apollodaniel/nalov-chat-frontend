@@ -115,7 +115,8 @@ export async function get_available_users(): Promise<User[]> {
 
 	const result = new HttpResult(response);
 	if (result.sucess) {
-		return result.data.users as User[];
+		const users  = result.data.users as User[];
+		return users.map((user: User) => {return {...user, profile_picture: user.profile_picture}});
 	}
 
 	throw new HttpError(result);
@@ -133,7 +134,9 @@ export async function get_user(id: string) {
 	const http_result = new HttpResult(response);
 
 	if (http_result.sucess) {
-		return http_result.data as User;
+		const user = http_result.data as User;
+		user.profile_picture = `/${user.profile_picture}`;
+		return user;
 	}
 
 	throw new Error("could not retrieve user info");
@@ -152,7 +155,9 @@ export async function get_current_user() {
 	const http_result = new HttpResult(response);
 
 	if (http_result.sucess) {
-		return http_result.data as User;
+		const user = http_result.data as User;
+		user.profile_picture = `/${user.profile_picture}`;
+		return user;
 	}
 
 	throw new Error("could not retrieve user info");
