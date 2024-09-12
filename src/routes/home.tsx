@@ -14,6 +14,7 @@ function Home() {
 	const [chats, setChats] = useState<ChatType[]>([]);
 	const [users, setUsers] = useState<User[]>([]);
 	const [search, setSearch] = useState<string>("");
+	const [focusedSearch, setFocusedSearch] = useState(false);
 
 	const [moreActionsPopupVisible, setMoreActionsPopupVisible] = useState(false);
 
@@ -71,6 +72,8 @@ function Home() {
 					<input
 						type="search"
 						className="form-control h-100"
+						onFocus={()=>setFocusedSearch(true)}
+						onBlur={()=>setFocusedSearch(false)}
 						onChange={(event) => {
 							setSearch(event.target.value);
 						}}
@@ -80,7 +83,7 @@ function Home() {
 				<button onClick={()=> setMoreActionsPopupVisible(true)} className="btn btn-primary h-100">More actions</button>
 			</div>
 			<ul className="list-group">
-				{search.length === 0
+				{!focusedSearch
 					? // chats
 						chats.map((c) => (
 							<li
