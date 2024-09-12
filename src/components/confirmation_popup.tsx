@@ -19,7 +19,7 @@ function ConfirmationPopup({title, content, visible, onConfirm, onCancel}: Props
 					<Modal.Title>{title}</Modal.Title>
 				</Modal.Header>
 				<Modal.Body>
-					<p>{content}</p>
+					<p style={{textWrap: "wrap"}}>{content}</p>
 				</Modal.Body>
 				<Modal.Footer>
 					<Button onClick={onCancel} variant="secondary">

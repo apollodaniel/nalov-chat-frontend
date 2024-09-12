@@ -4,7 +4,7 @@ import { User } from "../utils/types";
 import LoadingBar from "../components/loading_bar";
 import { get_current_host } from "../utils/functions/functions";
 import ProfilePicture from "../components/profile_picture";
-import { useNavigate } from "react-router-dom";
+import { useBlocker, useNavigate } from "react-router-dom";
 import ConfirmationPopup from "../components/confirmation_popup";
 
 function ProfileConfig() {
@@ -17,18 +17,23 @@ function ProfileConfig() {
 
 	const [imageLocation, setImageLocation] = useState("");
 
+	const [changed, setChanged] = useState(false);
 
-	useEffect(()=>{
-		window.onbeforeunload  = (e) => {
-			if (!name && !profilePicture) {
-				return undefined;
-			}
-			const message =
-				"Você realmente deseja sair?\nExistem mudanças que não foram salvas.";
 
-			return message;
-		};
-	}, [name, profilePicture]);
+	// useEffect(()=>{
+	// 	window.onbeforeunload  = (e) => {
+	// 		if (!name && !profilePicture) {
+	// 			return undefined;
+	// 		}
+	// 		const message =
+	// 			"Você realmente deseja sair?\nExistem mudanças que não foram salvas.";
+	//
+	// 		return message;
+	// 	};
+	// }, [name, profilePicture]);
+
+
+	let blocker = useBlocker(changed);
 
 	useEffect(() => {
 		if (user) {
@@ -122,7 +127,7 @@ function ProfileConfig() {
 											request.responseText,
 										);
 
-										window.onbeforeunload = ()=>undefined;
+										if(blocker.proceed) blocker.proceed();
 
 										window.open("/config/profile", "_self");
 									} else {
@@ -147,8 +152,7 @@ function ProfileConfig() {
 								accept="image/*"
 								style={{ display: "none" }}
 								onChange={(event) => {
-									console.log("alterando");
-
+									setChanged(true);
 									setProfilePicture(event.target.files);
 								}}
 							/>
@@ -169,15 +173,27 @@ function ProfileConfig() {
 								className="form-control"
 								value={name!}
 								onChange={(event) =>
-									setName(event.target.value)
+									{
+
+										setChanged(true);
+										setName(event.target.value)
+									}
 								}
 							/>
 							<label htmlFor="name">Name</label>
 						</div>
-						<button className="btn btn-primary mt-3" type="submit">
+						<button className={"btn btn-primary mt-3 "+(changed ? "" : "disabled")} type="submit">
 							Salvar
 						</button>
 					</form>
+
+					<ConfirmationPopup
+						visible={blocker.state === "blocked"}
+						title="Aviso"
+						content={"Você tem certeza que deseja deixar a página? Existem configurações não salvas"}
+						onCancel={()=>blocker.reset && blocker.reset()}
+						onConfirm={()=>blocker.proceed && blocker.proceed()}
+					/>
 				</div>
 			)}
 		</div>
