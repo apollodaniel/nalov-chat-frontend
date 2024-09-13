@@ -38,7 +38,7 @@ function ChatListItem({chat, navigate}: IProps) {
 			</div>
 			<div className="ms-auto d-flex flex-column justify-content-start align-items-end">
 				<p>{chat.user.username}</p>
-				<p>{DATETIME_FORMATTER.format(chat.last_message.date)}</p>
+				<p>{DATETIME_FORMATTER.format(chat.last_message.last_modified_date)}</p>
 			</div>
 		</li>
 	);

@@ -4,6 +4,7 @@ export const EVENT_EMITTER = new event.EventEmitter();
 
 export const DATETIME_FORMATTER = Intl.DateTimeFormat('pt-BR', {dateStyle: "medium", timeStyle: "short"});
 export const SHORT_DATETIME_FORMATTER = Intl.DateTimeFormat('pt-BR', {dateStyle: "short", timeStyle: "medium"});
+export const SHORT_TIME_FORMATTER = Intl.DateTimeFormat('pt-BR', {timeStyle: "short"});
 
 export const field_errors = {
 	invalid_password: "A Senha deve ter pelo menos 8 caracteres, letras minúsculas, maiúsculas, números e um caractere especial.",
@@ -14,6 +15,11 @@ export const field_errors = {
 	username_exists: "Nome de usuário já existe. Escolha outro.",
 	wrong_password: "Senha incorreta. Tente novamente!",
 	unknown_username: "Nome de usuário desconhecido.",
+};
+
+export const toast_error_messages = {
+	send_message_error: "Não foi possível enviar sua mensagem, tente novamente mais tarde!",
+	listen_messages_error: "Não foi possivel obter a lista de mensagens, tente novamente mais tarde."
 };
 
 export const field_patterns = {

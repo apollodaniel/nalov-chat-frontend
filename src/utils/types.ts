@@ -85,7 +85,8 @@ export type LoginFormSubmit = {
 export type Message = {
 	id: string,
 	content: string,
-	date: number,
+	creation_date: number,
+	last_modified_date: number,
 	sender_id: string,
 	receiver_id: string
 };

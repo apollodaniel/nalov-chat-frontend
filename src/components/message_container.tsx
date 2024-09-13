@@ -54,7 +54,7 @@ function MessageContainer({ msg, chat_id, onEdit}: IProps) {
 			>
 				{msg.content}
 				<p className="m-0 align-self-end" style={{ fontSize: "10px" }}>
-					{SHORT_DATETIME_FORMATTER.format(msg.date)}
+					{SHORT_DATETIME_FORMATTER.format(msg.creation_date)}
 				</p>
 			</div>
 
