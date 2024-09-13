@@ -1,7 +1,6 @@
 import "react";
 import { Message } from "../utils/types";
 import { EVENT_EMITTER, SHORT_DATETIME_FORMATTER } from "../utils/constants";
-import { useEffect, useState } from "react";
 import MessageContextMenu from "./message_context_menu";
 import { delete_message } from "../utils/functions/chat";
 
@@ -11,11 +10,15 @@ interface IProps {
 	chat_id: string;
 	onEdit: (msg: Message)=>void;
 	onContextMenu: () => void;
+	closeContextMenu?: () => void;
 }
 
-async function onAction(event: string, msg: Message, onEdit?: (msg: Message)=>void){
+async function onAction(event: string, msg: Message, onEdit?: (msg: Message)=>void, closeContextMenu?: ()=>void){
 
 	EVENT_EMITTER.emit('close-context-menu');
+
+	if(closeContextMenu)
+		closeContextMenu();
 	switch(event){
 		case "edit":
 			onEdit!(msg);
@@ -29,10 +32,9 @@ async function onAction(event: string, msg: Message, onEdit?: (msg: Message)=>vo
 			// show message info
 			break;
 	}
-
 }
 
-function MessageContainer({ msg, chat_id, onEdit, onContextMenu, showContextMenu}: IProps) {
+function MessageContainer({ msg, chat_id, onEdit, onContextMenu, showContextMenu, closeContextMenu}: IProps) {
 
 	return (
 		<div className={`w-100 d-flex flex-column`}>
@@ -58,7 +60,8 @@ function MessageContainer({ msg, chat_id, onEdit, onContextMenu, showContextMenu
 				visible={showContextMenu}
 				msg={msg}
 				chat_id={chat_id}
-				onAction={onAction}
+				onAction={(_event, _msg, _on_edit) => onAction(_event,_msg,_on_edit, closeContextMenu)}
+				onFocusExit={()=>closeContextMenu && closeContextMenu()}
 				onEdit={onEdit}
 			/>
 		</div>

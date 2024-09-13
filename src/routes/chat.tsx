@@ -156,6 +156,7 @@ function Chat() {
 								}}
 								onContextMenu={()=>setContextMenuMessage(msg.id)}
 								showContextMenu={contextMenuMessage === msg.id}
+								closeContextMenu={()=>setContextMenuMessage(null)}
 							/>
 						))}
 						<div ref={bottomRef}></div>
@@ -197,7 +198,7 @@ function Chat() {
 									}}
 									value={sendMessageContent}
 								/>
-								<label>Editing {editingMessage.id}</label>
+								<label>Editing message</label>
 							</div>
 							<button
 								className="btn btn-primary w-auto rounded-top-0 rounded-bottom-3 rounded-start-0 m-0"
