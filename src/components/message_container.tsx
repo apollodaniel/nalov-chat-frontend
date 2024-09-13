@@ -6,9 +6,11 @@ import MessageContextMenu from "./message_context_menu";
 import { delete_message } from "../utils/functions/chat";
 
 interface IProps {
+	showContextMenu: boolean;
 	msg: Message;
 	chat_id: string;
 	onEdit: (msg: Message)=>void;
+	onContextMenu: () => void;
 }
 
 async function onAction(event: string, msg: Message, onEdit?: (msg: Message)=>void){
@@ -30,13 +32,7 @@ async function onAction(event: string, msg: Message, onEdit?: (msg: Message)=>vo
 
 }
 
-function MessageContainer({ msg, chat_id, onEdit}: IProps) {
-
-	const [showContextMenu, setShowContextMenu] = useState(false);
-
-	useEffect(()=>{
-		EVENT_EMITTER.on('close-context-menu', ()=>setShowContextMenu(false));
-	}, []);
+function MessageContainer({ msg, chat_id, onEdit, onContextMenu, showContextMenu}: IProps) {
 
 	return (
 		<div className={`w-100 d-flex flex-column`}>
@@ -49,7 +45,7 @@ function MessageContainer({ msg, chat_id, onEdit}: IProps) {
 				}}
 				onContextMenu={(event) => {
 					event.preventDefault();
-					setShowContextMenu(true);
+					onContextMenu();
 				}}
 			>
 				{msg.content}
@@ -62,7 +58,6 @@ function MessageContainer({ msg, chat_id, onEdit}: IProps) {
 				visible={showContextMenu}
 				msg={msg}
 				chat_id={chat_id}
-				onFocusExit={()=>setShowContextMenu(false)}
 				onAction={onAction}
 				onEdit={onEdit}
 			/>

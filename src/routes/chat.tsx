@@ -30,6 +30,8 @@ function Chat() {
 	const navigate = useNavigate();
 	const location = useLocation();
 
+	const [contextMenuMessage, setContextMenuMessage] = useState<string | null>(null);
+
 	const getMessages = async () => {
 		try {
 			const messages = await get_messages(params["id"]!);
@@ -115,9 +117,7 @@ function Chat() {
 			<div
 				className="card w-100 h-100 d-flex flex-column "
 				style={{ maxHeight: "90vh", maxWidth: "800px" }}
-				onMouseDown={() => {
-					EVENT_EMITTER.emit("close-context-menu");
-				}}
+				onMouseDown={() => setContextMenuMessage(null)}
 			>
 				<div
 					className="card rounded-0 w-100 p-3 d-flex flex-row gap-3"
@@ -154,6 +154,8 @@ function Chat() {
 									setEditingMessage(msg);
 									setSendMessageContent(msg.content);
 								}}
+								onContextMenu={()=>setContextMenuMessage(msg.id)}
+								showContextMenu={contextMenuMessage === msg.id}
 							/>
 						))}
 						<div ref={bottomRef}></div>

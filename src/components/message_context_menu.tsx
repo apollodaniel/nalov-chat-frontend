@@ -4,7 +4,7 @@ interface IProps {
 	msg: Message;
 	chat_id: string;
 	visible: boolean;
-	onFocusExit: () => void;
+
 	onAction: (event: string, msg: Message, onEdit?: (msg: Message) => void) => void;
 	onEdit: (msg: Message) => void;
 }
@@ -29,14 +29,12 @@ function MessageContextMenu({
 	msg,
 	chat_id,
 	visible,
-	onFocusExit,
 	onAction,
 	onEdit
 }: IProps) {
 	return (
 		<ul
 			className={`card position-absolute list-group ${visible ? "d-block" : "d-none"}`} // ${chat_id === msg.sender_id ? "align-self-start mx-3" : "align-self-end mx-3"}`}
-			onBlur={() => onFocusExit()}
 			onMouseDown={(event) => {
 				event.preventDefault();
 				event.stopPropagation();
