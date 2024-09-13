@@ -97,3 +97,48 @@ export async function send_message(message: {
 		}
 	}
 }
+
+
+export async function patch_message(message_id: string, content: any){
+	const auth_token = await get_auth_token();
+
+	const response = await fetch(
+		get_current_host(`/api/messages/${message_id}`),
+		{
+			method: "PATCH",
+			body: JSON.stringify(content),
+			headers: {
+				"Content-Type": "application/json",
+				Authorization: `Bearer ${auth_token}`
+			}
+		}
+	);
+
+	if(!response.ok && !(response.status >= 200 && response.status < 300)){
+		// error
+		const response_body = await response.json();
+		throw new HttpError(response_body);
+	}
+}
+
+
+export async function delete_message(message_id: string){
+	const auth_token = await get_auth_token();
+
+	const response = await fetch(
+		get_current_host(`/api/messages/${message_id}`),
+		{
+			method: "DELETE",
+			headers: {
+				Authorization: `Bearer ${auth_token}`
+			}
+		}
+	);
+
+	if(!response.ok && !(response.status >= 200 && response.status < 300)){
+		// error
+		const response_body = await response.json();
+		throw new HttpError(response_body);
+	}
+}
+

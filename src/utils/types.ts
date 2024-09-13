@@ -27,7 +27,7 @@ export type UserCredentials = {
 export class HttpError extends Error{
 	data: any;
 	status_code: number;
-	constructor(result: HttpResult){
+	constructor(result: HttpResult | {status_code: number, data: any}){
 		super("http error");
 		this.data = result.data;
 		this.status_code = result.status_code;
