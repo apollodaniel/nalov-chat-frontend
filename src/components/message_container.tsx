@@ -1,6 +1,6 @@
 import "react";
 import { Message } from "../utils/types";
-import { EVENT_EMITTER, SHORT_DATETIME_FORMATTER } from "../utils/constants";
+import { SHORT_DATETIME_FORMATTER } from "../utils/constants";
 import MessageContextMenu from "./message_context_menu";
 import { delete_message } from "../utils/functions/chat";
 
@@ -8,20 +8,18 @@ interface IProps {
 	showContextMenu: boolean;
 	msg: Message;
 	chat_id: string;
-	onEdit: (msg: Message)=>void;
+	onEdit: (msg: Message) => void;
+	onShowMessageInfo: (msg: Message) => void;
 	onContextMenu: () => void;
 	closeContextMenu?: () => void;
 }
 
-async function onAction(event: string, msg: Message, onEdit?: (msg: Message)=>void, closeContextMenu?: ()=>void){
-
-	EVENT_EMITTER.emit('close-context-menu');
-
-	if(closeContextMenu)
+async function onAction(event: string, msg: Message, onShowMessageInfo: (msg: Message) => void, onEditContextMenu?: (msg: Message) => void, closeContextMenu?: () => void) {
+	if (closeContextMenu)
 		closeContextMenu();
-	switch(event){
+	switch (event) {
 		case "edit":
-			onEdit!(msg);
+			onEditContextMenu!(msg);
 			break;
 		case "delete":
 			// delete message
@@ -29,12 +27,13 @@ async function onAction(event: string, msg: Message, onEdit?: (msg: Message)=>vo
 			await delete_message(msg.id);
 			break;
 		default:
-			// show message info
+			// show message
+			onShowMessageInfo(msg);
 			break;
 	}
 }
 
-function MessageContainer({ msg, chat_id, onEdit, onContextMenu, showContextMenu, closeContextMenu}: IProps) {
+function MessageContainer({ msg, chat_id, onEdit, onContextMenu, showContextMenu, closeContextMenu, onShowMessageInfo }: IProps) {
 
 	return (
 		<div className={`w-100 d-flex flex-column`}>
@@ -60,8 +59,9 @@ function MessageContainer({ msg, chat_id, onEdit, onContextMenu, showContextMenu
 				visible={showContextMenu}
 				msg={msg}
 				chat_id={chat_id}
-				onAction={(_event, _msg, _on_edit) => onAction(_event,_msg,_on_edit, closeContextMenu)}
-				onFocusExit={()=>closeContextMenu && closeContextMenu()}
+				onAction={(_event, _msg, _onEditContextMenu) =>
+					onAction(_event, _msg, onShowMessageInfo, _onEditContextMenu, closeContextMenu)}
+				onFocusExit={() => closeContextMenu && closeContextMenu()}
 				onEdit={onEdit}
 			/>
 		</div>

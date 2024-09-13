@@ -10,10 +10,10 @@ import {
 	patch_message,
 	send_message,
 } from "../utils/functions/chat";
-import { EVENT_EMITTER } from "../utils/constants";
+import { DATETIME_FORMATTER, EVENT_EMITTER, SHORT_TIME_FORMATTER } from "../utils/constants";
 import { get_current_host } from "../utils/functions/functions";
 import MessageContainer from "../components/message_container";
-import { Toast } from "react-bootstrap";
+import { Modal, Toast } from "react-bootstrap";
 
 function Chat() {
 	const [messages, setMessages] = useState<Message[]>([]);
@@ -31,6 +31,7 @@ function Chat() {
 	const location = useLocation();
 
 	const [contextMenuMessage, setContextMenuMessage] = useState<string | null>(null);
+	const [showMessageInfoPopup, setShowMessageInfoPopup] = useState<Message | undefined>(undefined);
 
 	const getMessages = async () => {
 		try {
@@ -154,9 +155,14 @@ function Chat() {
 									setEditingMessage(msg);
 									setSendMessageContent(msg.content);
 								}}
-								onContextMenu={()=>setContextMenuMessage(msg.id)}
+								onShowMessageInfo={(msg) => {
+										console.log(msg.creation_date);
+										console.log(msg.last_modified_date);
+										return setShowMessageInfoPopup(msg)
+									}}
+								onContextMenu={() => setContextMenuMessage(msg.id)}
 								showContextMenu={contextMenuMessage === msg.id}
-								closeContextMenu={()=>setContextMenuMessage(null)}
+								closeContextMenu={() => setContextMenuMessage(null)}
 							/>
 						))}
 						<div ref={bottomRef}></div>
@@ -216,6 +222,48 @@ function Chat() {
 					)}
 				</div>
 			</div>
+
+			{
+				!(!showMessageInfoPopup) &&
+
+				<Modal show={true}  >
+					<Modal.Header>
+						<Modal.Title>Informações da mensagem</Modal.Title>
+						<input
+							type="button"
+							className="btn btn-close"
+							onClick={() => setShowMessageInfoPopup(undefined)}
+						/>
+					</Modal.Header>
+					<Modal.Body className="d-flex flex-column gap-3">
+						<div>
+							<h6 className="m-0">Conteúdo</h6>
+							<small>{showMessageInfoPopup?.content}</small>
+						</div>
+						<div className="d-flex flex-row gap-1 align-items-center">
+							<h6 className="m-0 me-1">Enviado por</h6>
+							<p className="m-0 fw-bold">{showMessageInfoPopup?.sender_id === user.id ? user.username : "Você"}</p>
+							<h6 className="m-0 mx-1">para</h6>
+							<p className="m-0 fw-bold">{showMessageInfoPopup?.receiver_id === user.id ? user.username : "Você"}</p>
+						</div>
+						{
+							showMessageInfoPopup!.creation_date < showMessageInfoPopup!.last_modified_date ? (
+
+								<div>
+									<h6 className="m-0">Modificado por ultimo</h6>
+									<small>{DATETIME_FORMATTER.format(showMessageInfoPopup?.last_modified_date)}</small>
+								</div>
+							) : (
+							<div></div>
+
+						)}
+						<div>
+							<h6 className="m-0">Data de criação</h6>
+							<small>{DATETIME_FORMATTER.format(showMessageInfoPopup?.creation_date)}</small>
+						</div>
+					</Modal.Body>
+				</Modal>
+			}
 
 			<div
 				className="position-absolute d-flex flex-column gap-2"
