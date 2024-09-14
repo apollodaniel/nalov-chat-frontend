@@ -48,8 +48,7 @@ function Chat() {
 						setTimeout(() => setErrorMessages((prev) => prev.filter((msg) => msg[1] != id.toString())), 10000);
 						return [...prev, [reason, id.toString()]];
 					});
-				},
-				3);
+				});
 		} catch (err: any) {
 			navigate(location.pathname);
 		}

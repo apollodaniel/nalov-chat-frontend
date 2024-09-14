@@ -35,7 +35,7 @@ function App() {
 				rj();
 			}
 		});
-		EVENT_EMITTER.emit("close");
+		EVENT_EMITTER.emit("close-stream");
 	}, [location]);
 
 	return (

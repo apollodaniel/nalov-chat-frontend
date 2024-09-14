@@ -1,9 +1,9 @@
 import axios, { isAxiosError } from "axios";
 import { get_auth_token } from "./user";
-import { ChatResult, HttpError, HttpResult, Message } from "../types";
+import { ChatResult, ChatType, HttpError, HttpResult, Message } from "../types";
 import { get_current_host } from "./functions";
 import { EventSourcePolyfill } from "event-source-polyfill";
-import { EVENT_EMITTER, toast_error_messages } from "../constants";
+import { EVENT_EMITTER, MAXIMUM_TRIES, RETRY_CONNECTION_TIMEOUT, toast_error_messages } from "../constants";
 
 export async function get_user_chats(): Promise<ChatResult> {
 	const token = await get_auth_token();
@@ -43,6 +43,18 @@ export async function get_messages(receiver_id: string): Promise<Message[]> {
 	throw new Error("unable to get messages");
 }
 
+function close_evt_src(evt_src: EventSourcePolyfill){
+	const listener = () => {
+		if (evt_src) {
+			evt_src.close();
+			EVENT_EMITTER.removeListener("close-stream", listener);
+			console.log("EventSource close requested.");
+		}
+	};
+
+	EVENT_EMITTER.on("close-stream", listener);
+}
+
 export async function listen_messages(
 	receiver_id: string,
 	callback: (messages: Message[]) => void,
@@ -50,7 +62,7 @@ export async function listen_messages(
 	tries?: number
 ) {
 	if (!tries)
-		tries = 3;
+		tries = MAXIMUM_TRIES;
 	const token = await get_auth_token();
 	const evt_src = new EventSourcePolyfill(
 		get_current_host(`/api/messages/listen?receiver_id=${receiver_id}`),
@@ -72,19 +84,54 @@ export async function listen_messages(
 		evt_src.close();
 		console.log(`Got an error while trying to listen messages, retrying... Tries left: ${tries}`);
 		if (tries > 1) {
-			setTimeout(() => listen_messages(receiver_id, callback, onError, tries - 1), 2000);
+			setTimeout(() => listen_messages(receiver_id, callback, onError, tries - 1), RETRY_CONNECTION_TIMEOUT);
 		} else {
 			console.log("got error");
 			onError(toast_error_messages.listen_messages_error);
 		}
 	};
 
-	EVENT_EMITTER.on("close", () => {
-		if (evt_src) {
-			evt_src.close();
-			console.log("EventSource close requested.");
+
+	close_evt_src(evt_src);
+}
+
+
+export async function listen_chats(
+	callback: (chats: ChatType[]) => void,
+	onError: (reason: string) => void,
+	tries?: number
+) {
+	if (!tries)
+		tries = MAXIMUM_TRIES;
+	const token = await get_auth_token();
+	const evt_src = new EventSourcePolyfill(
+		get_current_host(`/api/chats/listen`),
+		{
+			headers: {
+				Authorization: `Bearer ${token}`,
+				"Content-Type": "text/event-stream",
+			},
+		},
+	);
+
+	evt_src.onmessage = (event) => {
+		if (event.data) {
+			callback(JSON.parse(event.data) as ChatType[]);
 		}
-	});
+	};
+
+	evt_src.onerror = () => {
+		evt_src.close();
+		console.log(`Got an error while trying to listen chats, retrying... Tries left: ${tries}`);
+		if (tries > 1) {
+			setTimeout(() => listen_chats(callback, onError, tries - 1), RETRY_CONNECTION_TIMEOUT);
+		} else {
+			console.log("got error");
+			onError(toast_error_messages.listen_chats_error);
+		}
+	};
+
+	close_evt_src(evt_src);
 }
 
 export async function send_message(message: {
