@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
+import "./index.css";
 import { Outlet, useLocation, useNavigate} from "react-router-dom";
 import { check_user_logged_in } from "./utils/functions/user";
 import LoadingBar from "./components/loading_bar";
-import { get_current_host } from "./utils/functions/functions";
 import { EVENT_EMITTER } from "./utils/constants";
 
 function App() {

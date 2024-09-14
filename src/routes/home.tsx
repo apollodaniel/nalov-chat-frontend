@@ -2,10 +2,9 @@ import { useEffect, useState } from "react";
 import { get_user_chats, listen_chats } from "../utils/functions/chat";
 import { isAxiosError } from "axios";
 import { ChatType, User } from "../utils/types";
-import { confirmation_modals, DATETIME_FORMATTER } from "../utils/constants";
 import { get_available_users, get_current_user, logout_user } from "../utils/functions/user";
 import { useNavigate } from "react-router-dom";
-import ConfirmationPopup from "../components/confirmation_popup";
+
 import HomeTreeDotsPopup from "../components/home_three_dots_popup";
 import ChatListItem from "../components/chat_list_item";
 import UserListItem from "../components/user_list_item";
@@ -97,7 +96,7 @@ function Home() {
 				</div>
 				<button onClick={()=> setMoreActionsPopupVisible(true)} className="btn btn-primary h-100">More actions</button>
 			</div>
-			<ul className="list-group">
+			<ul className="list-group rounded-5">
 				{!focusedSearch && search.length === 0
 					? // chats
 						chats.map((c) => <ChatListItem key={c.user.id} navigate={navigate} chat={c} />)
