@@ -16,6 +16,7 @@ export async function get_user_chats(): Promise<ChatResult> {
 	const chats_result = new HttpResult(response);
 
 	if (chats_result.sucess) {
+		console.log(chats_result);
 		return chats_result.data as ChatResult;
 	}
 

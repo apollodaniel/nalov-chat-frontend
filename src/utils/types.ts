@@ -87,6 +87,7 @@ export type Message = {
 	content: string,
 	creation_date: number,
 	last_modified_date: number,
+	seen_date: number,
 	sender_id: string,
 	receiver_id: string
 };
@@ -94,7 +95,8 @@ export type Message = {
 // chats
 export type ChatType = {
 	user: User,
-	last_message: Message
+	last_message: Message,
+	unseen_message_count: number
 };
 
 export type ChatResult = {
