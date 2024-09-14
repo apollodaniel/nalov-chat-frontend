@@ -14,9 +14,14 @@ interface IProps {
 	closeContextMenu?: () => void;
 }
 
-async function onAction(event: string, msg: Message, onShowMessageInfo: (msg: Message) => void, onEditContextMenu?: (msg: Message) => void, closeContextMenu?: () => void) {
-	if (closeContextMenu)
-		closeContextMenu();
+async function onAction(
+	event: string,
+	msg: Message,
+	onShowMessageInfo: (msg: Message) => void,
+	onEditContextMenu?: (msg: Message) => void,
+	closeContextMenu?: () => void,
+) {
+	if (closeContextMenu) closeContextMenu();
 	switch (event) {
 		case "edit":
 			onEditContextMenu!(msg);
@@ -33,12 +38,19 @@ async function onAction(event: string, msg: Message, onShowMessageInfo: (msg: Me
 	}
 }
 
-function MessageContainer({ msg, chat_id, onEdit, onContextMenu, showContextMenu, closeContextMenu, onShowMessageInfo }: IProps) {
-
+function MessageContainer({
+	msg,
+	chat_id,
+	onEdit,
+	onContextMenu,
+	showContextMenu,
+	closeContextMenu,
+	onShowMessageInfo,
+}: IProps) {
 	return (
 		<div className={`w-100 d-flex flex-column`}>
 			<div
-				className={`card d-flex flex-column justify-content-between p-0 px-3 py-3 gap-1 ${chat_id === msg.sender_id ? "align-self-start" : "align-self-end"}`}
+				className={`card d-flex flex-column justify-content-between p-0 gap-1 ${chat_id === msg.sender_id ? "align-self-start" : "align-self-end"}`}
 				style={{
 					minHeight: "50px",
 					minWidth: "150px",
@@ -49,18 +61,33 @@ function MessageContainer({ msg, chat_id, onEdit, onContextMenu, showContextMenu
 					onContextMenu();
 				}}
 			>
-				{msg.content}
-				<p className="m-0 align-self-end" style={{ fontSize: "10px" }}>
-					{SHORT_DATETIME_FORMATTER.format(msg.creation_date)}
-				</p>
+				<p className={`m-0 mx-3 ${msg.last_modified_date != msg.creation_date ? "mt-3 mb-1": "my-3"}`}>{msg.content}</p>
+				{msg.creation_date != msg.last_modified_date && (
+					<p
+						className="m-0 mx-2 align-self-end"
+						style={{ fontSize: "10px" }}
+					>
+						Edited
+					</p>
+				)}
 			</div>
 
+			<p className={`m-0 px-1 ${chat_id === msg.sender_id ? "align-self-start" : "align-self-end"}`} style={{ fontSize: "10px" }}>
+				{SHORT_DATETIME_FORMATTER.format(msg.creation_date)}
+			</p>
 			<MessageContextMenu
 				visible={showContextMenu}
 				msg={msg}
 				chat_id={chat_id}
 				onAction={(_event, _msg, _onEditContextMenu) =>
-					onAction(_event, _msg, onShowMessageInfo, _onEditContextMenu, closeContextMenu)}
+					onAction(
+						_event,
+						_msg,
+						onShowMessageInfo,
+						_onEditContextMenu,
+						closeContextMenu,
+					)
+				}
 				onFocusExit={() => closeContextMenu && closeContextMenu()}
 				onEdit={onEdit}
 			/>
