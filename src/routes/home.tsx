@@ -3,7 +3,7 @@ import { get_user_chats, listen_chats } from "../utils/functions/chat";
 import { isAxiosError } from "axios";
 import { ChatType, User } from "../utils/types";
 import { confirmation_modals, DATETIME_FORMATTER } from "../utils/constants";
-import { get_available_users, logout_user } from "../utils/functions/user";
+import { get_available_users, get_current_user, logout_user } from "../utils/functions/user";
 import { useNavigate } from "react-router-dom";
 import ConfirmationPopup from "../components/confirmation_popup";
 import HomeTreeDotsPopup from "../components/home_three_dots_popup";
@@ -13,7 +13,6 @@ import { Toast } from "react-bootstrap";
 
 function Home() {
 	// main page
-
 	const [chats, setChats] = useState<ChatType[]>([]);
 	const [users, setUsers] = useState<User[]>([]);
 	const [search, setSearch] = useState<string>("");

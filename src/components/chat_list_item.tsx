@@ -6,7 +6,7 @@ import { get_current_host } from "../utils/functions/functions";
 
 interface IProps{
 	navigate: NavigateFunction,
-	chat: ChatType
+	chat: ChatType,
 }
 
 function ChatListItem({chat, navigate}: IProps) {
@@ -31,9 +31,9 @@ function ChatListItem({chat, navigate}: IProps) {
 			<div className="d-flex flex-column justify-content-start align-items-start">
 				<div className="fw-bold h4">{chat.user.name}</div>
 				<p>
-					{chat.last_message.content.length > 15
+					{`${chat.user.id !== chat.last_message.sender_id ? "Você: " : ""}${chat.last_message.content.length > 15
 						? chat.last_message.content.substring(0, 15)
-						: chat.last_message.content}
+						: chat.last_message.content}`}
 				</p>
 			</div>
 			<div className="ms-auto d-flex flex-column justify-content-start align-items-end">
