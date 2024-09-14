@@ -118,7 +118,7 @@ function Home() {
 			>
 				{
 					errorMessages.map((msg) => (
-						<Toast key={msg[1]} bg="danger" show={true} onClose={() => setErrorMessages((prev) => prev.filter((m) => m[1] != msg[1]))}>
+						<Toast key={msg[1]} bg="danger" show={true} style={{zIndex: "10"}} onClose={() => setErrorMessages((prev) => prev.filter((m) => m[1] != msg[1]))}>
 							<Toast.Header className="d-flex flex-row justify-content">
 								<div className="h6 fw-bold m-0 me-auto">Sistema</div>
 								<small>{Intl.DateTimeFormat('pt-BR', { timeStyle: "medium" }).format(parseInt(msg[1]))}</small>
