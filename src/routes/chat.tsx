@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { Message, User } from "../utils/types";
+import { Message, PositionOffset, User } from "../utils/types";
 import LoadingBar from "../components/loading_bar";
 import { get_user } from "../utils/functions/user";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { isAxiosError } from "axios";
 import {
+	delete_message,
 	get_messages,
 	listen_messages,
 	patch_message,
@@ -12,12 +13,37 @@ import {
 } from "../utils/functions/chat";
 import {
 	DATETIME_FORMATTER,
-	EVENT_EMITTER,
-	SHORT_TIME_FORMATTER,
 } from "../utils/constants";
 import { get_current_host } from "../utils/functions/functions";
 import MessageContainer from "../components/message_container";
 import { Modal, Toast } from "react-bootstrap";
+import MessageContextMenu from "../components/message_context_menu";
+
+
+
+async function onAction(
+	event: string,
+	msg: Message,
+	onShowMessageInfo: (msg: Message) => void,
+	onEditContextMenu?: (msg: Message) => void,
+	closeContextMenu?: () => void,
+) {
+	if (closeContextMenu) closeContextMenu();
+	switch (event) {
+		case "edit":
+			onEditContextMenu!(msg);
+			break;
+		case "delete":
+			// delete message
+			console.log("deleted");
+			await delete_message(msg.id);
+			break;
+		default:
+			// show message
+			onShowMessageInfo(msg);
+			break;
+	}
+}
 
 function Chat() {
 	const [messages, setMessages] = useState<Message[]>([]);
@@ -34,12 +60,11 @@ function Chat() {
 	const navigate = useNavigate();
 	const location = useLocation();
 
-	const [contextMenuMessage, setContextMenuMessage] = useState<string | null>(
-		null,
-	);
 	const [showMessageInfoPopup, setShowMessageInfoPopup] = useState<
 		Message | undefined
 	>(undefined);
+
+	const [showContextMenu, setShowContextMenu] = useState<[Message, PositionOffset] | undefined>();
 
 	const getMessages = async () => {
 		try {
@@ -143,11 +168,15 @@ function Chat() {
 	return !user ? (
 		<LoadingBar />
 	) : (
-		<div className="w-100 h-100 d-flex flex-column align-items-center justify-content-center">
+		<div
+			className="w-100 h-100 d-flex flex-column align-items-center justify-content-center"
+
+			onMouseDown={() => setShowContextMenu(undefined)}
+
+		>
 			<div
 				className="card w-100 h-100 d-flex flex-column "
 				style={{ maxHeight: "90vh", maxWidth: "800px" }}
-				onMouseDown={() => setContextMenuMessage(null)}
 			>
 				<div
 					className="card rounded-0 w-100 p-3 d-flex flex-row gap-3"
@@ -180,22 +209,7 @@ function Chat() {
 								key={msg.id}
 								msg={msg}
 								chat_id={params["id"]!}
-								onEdit={() => {
-									setEditingMessage(msg);
-									setSendMessageContent(msg.content);
-								}}
-								onShowMessageInfo={(msg) => {
-									console.log(msg.creation_date);
-									console.log(msg.last_modified_date);
-									return setShowMessageInfoPopup(msg);
-								}}
-								onContextMenu={() =>
-									setContextMenuMessage(msg.id)
-								}
-								showContextMenu={contextMenuMessage === msg.id}
-								closeContextMenu={() =>
-									setContextMenuMessage(null)
-								}
+								onContextMenu={(msg, pos_offset) => setShowContextMenu([msg, pos_offset])}
 							/>
 						))}
 						<div ref={bottomRef}></div>
@@ -280,7 +294,7 @@ function Chat() {
 							style={{
 								overflow: "hidden",
 								whiteSpace: "nowrap",
-									textOverflow: "ellipsis",
+								textOverflow: "ellipsis",
 							}}
 						>
 							<h6 className="m-0">Conteúdo</h6>
@@ -325,7 +339,7 @@ function Chat() {
 								)}
 							</small>
 						</div>
-						{ showMessageInfoPopup.seen_date && <div>
+						{showMessageInfoPopup.seen_date && <div>
 							<h6 className="m-0">Visualizado em</h6>
 							<small>
 								{DATETIME_FORMATTER.format(
@@ -370,6 +384,32 @@ function Chat() {
 					</Toast>
 				))}
 			</div>
+			{
+				showContextMenu &&
+				<MessageContextMenu
+					msg={showContextMenu![0]}
+					chat_id={params["id"]!}
+					onAction={(_event: any, _msg: any, _onEditContextMenu: any) =>
+						onAction(
+							_event,
+							_msg,
+							(msg: any) => {
+								console.log(msg.creation_date);
+								console.log(msg.last_modified_date);
+								return setShowMessageInfoPopup(msg);
+							},
+							_onEditContextMenu,
+							() => setShowContextMenu(undefined),
+						)
+					}
+					onFocusExit={() => setShowContextMenu(undefined)}
+					onEdit={() => {
+						setEditingMessage(showContextMenu[0]);
+						setSendMessageContent(showContextMenu[0].content);
+					}}
+					position_offset={showContextMenu[1]}
+				/>
+			}
 		</div>
 	);
 }

@@ -6,6 +6,8 @@ export const DATETIME_FORMATTER = Intl.DateTimeFormat('pt-BR', {dateStyle: "medi
 export const SHORT_DATETIME_FORMATTER = Intl.DateTimeFormat('pt-BR', {dateStyle: "short", timeStyle: "medium"});
 export const SHORT_TIME_FORMATTER = Intl.DateTimeFormat('pt-BR', {timeStyle: "short"});
 
+
+
 export const field_errors = {
 	invalid_password: "A Senha deve ter pelo menos 8 caracteres, letras minúsculas, maiúsculas, números e um caractere especial.",
 	invalid_email: "Por favor, forneça um email válido.",
@@ -61,3 +63,4 @@ export const more_actions_modal = {
 		logout_button: "Logout"
 	}
 };
+

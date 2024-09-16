@@ -1,5 +1,8 @@
 import { AxiosResponse } from "axios";
 
+export type PositionOffset = {
+	offset_left: number, offset_top: number
+}
 
 // templates
 export type UserTemplate = {
@@ -24,17 +27,17 @@ export type UserCredentials = {
 
 
 // errors
-export class HttpError extends Error{
+export class HttpError extends Error {
 	data: any;
 	status_code: number;
-	constructor(result: HttpResult | {status_code: number, data: any}){
+	constructor(result: HttpResult | { status_code: number, data: any }) {
 		super("http error");
 		this.data = result.data;
 		this.status_code = result.status_code;
 	}
 }
 
-export type BackendError = {type: string, path: string, location: string, msg: string};
+export type BackendError = { type: string, path: string, location: string, msg: string };
 
 export type ErrorResult = {
 	errors: BackendError[]
@@ -50,7 +53,7 @@ export class HttpResult {
 	sucess: boolean;
 	data: any;
 	status_code: number;
-	constructor(response: AxiosResponse){
+	constructor(response: AxiosResponse) {
 		this.sucess = response.status >= 200 && response.status < 300;
 		this.status_code = response.status;
 		this.data = response.data;

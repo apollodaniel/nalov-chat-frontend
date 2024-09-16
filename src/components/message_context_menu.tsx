@@ -1,12 +1,13 @@
-import { Message } from "../utils/types";
+import { MutableRefObject, useEffect, useRef } from "react";
+import { Message, PositionOffset } from "../utils/types";
 
 interface IProps {
 	msg: Message;
 	chat_id: string;
-	visible: boolean;
 	onFocusExit: () => void;
 	onAction: (event: string, msg: Message, onEdit?: (msg: Message) => void) => void;
 	onEdit: (msg: Message) => void;
+	position_offset?: PositionOffset
 }
 
 interface ContextMenuItemProps {
@@ -31,33 +32,27 @@ function ContextMenuItem({ name, event_callback }: ContextMenuItemProps) {
 function MessageContextMenu({
 	msg,
 	chat_id,
-	visible,
 	onFocusExit,
 	onAction,
-	onEdit
+	onEdit,
+	position_offset
 }: IProps) {
 	return (
 		<ul
-			className={`card position-absolute list-group ${visible ? "d-block" : "d-none"}`} // ${chat_id === msg.sender_id ? "align-self-start mx-3" : "align-self-end mx-3"}`}
+			className="card  w-100 position-absolute list-group" // ${chat_id === msg.sender_id ? "align-self-start mx-3" : "align-self-end mx-3"}`}
 			onBlur={() => onFocusExit()}
 			onMouseDown={(event) => {
 				event.preventDefault();
 				event.stopPropagation();
 			}}
 			style={
-				chat_id !== msg.sender_id
-					? {
-						minWidth: "120px",
 
-						zIndex: "10",
-						right: "40px",
-					}
-					: {
-						minWidth: "120px",
-
-						zIndex: "10",
-						left: "40px",
-					}
+				{
+					maxWidth: "250px",
+					zIndex: "10",
+					top: `${position_offset?.offset_top || 0}px`,
+					left: `${position_offset?.offset_left|| 0}px`
+				}
 			}
 		>
 			{msg.sender_id != chat_id && (
