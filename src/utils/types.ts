@@ -27,6 +27,9 @@ export type UserCredentials = {
 
 
 // errors
+
+export type PopupErrorMessages = [string, string][];
+
 export class HttpError extends Error {
 	data: any;
 	status_code: number;
@@ -92,8 +95,15 @@ export type Message = {
 	last_modified_date: number,
 	seen_date: number,
 	sender_id: string,
-	receiver_id: string
+	receiver_id: string,
+	attachment_id?: string
 };
+
+export type Attachment = {
+	filename: string,
+	mimetype: string,
+	byte_length: number
+}
 
 // chats
 export type ChatType = {

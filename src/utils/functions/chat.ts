@@ -1,6 +1,6 @@
 import axios, { isAxiosError } from "axios";
 import { get_auth_token } from "./user";
-import { ChatResult, ChatType, HttpError, HttpResult, Message } from "../types";
+import { Attachment, ChatResult, ChatType, HttpError, HttpResult, Message } from "../types";
 import { get_current_host } from "./functions";
 import { EventSourcePolyfill } from "event-source-polyfill";
 import { EVENT_EMITTER, MAXIMUM_TRIES, RETRY_CONNECTION_TIMEOUT, toast_error_messages } from "../constants";
@@ -44,7 +44,7 @@ export async function get_messages(receiver_id: string): Promise<Message[]> {
 	throw new Error("unable to get messages");
 }
 
-function close_evt_src(evt_src: EventSourcePolyfill){
+function close_evt_src(evt_src: EventSourcePolyfill) {
 	const listener = () => {
 		if (evt_src) {
 			evt_src.close();
@@ -138,16 +138,21 @@ export async function listen_chats(
 export async function send_message(message: {
 	receiver_id: string;
 	content: string;
-}, onError?: (reason: string) => void) {
+	attachment?: Attachment;
+}, onError?: (reason: string) => void, onSucess?: (result: {message_id: string, attachment_id: string|undefined}) => void
+) {
 	let tries = 3;
 	while (tries > 0) {
 		try {
 			const token = await get_auth_token();
-			await axios.put(get_current_host("/api/messages"), message, {
+			const response = await axios.put(get_current_host("/api/messages"), message, {
 				headers: {
 					Authorization: `Bearer ${token}`,
 				},
 			});
+			console.log(response.data)
+			if(onSucess)
+				return onSucess(response.data);
 			break;
 		} catch (err: any) {
 			if (isAxiosError(err) && err.status && err.status === 400) {
@@ -158,9 +163,9 @@ export async function send_message(message: {
 		console.log(`Could not send the messagem, retrying... Tries left: ${tries}`);
 		await new Promise((r) => setTimeout(r, 1000));
 	}
-	if(tries <= 0){
+	if (tries <= 0) {
 		// there was an error on sending
-		if(onError) onError(toast_error_messages.send_message_error);
+		if (onError) onError(toast_error_messages.send_message_error);
 	}
 }
 

@@ -2,13 +2,13 @@ import { useEffect, useState } from "react";
 import { get_user_chats, listen_chats } from "../utils/functions/chat";
 import { isAxiosError } from "axios";
 import { ChatType, User } from "../utils/types";
-import { get_available_users, get_current_user, logout_user } from "../utils/functions/user";
+import { get_available_users } from "../utils/functions/user";
 import { useNavigate } from "react-router-dom";
 
 import HomeTreeDotsPopup from "../components/home_three_dots_popup";
 import ChatListItem from "../components/chat_list_item";
 import UserListItem from "../components/user_list_item";
-import { Toast } from "react-bootstrap";
+import { EVENT_ERROR_EMITTER } from "../utils/constants";
 
 function Home() {
 	// main page
@@ -16,7 +16,6 @@ function Home() {
 	const [users, setUsers] = useState<User[]>([]);
 	const [search, setSearch] = useState<string>("");
 	const [focusedSearch, setFocusedSearch] = useState(false);
-	const [errorMessages, setErrorMessages] = useState<string[][]>([]); // errors
 	const [moreActionsPopupVisible, setMoreActionsPopupVisible] = useState(false);
 
 	const navigate = useNavigate();
@@ -44,14 +43,7 @@ function Home() {
 			await listen_chats((chats: ChatType[]) => {
 				setChats(chats);
 			},
-				(reason: string) => {
-					// unable to listen
-					setErrorMessages((prev) => {
-						const id = Date.now();
-						setTimeout(() => setErrorMessages((prev) => prev.filter((msg) => msg[1] != id.toString())), 10000);
-						return [...prev, [reason, id.toString()]];
-					});
-				});
+				(reason: string) => EVENT_ERROR_EMITTER.emit('add-error', reason));
 		} catch (err: any) {
 			if (isAxiosError(err) && err.response && err.response.data) {
 				// backend error
@@ -108,25 +100,6 @@ function Home() {
 				show={moreActionsPopupVisible}
 				navigate={navigate}
 			/>
-			<div
-				className="position-absolute d-flex flex-column gap-2"
-				style={{
-					top: "16px",
-					right: "16px"
-				}}
-			>
-				{
-					errorMessages.map((msg) => (
-						<Toast key={msg[1]} bg="danger" show={true} style={{zIndex: "10"}} onClose={() => setErrorMessages((prev) => prev.filter((m) => m[1] != msg[1]))}>
-							<Toast.Header className="d-flex flex-row justify-content">
-								<div className="h6 fw-bold m-0 me-auto">Sistema</div>
-								<small>{Intl.DateTimeFormat('pt-BR', { timeStyle: "medium" }).format(parseInt(msg[1]))}</small>
-							</Toast.Header>
-							<Toast.Body>{msg[0]}</Toast.Body>
-						</Toast>
-					))
-				}
-			</div>
 		</div>
 	);
 }

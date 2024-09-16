@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Message, PositionOffset, User } from "../utils/types";
+import { Attachment, Message, PositionOffset, User } from "../utils/types";
 import LoadingBar from "../components/loading_bar";
 import { get_user } from "../utils/functions/user";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
@@ -13,13 +13,15 @@ import {
 } from "../utils/functions/chat";
 import {
 	DATETIME_FORMATTER,
+	EVENT_ERROR_EMITTER,
+	ON_ERROR_CALLBACK,
 } from "../utils/constants";
-import { get_current_host } from "../utils/functions/functions";
+import { get_current_host, upload_file } from "../utils/functions/functions";
 import MessageContainer from "../components/message_container";
-import { Modal, Toast } from "react-bootstrap";
+import { Modal } from "react-bootstrap";
 import MessageContextMenu from "../components/message_context_menu";
-
-
+import AttachFileIcon from '@mui/icons-material/AttachFile';
+import filetypeinfo from "magic-bytes.js";
 
 async function onAction(
 	event: string,
@@ -52,9 +54,10 @@ function Chat() {
 	const [editingMessage, setEditingMessage] = useState<Message | undefined>(
 		undefined,
 	);
-	const bottomRef = useRef(null);
 
-	const [errorMessages, setErrorMessages] = useState<string[][]>([]);
+	const bottomRef = useRef(null);
+	const filePickerRef = useRef(null);
+	const [selectedFileAttachment, setSelectedFileAttachment] = useState<File | undefined>(undefined);
 
 	const params = useParams();
 	const navigate = useNavigate();
@@ -65,7 +68,6 @@ function Chat() {
 	>(undefined);
 
 	const [showContextMenu, setShowContextMenu] = useState<[Message, PositionOffset] | undefined>();
-
 	const getMessages = async () => {
 		try {
 			const messages = await get_messages(params["id"]!);
@@ -76,22 +78,7 @@ function Chat() {
 				(messages: Message[]) => {
 					setMessages(messages);
 				},
-				(reason: string) => {
-					// unable to listen
-					setErrorMessages((prev) => {
-						const id = Date.now();
-						setTimeout(
-							() =>
-								setErrorMessages((prev) =>
-									prev.filter(
-										(msg) => msg[1] != id.toString(),
-									),
-								),
-							10000,
-						);
-						return [...prev, [reason, id.toString()]];
-					});
-				},
+				ON_ERROR_CALLBACK,
 			);
 		} catch (err: any) {
 			navigate(location.pathname);
@@ -113,30 +100,45 @@ function Chat() {
 
 	const sendMessage = async () => {
 		const message_content = sendMessageContent;
+
+		let attachment: Attachment | undefined;
+		if (selectedFileAttachment) {
+			let mimetype = "text/plain";
+
+			const blob = selectedFileAttachment.slice(0, 1024);
+			const fileReader = new FileReader();
+			fileReader.onloadend = (f) => {
+				if(f.target && f.target.result){
+					const bytes = new Uint8Array(f.target.result as ArrayBuffer);
+					const fileinfo = filetypeinfo(bytes)[0];
+					if(fileinfo && fileinfo.mime)
+						mimetype = fileinfo.mime;
+				}
+			}
+			fileReader.readAsArrayBuffer(blob);
+
+			attachment = {
+				filename: selectedFileAttachment.name,
+				mimetype: mimetype,
+				byte_length: selectedFileAttachment.size
+			};
+		}
+
 		try {
 			await send_message(
 				{
 					content: message_content,
 					receiver_id: params["id"]!,
+					attachment: attachment
 				},
-				(reason: string) => {
-					// unable to listen
-					setErrorMessages((prev) => {
-						const id = Date.now();
-						setTimeout(
-							() =>
-								setErrorMessages((prev) =>
-									prev.filter(
-										(msg) => msg[1] != id.toString(),
-									),
-								),
-							10000,
-						);
-						return [...prev, [reason, id.toString()]];
-					});
-				},
+				ON_ERROR_CALLBACK,
+				(result) => {
+					if (selectedFileAttachment) {
+						upload_file(selectedFileAttachment, result.message_id, result.attachment_id!, ON_ERROR_CALLBACK);
+					}
+					setSendMessageContent("");
+				}
 			);
-			setSendMessageContent("");
 		} catch (err: any) { }
 	};
 	const editMessage = async () => {
@@ -161,9 +163,6 @@ function Chat() {
 		}
 	}, [messages]);
 
-	useEffect(() => {
-		console.log(errorMessages);
-	}, [errorMessages]);
 
 	return !user ? (
 		<LoadingBar />
@@ -172,7 +171,6 @@ function Chat() {
 			className="w-100 h-100 d-flex flex-column align-items-center justify-content-center"
 
 			onMouseDown={() => setShowContextMenu(undefined)}
-
 		>
 			<div
 				className="card w-100 h-100 d-flex flex-column "
@@ -218,21 +216,30 @@ function Chat() {
 				<div className="w-100 bg-white rounded-top-0 rounded-bottom-3">
 					{!editingMessage ? (
 						// sending message input
-						<div className="form-floating">
-							<input
-								className="form-control rounded-0 rounded-bottom-3"
-								type="text"
-								onChange={(event) => {
-									setSendMessageContent(event.target.value);
-								}}
-								onKeyDownCapture={(event) => {
-									if (event.key == "Enter") {
-										sendMessage();
-									}
-								}}
-								value={sendMessageContent}
-							/>
-							<label>Message</label>
+						<div className="d-flex flex-row">
+							<div className="form-floating w-100 rounded-0 rounded-end-0 rounded-start-3 rounded-top-0">
+								<input
+									className="form-control rounded-0 rounded-end-0 rounded-start-3 rounded-top-0"
+									type="text"
+									onChange={(event) => {
+										setSendMessageContent(event.target.value);
+									}}
+									onKeyDownCapture={(event) => {
+										if (event.key == "Enter") {
+											sendMessage();
+										}
+									}}
+									value={sendMessageContent}
+								/>
+								<label>Message{selectedFileAttachment && ` + ${selectedFileAttachment.name}`}</label>
+							</div>
+
+							{ /* upload file button */}
+							<button
+								className="btn btn-primary rounded-0 rounded-top-0 rounded-end"
+								onClick={() => (filePickerRef.current! as HTMLElement).click()}
+							> <AttachFileIcon /> </button>
+
 						</div>
 					) : (
 						// editing message input
@@ -271,6 +278,14 @@ function Chat() {
 					)}
 				</div>
 			</div>
+
+			<input
+				className="d-none"
+				ref={filePickerRef}
+				type="file"
+				onChange={
+					(event) => setSelectedFileAttachment(event.target.files ? event.target.files[0] || undefined : undefined)
+				} />
 
 			{!!showMessageInfoPopup && (
 				<Modal show={true}>
@@ -350,40 +365,6 @@ function Chat() {
 					</Modal.Body>
 				</Modal>
 			)}
-
-			<div
-				className="position-absolute d-flex flex-column gap-2"
-				style={{
-					top: "16px",
-					right: "16px",
-				}}
-			>
-				{errorMessages.map((msg) => (
-					<Toast
-						key={msg[1]}
-						bg="danger"
-						style={{ zIndex: "10" }}
-						show={true}
-						onClose={() =>
-							setErrorMessages((prev) =>
-								prev.filter((m) => m[1] != msg[1]),
-							)
-						}
-					>
-						<Toast.Header className="d-flex flex-row justify-content">
-							<div className="h6 fw-bold m-0 me-auto">
-								Sistema
-							</div>
-							<small>
-								{Intl.DateTimeFormat("pt-BR", {
-									timeStyle: "medium",
-								}).format(parseInt(msg[1]))}
-							</small>
-						</Toast.Header>
-						<Toast.Body>{msg[0]}</Toast.Body>
-					</Toast>
-				))}
-			</div>
 			{
 				showContextMenu &&
 				<MessageContextMenu

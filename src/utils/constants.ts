@@ -1,11 +1,13 @@
-import event from 'events';
+import { EventEmitter2 } from "eventemitter2";
 
-export const EVENT_EMITTER = new event.EventEmitter();
+export const EVENT_EMITTER = new EventEmitter2({});
+export const EVENT_ERROR_EMITTER = new EventEmitter2({});
 
 export const DATETIME_FORMATTER = Intl.DateTimeFormat('pt-BR', {dateStyle: "medium", timeStyle: "short"});
 export const SHORT_DATETIME_FORMATTER = Intl.DateTimeFormat('pt-BR', {dateStyle: "short", timeStyle: "medium"});
 export const SHORT_TIME_FORMATTER = Intl.DateTimeFormat('pt-BR', {timeStyle: "short"});
 
+export const ON_ERROR_CALLBACK = (reason: string) => EVENT_ERROR_EMITTER.emit("add-error", reason);
 
 
 export const field_errors = {
@@ -25,8 +27,8 @@ export const toast_error_messages = {
 	listen_chats_error: "Não foi possivel obter a lista de chats, tente novamente mais tarde."
 };
 
-export const MAXIMUM_TRIES = 4;
-export const RETRY_CONNECTION_TIMEOUT = 3000;
+export const MAXIMUM_TRIES = 1;
+export const RETRY_CONNECTION_TIMEOUT = 500;
 
 export const field_patterns = {
 	username: /(^[a-zA-Z0-9]+([_ -]?[a-zA-Z0-9])*.{4,})$/,
