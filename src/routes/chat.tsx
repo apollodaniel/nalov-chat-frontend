@@ -140,6 +140,7 @@ function Chat() {
 		);
 
 		setSendMessageContent("");
+		setSelectedFileAttachment(undefined);
 	};
 	const editMessage = async () => {
 		try {
