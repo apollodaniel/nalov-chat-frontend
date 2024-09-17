@@ -16,7 +16,6 @@ export async function get_user_chats(): Promise<ChatResult> {
 	const chats_result = new HttpResult(response);
 
 	if (chats_result.sucess) {
-		console.log(chats_result);
 		return chats_result.data as ChatResult;
 	}
 
@@ -127,7 +126,6 @@ export async function listen_chats(
 		if (tries > 1) {
 			setTimeout(() => listen_chats(callback, onError, tries - 1), RETRY_CONNECTION_TIMEOUT);
 		} else {
-			console.log("got error");
 			onError(toast_error_messages.listen_chats_error);
 		}
 	};
@@ -150,7 +148,6 @@ export async function send_message(message: {
 					Authorization: `Bearer ${token}`,
 				},
 			});
-			console.log(response.data)
 			if(onSucess)
 				return onSucess(response.data);
 			break;

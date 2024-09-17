@@ -84,7 +84,11 @@ export async function check_user_logged_in() {
 }
 export async function get_auth_token(): Promise<string> {
 	let auth_token = window.sessionStorage.getItem("auth_token");
-	if (!auth_token) await refresh_user_token();
+	if (!auth_token)
+		await refresh_user_token();
+	else if (!(await verify_token(auth_token, "Auth")))
+		await refresh_user_token();
+
 	auth_token = window.sessionStorage.getItem("auth_token");
 	if (!auth_token) {
 		throw new Error("error while trying to get user auth token");
@@ -101,7 +105,12 @@ export async function verify_token(
 		type: type,
 		token: token,
 	});
-	return result.status >= 200 && result.status < 300;
+
+	let valid_token = false;
+	if (result.status >= 200 && result.status < 300) {
+		valid_token = result.data.valid;
+	}
+	return valid_token;
 }
 
 export async function get_available_users(): Promise<User[]> {
@@ -115,8 +124,8 @@ export async function get_available_users(): Promise<User[]> {
 
 	const result = new HttpResult(response);
 	if (result.sucess) {
-		const users  = result.data.users as User[];
-		return users.map((user: User) => {return {...user, profile_picture: user.profile_picture}});
+		const users = result.data.users as User[];
+		return users.map((user: User) => { return { ...user, profile_picture: user.profile_picture } });
 	}
 
 	throw new HttpError(result);

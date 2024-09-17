@@ -27,8 +27,8 @@ export const toast_error_messages = {
 	listen_chats_error: "Não foi possivel obter a lista de chats, tente novamente mais tarde."
 };
 
-export const MAXIMUM_TRIES = 1;
-export const RETRY_CONNECTION_TIMEOUT = 500;
+export const MAXIMUM_TRIES = 4;
+export const RETRY_CONNECTION_TIMEOUT = 3000;
 
 export const field_patterns = {
 	username: /(^[a-zA-Z0-9]+([_ -]?[a-zA-Z0-9])*.{4,})$/,
