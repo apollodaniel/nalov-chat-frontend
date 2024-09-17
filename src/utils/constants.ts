@@ -24,7 +24,8 @@ export const field_errors = {
 export const toast_error_messages = {
 	send_message_error: "Não foi possível enviar sua mensagem, tente novamente mais tarde!",
 	listen_messages_error: "Não foi possivel obter a lista de mensagens, tente novamente mais tarde.",
-	listen_chats_error: "Não foi possivel obter a lista de chats, tente novamente mais tarde."
+	listen_chats_error: "Não foi possivel obter a lista de chats, tente novamente mais tarde.",
+	check_token_error: "Não foi possível autenticar sua sessão, tente novamente mais tarde."
 };
 
 export const MAXIMUM_TRIES = 4;

@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { get_current_host } from "./functions";
 import {
 	HttpError,
@@ -10,6 +10,7 @@ import {
 	UserTemplate,
 } from "../types";
 import { NavigateFunction } from "react-router-dom";
+import { EVENT_ERROR_EMITTER, toast_error_messages } from "../constants";
 
 export async function register_user(user: UserTemplate) {
 	const result = await axios.post(get_current_host("/auth/register"), user);
@@ -101,16 +102,24 @@ export async function verify_token(
 	token: string,
 	type: "Refresh" | "Auth",
 ): Promise<boolean> {
-	const result = await axios.post(get_current_host("/auth/check-token"), {
-		type: type,
-		token: token,
-	});
+	try{
+		const result = await axios.post(get_current_host("/auth/check-token"), {
+			type: type,
+			token: token,
+		});
 
-	let valid_token = false;
-	if (result.status >= 200 && result.status < 300) {
-		valid_token = result.data.valid;
+		if (!(result.status >= 200 && result.status < 300)){
+			return false;
+		}
+		return result.data.valid;
+	}catch(err: any){
+		if(err instanceof AxiosError && err.message === "Network Error"){
+			EVENT_ERROR_EMITTER.emit("add-error", toast_error_messages.check_token_error);
+		}
+		throw err;
 	}
-	return valid_token;
+
+
 }
 
 export async function get_available_users(): Promise<User[]> {

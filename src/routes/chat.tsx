@@ -124,22 +124,22 @@ function Chat() {
 			};
 		}
 
-		try {
-			await send_message(
-				{
-					content: message_content,
-					receiver_id: params["id"]!,
-					attachment: attachment
-				},
-				ON_ERROR_CALLBACK,
-				(result) => {
-					if (selectedFileAttachment) {
-						upload_file(selectedFileAttachment, result.message_id, result.attachment_id!, ON_ERROR_CALLBACK);
-					}
-					setSendMessageContent("");
+		await send_message(
+			{
+				content: message_content,
+				receiver_id: params["id"]!,
+				attachment: attachment
+			},
+			ON_ERROR_CALLBACK,
+			(result) => {
+				if (selectedFileAttachment) {
+					upload_file(selectedFileAttachment, result.message_id, result.attachment_id!, ON_ERROR_CALLBACK);
 				}
-			);
-		} catch (err: any) { }
+
+			}
+		);
+
+		setSendMessageContent("");
 	};
 	const editMessage = async () => {
 		try {

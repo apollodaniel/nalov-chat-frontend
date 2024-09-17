@@ -1,13 +1,20 @@
 import { Toast } from "react-bootstrap"
 import { PopupErrorMessages } from "../utils/types"
 import { useEffect, useState } from "react"
-import { EVENT_ERROR_EMITTER } from "../utils/constants";
+import { EVENT_ERROR_EMITTER, toast_error_messages } from "../utils/constants";
 
 export default function PopupErrorMessage() {
 	const [errorMessages, setErrorMessages] = useState<PopupErrorMessages>([]);
 
 	const listener = (reason: string) => {
+
 		setErrorMessages((prev) => {
+			// only stack same message when the message is send message error, except ignores
+			if (reason !== toast_error_messages.send_message_error && prev.filter((e) => e[0] === reason).length != 0) {
+				// ignores error message
+				return prev;
+			}
+
 			const id = Date.now();
 			setTimeout(
 				() =>
@@ -20,6 +27,7 @@ export default function PopupErrorMessage() {
 			);
 			return [...prev, [reason, id.toString()]];
 		});
+
 	};
 
 	useEffect(() => {

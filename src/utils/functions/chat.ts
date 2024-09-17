@@ -139,29 +139,16 @@ export async function send_message(message: {
 	attachment?: Attachment;
 }, onError?: (reason: string) => void, onSucess?: (result: {message_id: string, attachment_id: string|undefined}) => void
 ) {
-	let tries = 3;
-	while (tries > 0) {
-		try {
-			const token = await get_auth_token();
-			const response = await axios.put(get_current_host("/api/messages"), message, {
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-			});
-			if(onSucess)
-				return onSucess(response.data);
-			break;
-		} catch (err: any) {
-			if (isAxiosError(err) && err.status && err.status === 400) {
-				break;
-			}
-		}
-		tries--;
-		console.log(`Could not send the messagem, retrying... Tries left: ${tries}`);
-		await new Promise((r) => setTimeout(r, 1000));
-	}
-	if (tries <= 0) {
-		// there was an error on sending
+	try {
+		const token = await get_auth_token();
+		const response = await axios.put(get_current_host("/api/messages"), message, {
+			headers: {
+				Authorization: `Bearer ${token}`,
+			},
+		});
+		if(onSucess)
+			return onSucess(response.data);
+	} catch (err: any) {
 		if (onError) onError(toast_error_messages.send_message_error);
 	}
 }
