@@ -96,13 +96,15 @@ export type Message = {
 	seen_date: number,
 	sender_id: string,
 	receiver_id: string,
-	attachment_id?: string
 };
 
 export type Attachment = {
+	id?: string,
+	message_id?: string,
+	date?: number,
 	filename: string,
-	mimetype: string,
-	byte_length: number
+	mime_type: string,
+	byte_length: number,
 }
 
 // chats

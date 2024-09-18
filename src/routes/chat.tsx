@@ -13,10 +13,9 @@ import {
 } from "../utils/functions/chat";
 import {
 	DATETIME_FORMATTER,
-	EVENT_ERROR_EMITTER,
 	ON_ERROR_CALLBACK,
 } from "../utils/constants";
-import { get_current_host, upload_file } from "../utils/functions/functions";
+import { get_current_host, upload_files } from "../utils/functions/functions";
 import MessageContainer from "../components/message_container";
 import { Modal } from "react-bootstrap";
 import MessageContextMenu from "../components/message_context_menu";
@@ -57,7 +56,7 @@ function Chat() {
 
 	const bottomRef = useRef(null);
 	const filePickerRef = useRef(null);
-	const [selectedFileAttachment, setSelectedFileAttachment] = useState<File | undefined>(undefined);
+	const [selectedAttachments, setSelectedAttachments] = useState<File[]>([]);
 
 	const params = useParams();
 	const navigate = useNavigate();
@@ -101,11 +100,10 @@ function Chat() {
 	const sendMessage = async () => {
 		const message_content = sendMessageContent;
 
-		let attachment: Attachment | undefined;
-		if (selectedFileAttachment) {
+		let attachments: Attachment[] = selectedAttachments.map((fileAttachment)=>{
 			let mimetype = "text/plain";
 
-			const blob = selectedFileAttachment.slice(0, 1024);
+			const blob = fileAttachment.slice(0, 1024);
 			const fileReader = new FileReader();
 			fileReader.onloadend = (f) => {
 				if(f.target && f.target.result){
@@ -117,30 +115,30 @@ function Chat() {
 			}
 			fileReader.readAsArrayBuffer(blob);
 
-			attachment = {
-				filename: selectedFileAttachment.name,
-				mimetype: mimetype,
-				byte_length: selectedFileAttachment.size
+			return {
+				filename: fileAttachment.name,
+				mime_type: mimetype,
+				byte_length: fileAttachment.size
 			};
-		}
+		});
 
 		await send_message(
 			{
 				content: message_content,
 				receiver_id: params["id"]!,
-				attachment: attachment
+				attachments: attachments
 			},
 			ON_ERROR_CALLBACK,
 			(result) => {
-				if (selectedFileAttachment) {
-					upload_file(selectedFileAttachment, result.message_id, result.attachment_id!, ON_ERROR_CALLBACK);
+				if (selectedAttachments.length > 0 ) {
+					upload_files(selectedAttachments, result.message_id, ON_ERROR_CALLBACK);
 				}
 
 			}
 		);
 
 		setSendMessageContent("");
-		setSelectedFileAttachment(undefined);
+		setSelectedAttachments([]);
 	};
 	const editMessage = async () => {
 		try {
@@ -232,7 +230,7 @@ function Chat() {
 									}}
 									value={sendMessageContent}
 								/>
-								<label>Message{selectedFileAttachment && ` + ${selectedFileAttachment.name}`}</label>
+								<label>Message{selectedAttachments.length > 0 && ` + ${selectedAttachments.map((at)=>at.name).join(" + ")}`}</label>
 							</div>
 
 							{ /* upload file button */}
@@ -285,8 +283,8 @@ function Chat() {
 				ref={filePickerRef}
 				type="file"
 				onChange={
-					(event) => setSelectedFileAttachment(event.target.files ? event.target.files[0] || undefined : undefined)
-				} />
+					(event) => setSelectedAttachments(event.target.files ? Array.from(event.target.files) : [])
+				} multiple={true} />
 
 			{!!showMessageInfoPopup && (
 				<Modal show={true}>

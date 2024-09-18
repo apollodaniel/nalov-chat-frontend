@@ -1,7 +1,8 @@
-import { DATETIME_FORMATTER, SHORT_TIME_FORMATTER } from "../constants";
-import { BackendError, FieldError } from "../types";
+import { SHORT_TIME_FORMATTER } from "../constants";
+import { Attachment, BackendError, FieldError, HttpResult } from "../types";
 import { delete_message } from "./chat";
 import { get_auth_token } from "./user";
+import axios from "axios";
 
 export function get_current_host(args?: string): string {
 	let location = window.location.href;
@@ -53,26 +54,62 @@ export function format_date_user_friendly(date: number): string {
 	else return GENERIC_DATE_FORMATTER.format(date);
 }
 
+export async function get_attachments(message_id: string): Promise<Attachment[]> {
+	const token = await get_auth_token();
 
-export function upload_file(file: File, message_id: string, attachment_id: string, onError: (reason: string) => void) {
-	get_auth_token().then((token) => {
+	const response = await fetch(
+		get_current_host(`/api/messages/${message_id}/attachments`),
+		{
+			method: "GET",
+			headers: {
+				Authorization: `Bearer ${token}`
+			}
+		}
+	);
+
+	if (response.status === 200) {
+		return response.json();
+	}
+
+	throw new Error("unable to get attachments");
+}
+
+export async function upload_files(files: File[], message_id: string, onError: (reason: string) => void) {
+
+	const _onError = (aditional_message?: string)=>{
+		onError(`Could not send you attachment file. ${aditional_message || ""}`);
+		delete_message(message_id);
+	}
+
+	try {
+		const token = await get_auth_token();
 		let form_data = new FormData();
-		form_data.append('file', file);
+
+		const attachments = await get_attachments(message_id);
+
+		console.log(files);
+		console.log(attachments);
+
+		for (const attachment of attachments) {
+			console.log("Unable to find file that matches attachments info");
+			const file = files.find((file)=> file.name == attachment.filename && file.size == attachment.byte_length);
+			if(!file)
+				throw new Error("Unable to find file that matches attachments info");
+
+			form_data.append(attachment.id!, file);
+		}
 
 		let request = new XMLHttpRequest();
 
-		const url = get_current_host(`/api/upload?attachment_id=${attachment_id}`);
+		const url = get_current_host(`/api/upload?message_id=${message_id}`);
 		console.log(url);
 		request.open("POST", url);
 
 		request.setRequestHeader("Authorization", `Bearer ${token}`);
 		request.send(form_data);
 
-
-		request.addEventListener("error", () => {
-			onError(`Could not send you attachment file. Server responded with code ${request.status}`)
-			delete_message(message_id);
-		});
-
-	});
+		request.addEventListener("error", () => _onError(`Server responded with code ${request.status}`));
+	}catch(err){
+		_onError();
+	}
 }
