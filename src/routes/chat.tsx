@@ -99,16 +99,16 @@ function Chat() {
 	const sendMessage = async () => {
 		const message_content = sendMessageContent;
 
-		let attachments: Attachment[] = selectedAttachments.map((fileAttachment)=>{
+		let attachments: Attachment[] = selectedAttachments.map((fileAttachment) => {
 			let mimetype = "text/plain";
 
 			const blob = fileAttachment.slice(0, 1024);
 			const fileReader = new FileReader();
 			fileReader.onloadend = (f) => {
-				if(f.target && f.target.result){
+				if (f.target && f.target.result) {
 					const bytes = new Uint8Array(f.target.result as ArrayBuffer);
 					const fileinfo = filetypeinfo(bytes)[0];
-					if(fileinfo && fileinfo.mime)
+					if (fileinfo && fileinfo.mime)
 						mimetype = fileinfo.mime;
 				}
 			}
@@ -130,7 +130,7 @@ function Chat() {
 		);
 
 
-		if (selectedAttachments.length > 0 ) {
+		if (selectedAttachments.length > 0) {
 			upload_files(selectedAttachments, result.message_id);
 		}
 
@@ -138,13 +138,11 @@ function Chat() {
 		setSelectedAttachments([]);
 	};
 	const editMessage = async () => {
-		try {
-			await patch_message(editingMessage!.id, {
-				content: sendMessageContent,
-			});
-			setEditingMessage(undefined);
-			setSendMessageContent("");
-		} catch (err: any) { }
+		setEditingMessage(undefined);
+		setSendMessageContent("");
+		await patch_message(editingMessage!.id, {
+			content: sendMessageContent,
+		});
 	};
 
 	useEffect(() => {
@@ -224,10 +222,11 @@ function Chat() {
 										if (event.key == "Enter") {
 											sendMessage();
 										}
+
 									}}
 									value={sendMessageContent}
 								/>
-								<label>Message{selectedAttachments.length > 0 && ` + ${selectedAttachments.map((at)=>at.name).join(" + ")}`}</label>
+								<label>Message{selectedAttachments.length > 0 && ` + ${selectedAttachments.map((at) => at.name).join(" + ")}`}</label>
 							</div>
 
 							{ /* upload file button */}

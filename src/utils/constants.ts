@@ -1,4 +1,5 @@
 import { EventEmitter2 } from "eventemitter2";
+import { useRef } from "react";
 
 export const EVENT_EMITTER = new EventEmitter2({});
 export const EVENT_ERROR_EMITTER = new EventEmitter2({});

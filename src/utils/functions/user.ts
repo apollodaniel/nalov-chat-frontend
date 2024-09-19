@@ -12,7 +12,7 @@ export const register_user = (user: RegisterFormSubmit): Promise<void> =>
 	new Promise((r, _rj) => execRequest({
 		endpoint: `/auth/register`,
 		method: "POST",
-		options: { body: user, headers: {} },
+		options: { content: user, headers: {} },
 		errorMessage: toast_error_messages.register_error,
 		onSucess: async () => {
 			await login_user({
@@ -28,15 +28,15 @@ export const login_user = (user: UserCredentials): Promise<void> =>
 	new Promise((r, _rj) => execRequest({
 		endpoint: `/auth/login`,
 		method: "POST",
-		options: { body: user, headers: {} },
+		options: { content: user, headers: {} },
 		errorMessage: toast_error_messages.login_error,
-		onSucess: (data: any)=>{
+		onSucess: (data: any) => {
 			window.localStorage.setItem("refresh_token", data.refresh_token);
 			window.sessionStorage.setItem("auth_token", data.auth_token);
 			r();
-		}
+		},
+		onFail: _rj
 	}));
-
 
 export const get_available_users = (): Promise<User[]> =>
 	new Promise((r, _rj) => execRequest({
@@ -65,10 +65,10 @@ export const logout_user = (): Promise<User> =>
 	new Promise((r, _rj) => execRequest({
 		endpoint: `/auth/logout`,
 		method: "POST",
-		onSucess: ()=>{
+		onSucess: () => {
 			window.localStorage.clear();
 			window.sessionStorage.clear();
-			setTimeout(()=>window.open(window.location.href, "_self"), 2000);
+			setTimeout(() => window.open(window.location.href, "_self"), 2000);
 		}
 	}));
 
@@ -113,3 +113,18 @@ export async function get_auth_token(): Promise<string> {
 	return auth_token;
 }
 
+
+export const check_user_logged_in = async () => {
+	const token = await get_auth_token();
+	return await new Promise((r) => execRequest({
+		endpoint: "/auth/check-token",
+		method: "POST",
+		options: {
+			content: {
+				token: token,
+				type: "Auth"
+			}
+		},
+		onSucess: r
+	}));
+};

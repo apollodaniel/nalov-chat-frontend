@@ -25,9 +25,9 @@ function Home() {
 
 	const get_chats = async () => {
 		const chat_result = await get_user_chats();
-		setChats(chat_result.chats);
+		setChats(chat_result);
 
-		await listen_chats((chats: ChatType[]) => setChats(chats));
+		listen_chats((chats: ChatType[]) => setChats(chats));
 	};
 
 	useEffect(() => {

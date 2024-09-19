@@ -8,7 +8,6 @@ import {
 import { register_user } from "../utils/functions/user";
 import { parse_errors } from "../utils/functions/functions";
 import { useNavigate } from "react-router-dom";
-import ErrorPopup from "../components/error_modal";
 import { isAxiosError } from "axios";
 
 function Register() {
@@ -139,14 +138,6 @@ function Register() {
 					/>
 				</form>
 			</div>
-			<ErrorPopup
-				visible={unknownErrorMessage ? true : false}
-				title={modal_errors.register.title}
-				content={unknownErrorMessage || ""}
-				onConfirm={()=>{
-					navigate("/register")
-				}}
-			/>
 		</main>
 	);
 }
