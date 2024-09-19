@@ -1,5 +1,3 @@
-import React, { useRef } from "react";
-import { get_current_host } from "../utils/functions/functions";
 import "./profile_picture.css";
 
 interface IProps{
@@ -15,7 +13,7 @@ function ProfilePicture({url, onClick}: IProps) {
 			className="position-relative rounded-circle mt-5 mb-4 d-flex align-items-center justify-content-center"
 			style={{ width: "150px", height: "150px" }}
 			id="profile-picture"
-			onClick={(event)=>onClick()}
+			onClick={()=>onClick()}
 		>
 			<img
 				className="position-absolute rounded-circle"

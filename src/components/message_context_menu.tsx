@@ -1,4 +1,3 @@
-import { MutableRefObject, useEffect, useRef } from "react";
 import { Message, PositionOffset } from "../utils/types";
 
 interface IProps {

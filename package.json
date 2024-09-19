@@ -12,6 +12,7 @@
   "dependencies": {
     "@emotion/styled": "^11.13.0",
     "@fortawesome/react-fontawesome": "^0.2.2",
+    "@microsoft/fetch-event-source": "^2.0.1",
     "@mui/icons-material": "^6.0.1",
     "@mui/material": "^6.0.1",
     "@types/event-source-polyfill": "^1.0.5",
@@ -20,7 +21,6 @@
     "@types/react-router-dom": "^5.3.3",
     "axios": "^1.7.5",
     "bootstrap": "^5.3.3",
-    "event-source-polyfill": "^1.0.31",
     "eventemitter2": "^6.4.9",
     "magic-bytes.js": "^1.10.0",
     "react": "^18.3.1",

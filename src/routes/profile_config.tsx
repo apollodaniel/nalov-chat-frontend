@@ -4,12 +4,11 @@ import { User } from "../utils/types";
 import LoadingBar from "../components/loading_bar";
 import { get_current_host } from "../utils/functions/functions";
 import ProfilePicture from "../components/profile_picture";
-import { useBlocker, useNavigate } from "react-router-dom";
+import { useBlocker } from "react-router-dom";
 import ConfirmationPopup from "../components/confirmation_popup";
 
 function ProfileConfig() {
 	const [user, setUser] = useState<User | undefined>();
-	const navigate = useNavigate();
 	const [loading, setLoading] = useState(true);
 
 	const [name, setName] = useState<string | undefined>(undefined);
@@ -19,25 +18,12 @@ function ProfileConfig() {
 
 	const [changed, setChanged] = useState(false);
 
-
-	// useEffect(()=>{
-	// 	window.onbeforeunload  = (e) => {
-	// 		if (!name && !profilePicture) {
-	// 			return undefined;
-	// 		}
-	// 		const message =
-	// 			"Você realmente deseja sair?\nExistem mudanças que não foram salvas.";
-	//
-	// 		return message;
-	// 	};
-	// }, [name, profilePicture]);
-
-
 	let blocker = useBlocker(changed);
 
 	useEffect(() => {
 		if (user) {
 			setImageLocation(get_current_host(user!.profile_picture));
+			setName(user.name);
 		}
 	}, [user]);
 
@@ -52,12 +38,9 @@ function ProfileConfig() {
 	useEffect(() => {
 		get_current_user().then((result) => {
 			setUser(result);
-			setName(result.name);
 			setLoading(false);
 		});
 	}, []);
-
-
 
 	return (
 		<div
@@ -187,6 +170,7 @@ function ProfileConfig() {
 						</button>
 					</form>
 
+					{/* Unsaved changes popup */}
 					<ConfirmationPopup
 						visible={blocker.state === "blocked"}
 						title="Aviso"

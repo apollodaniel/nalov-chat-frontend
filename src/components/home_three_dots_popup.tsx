@@ -53,7 +53,7 @@ function HomeTreeDotsPopup({ show, navigate, onCancel }: IProps) {
 				visible={logoutPopupVisible}
 				onConfirm={async () => {
 					setLogoutPopupVisible(false);
-					await logout_user(navigate);
+					await logout_user();
 				}}
 				onCancel={() => setLogoutPopupVisible(false)}
 			/>

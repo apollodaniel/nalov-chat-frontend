@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { get_user_chats, listen_chats } from "../utils/functions/chat";
-import { isAxiosError } from "axios";
 import { ChatType, User } from "../utils/types";
 import { get_available_users } from "../utils/functions/user";
 import { useNavigate } from "react-router-dom";
@@ -8,7 +7,6 @@ import { useNavigate } from "react-router-dom";
 import HomeTreeDotsPopup from "../components/home_three_dots_popup";
 import ChatListItem from "../components/chat_list_item";
 import UserListItem from "../components/user_list_item";
-import { EVENT_ERROR_EMITTER } from "../utils/constants";
 
 function Home() {
 	// main page
@@ -21,40 +19,15 @@ function Home() {
 	const navigate = useNavigate();
 
 	const get_users = async () => {
-		try {
-			const users = await get_available_users();
-			setUsers(users);
-		} catch (err: any) {
-			if (isAxiosError(err) && err.response && err.response.data) {
-				// backend error
-				// const parsed_error = parse_errors(
-				// 	err.response.data.errors as BackendError[],
-				// );
-			}
-		}
+		const users = await get_available_users();
+		setUsers(users);
 	};
 
 	const get_chats = async () => {
-		try {
-			const chat_result = await get_user_chats();
-			setChats(chat_result.chats);
+		const chat_result = await get_user_chats();
+		setChats(chat_result.chats);
 
-
-			await listen_chats((chats: ChatType[]) => {
-				setChats(chats);
-			},
-				(reason: string) => EVENT_ERROR_EMITTER.emit('add-error', reason));
-		} catch (err: any) {
-			if (isAxiosError(err) && err.response && err.response.data) {
-				// backend error
-				// const parsed_error = parse_errors(
-				// 	err.response.data.errors as BackendError[],
-				// );
-			}
-			if (isAxiosError(err) && err.response && err.response.status != 401) {
-				setTimeout(()=>get_chats(),1000);
-			}
-		}
+		await listen_chats((chats: ChatType[]) => setChats(chats));
 	};
 
 	useEffect(() => {

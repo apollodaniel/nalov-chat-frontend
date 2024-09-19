@@ -13,29 +13,27 @@ function App() {
 	const navigate = useNavigate();
 
 	useEffect(() => {
-		new Promise(async (r, rj) => {
-			try {
-				setLoading(true);
-				await check_user_logged_in();
-				if (
-					location.pathname === "/register" ||
-					location.pathname === "/login"
-				) {
-					navigate("/");
-				}
-				setLoading(false);
-				r(undefined);
-			} catch (err: any) {
-				if (
-					location.pathname !== "/login" &&
-					location.pathname !== "/register"
-				) {
-					navigate("/login");
-				}
-				setLoading(false);
-				rj();
+		setLoading(true);
+		check_user_logged_in().then(() => {
+			if (
+				location.pathname === "/register" ||
+				location.pathname === "/login"
+			) {
+				navigate("/");
 			}
-		});
+			setLoading(false);
+		}).catch(() => {
+
+			if (
+				location.pathname !== "/login" &&
+				location.pathname !== "/register"
+			) {
+				navigate("/login");
+			}
+			setLoading(false);
+		})
+
+
 
 	}, [location]);
 

@@ -13,7 +13,6 @@ import {
 } from "../utils/functions/chat";
 import {
 	DATETIME_FORMATTER,
-	ON_ERROR_CALLBACK,
 } from "../utils/constants";
 import { get_current_host, upload_files } from "../utils/functions/functions";
 import MessageContainer from "../components/message_container";
@@ -77,7 +76,7 @@ function Chat() {
 				(messages: Message[]) => {
 					setMessages(messages);
 				},
-				ON_ERROR_CALLBACK,
+
 			);
 		} catch (err: any) {
 			navigate(location.pathname);
@@ -122,20 +121,18 @@ function Chat() {
 			};
 		});
 
-		await send_message(
+		const result = await send_message(
 			{
 				content: message_content,
 				receiver_id: params["id"]!,
 				attachments: attachments
-			},
-			ON_ERROR_CALLBACK,
-			(result) => {
-				if (selectedAttachments.length > 0 ) {
-					upload_files(selectedAttachments, result.message_id, ON_ERROR_CALLBACK);
-				}
-
 			}
 		);
+
+
+		if (selectedAttachments.length > 0 ) {
+			upload_files(selectedAttachments, result.message_id);
+		}
 
 		setSendMessageContent("");
 		setSelectedAttachments([]);

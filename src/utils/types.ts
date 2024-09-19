@@ -1,4 +1,8 @@
 import { AxiosResponse } from "axios";
+import { get_auth_token, refresh_user_token } from "./functions/user";
+import { EVENT_ERROR_EMITTER, toast_error_messages } from "./constants";
+import axios from "axios";
+
 
 export type PositionOffset = {
 	offset_left: number, offset_top: number
@@ -54,14 +58,58 @@ export type FieldError = {
 // result
 export class HttpResult {
 	sucess: boolean;
-	data: any;
+	_data: any;
+
+	response: AxiosResponse;
 	status_code: number;
 	constructor(response: AxiosResponse) {
 		this.sucess = response.status >= 200 && response.status < 300;
 		this.status_code = response.status;
-		this.data = response.data;
+		this._data = response.data;
+		this.response = response;
 	}
+	async data(): Promise<any> {
+		console.log("Retrieving data");
+		if (this.status_code === 601) {
+			if (!this.response.config) {
+				console.log("Cannot retrieve last request");
+				EVENT_ERROR_EMITTER.emit("add-error", toast_error_messages.check_token_error);
+
+				return this._data;
+			}
+
+			try {
+				console.log("refreshing token");
+				await refresh_user_token();
+				const token = await get_auth_token();
+
+				// retry request
+				const response = await axios({
+					...this.response.config,
+					headers: {
+						Authorization: `Bearer ${token}`
+					}
+				});
+
+				console.log(response.data);
+
+				this.sucess = response.status >= 200 && response.status < 300;
+				this.status_code = response.status;
+				this._data = response.data;
+
+				return this._data;
+			} catch (err:any) {
+				console.log(err.message);
+				EVENT_ERROR_EMITTER.emit("add-error", toast_error_messages.check_token_error);
+			}
+		}
+		return this._data;
+	}
+
+
 }
+
+
 
 export type LoginResult = {
 	refresh_token: string,
@@ -117,3 +165,4 @@ export type ChatType = {
 export type ChatResult = {
 	chats: ChatType[]
 };
+

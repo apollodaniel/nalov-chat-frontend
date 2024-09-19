@@ -1,4 +1,3 @@
-import "react";
 import { Message, PositionOffset } from "../utils/types";
 import { SHORT_DATETIME_FORMATTER } from "../utils/constants";
 
@@ -7,20 +6,6 @@ interface IProps {
 	chat_id: string;
 	onContextMenu: (msg: Message, position_offset: PositionOffset) => void;
 }
-
-var cumulativeOffset = function(element: HTMLElement): PositionOffset {
-	var top = 0, left = 0;
-	do {
-		top += element.offsetTop || 0;
-		left += element.offsetLeft || 0;
-		element = element.parentElement!;
-	} while (element);
-
-	return {
-		offset_top: top,
-		offset_left: left
-	};
-};
 
 function MessageContainer({
 	msg,

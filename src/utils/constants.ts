@@ -25,7 +25,13 @@ export const toast_error_messages = {
 	send_message_error: "Não foi possível enviar sua mensagem, tente novamente mais tarde!",
 	listen_messages_error: "Não foi possivel obter a lista de mensagens, tente novamente mais tarde.",
 	listen_chats_error: "Não foi possivel obter a lista de chats, tente novamente mais tarde.",
-	check_token_error: "Não foi possível autenticar sua sessão, tente novamente mais tarde."
+	check_token_error: "Não foi possível autenticar sua sessão, tente novamente mais tarde.",
+	expired_session: "Sessão expirada, por favor entre novamente.",
+	register_error: "Não foi possível criar sua conta, tente novamente mais tarde.",
+	login_error: "Não foi possível fazer login, tente novamente mais tarde.",
+	get_messages_error: "Não foi possível obter as mensagens, tente novamente mais tarde.",
+	get_chats_error: "Não foi possível obter os chats, tente novamente mais tarde.",
+	get_users_error: "Não foi possível obter os usuários, tente novamente mais tarde."
 };
 
 export const MAXIMUM_TRIES = 4;

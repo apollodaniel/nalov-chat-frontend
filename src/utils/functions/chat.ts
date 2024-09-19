@@ -1,200 +1,105 @@
-import axios, { isAxiosError } from "axios";
-import { get_auth_token } from "./user";
+import { get_auth_token, refresh_user_token } from "./user";
 import { Attachment, ChatResult, ChatType, HttpError, HttpResult, Message } from "../types";
-import { get_current_host } from "./functions";
-import { EventSourcePolyfill } from "event-source-polyfill";
-import { EVENT_EMITTER, MAXIMUM_TRIES, RETRY_CONNECTION_TIMEOUT, toast_error_messages } from "../constants";
+import { execRequest, get_current_host, onReqError } from "./functions";
+import { fetchEventSource } from "@microsoft/fetch-event-source";
+import { EVENT_ERROR_EMITTER, MAXIMUM_TRIES, RETRY_CONNECTION_TIMEOUT, toast_error_messages } from "../constants";
 
-export async function get_user_chats(): Promise<ChatResult> {
-	const token = await get_auth_token();
-	const response = await axios.get(get_current_host("/api/chats"), {
-		headers: {
-			Authorization: `Bearer ${token}`,
-		},
-	});
+export const get_user_chats = (): Promise<ChatType[]> =>
+	new Promise((r, _rj) => execRequest({ endpoint: '/api/chats', method: "GET", onSucess: r }));
 
-	const chats_result = new HttpResult(response);
+export const get_messages = (receiver_id: string): Promise<Message[]> =>
+	new Promise((r, _rj) => execRequest({ endpoint: '/api/messages', method: "GET", onSucess: r }));
 
-	if (chats_result.sucess) {
-		return chats_result.data as ChatResult;
-	}
+export const send_message = (message: {
+	receiver_id: string;
+	content: string;
+	attachments?: Attachment[];
+}): Promise<any> =>
+	new Promise((r, _rj) => execRequest({ endpoint: '/api/messages', method: "PUT", errorMessage: toast_error_messages.send_message_error, options: { body: message }, onSucess: r }));
 
-	throw new HttpError(chats_result);
-}
+export const patch_message = (message_id: string, content: any): Promise<void> =>
+	new Promise((r, _rj) => execRequest({ endpoint: `/api/messages/${message_id}`, options: { body: content }, method: "PATCH", onSucess: r }));
 
-export async function get_messages(receiver_id: string): Promise<Message[]> {
-	const token = await get_auth_token();
-
-	const messages_result = new HttpResult(
-		await axios.get(
-			get_current_host(`/api/messages?receiver_id=${receiver_id}`),
-			{
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-			},
-		),
-	);
-
-	if (messages_result.sucess) {
-		return messages_result.data.messages as Message[];
-	}
-
-	throw new Error("unable to get messages");
-}
-
-function close_evt_src(evt_src: EventSourcePolyfill) {
-	const listener = () => {
-		if (evt_src) {
-			evt_src.close();
-			EVENT_EMITTER.removeListener("close-stream", listener);
-			console.log("EventSource close requested.");
-		}
-	};
-
-	EVENT_EMITTER.on("close-stream", listener);
-}
+export const delete_message = (message_id: string): Promise<void> =>
+	new Promise((r, _rj) => execRequest({ endpoint: `/api/messages/${message_id}`, method: "DELETE", onSucess: r }));
 
 export async function listen_messages(
 	receiver_id: string,
 	callback: (messages: Message[]) => void,
-	onError: (reason: string) => void,
 	tries?: number
 ) {
 	if (!tries)
 		tries = MAXIMUM_TRIES;
 	const token = await get_auth_token();
-	const evt_src = new EventSourcePolyfill(
+	await fetchEventSource(
 		get_current_host(`/api/messages/listen?receiver_id=${receiver_id}`),
 		{
 			headers: {
 				Authorization: `Bearer ${token}`,
 				"Content-Type": "text/event-stream",
 			},
+			onopen: async (response) => {
+				if (response.status === 601) {
+					// refresh token
+					await refresh_user_token();
+					listen_messages(receiver_id, callback, tries - 1)
+				}
+			},
+			onmessage: (event) => {
+				if (event.data) {
+					callback(JSON.parse(event.data)["messages"] as Message[]);
+				}
+			},
+			onerror: (err) => {
+				console.log(err);
+				console.log(`Got an error while trying to listen messages, retrying... Tries left: ${tries}`);
+				if (tries > 1) {
+					setTimeout(() => listen_messages(receiver_id, callback, tries - 1), RETRY_CONNECTION_TIMEOUT);
+				} else {
+					console.log("got error");
+					EVENT_ERROR_EMITTER.emit('add-error', toast_error_messages.listen_messages_error);
+				}
+			}
 		},
 	);
 
-	evt_src.onmessage = (event) => {
-		if (event.data) {
-			callback(JSON.parse(event.data)["messages"] as Message[]);
-		}
-	};
-
-	evt_src.onerror = () => {
-		evt_src.close();
-		console.log(`Got an error while trying to listen messages, retrying... Tries left: ${tries}`);
-		if (tries > 1) {
-			setTimeout(() => listen_messages(receiver_id, callback, onError, tries - 1), RETRY_CONNECTION_TIMEOUT);
-		} else {
-			console.log("got error");
-			onError(toast_error_messages.listen_messages_error);
-		}
-	};
-
-
-	close_evt_src(evt_src);
 }
 
 
 export async function listen_chats(
 	callback: (chats: ChatType[]) => void,
-	onError: (reason: string) => void,
 	tries?: number
 ) {
 	if (!tries)
 		tries = MAXIMUM_TRIES;
 	const token = await get_auth_token();
-	const evt_src = new EventSourcePolyfill(
+	await fetchEventSource(
 		get_current_host(`/api/chats/listen`),
 		{
 			headers: {
 				Authorization: `Bearer ${token}`,
 				"Content-Type": "text/event-stream",
 			},
+			onopen: async (response) => {
+				if (response.status === 601) {
+					// refresh token
+					await refresh_user_token();
+					listen_chats(callback, tries - 1);
+				}
+			},
+			onmessage: (event) => {
+				if (event.data) {
+					callback(JSON.parse(event.data) as ChatType[]);
+				}
+			},
+			onerror: (err) => {
+				console.log(`Got an error while trying to listen chats, retrying... Tries left: ${tries}`);
+				if (tries > 1) {
+					setTimeout(() => listen_chats(callback, tries - 1), RETRY_CONNECTION_TIMEOUT);
+				} else {
+					EVENT_ERROR_EMITTER.emit('add-error', toast_error_messages.listen_chats_error);
+				}
+			}
 		},
 	);
-
-	evt_src.onmessage = (event) => {
-		if (event.data) {
-			callback(JSON.parse(event.data) as ChatType[]);
-		}
-	};
-
-	evt_src.onerror = () => {
-		evt_src.close();
-		console.log(`Got an error while trying to listen chats, retrying... Tries left: ${tries}`);
-		if (tries > 1) {
-			setTimeout(() => listen_chats(callback, onError, tries - 1), RETRY_CONNECTION_TIMEOUT);
-		} else {
-			onError(toast_error_messages.listen_chats_error);
-		}
-	};
-
-	close_evt_src(evt_src);
-}
-
-export async function send_message(message: {
-	receiver_id: string;
-	content: string;
-	attachments?: Attachment[];
-}, onError?: (reason: string) => void, onSucess?: (result: { message_id: string }) => void
-) {
-	try {
-		const token = await get_auth_token();
-		const response = await axios.put(get_current_host("/api/messages"),
-			message,
-			{
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-			});
-		if (onSucess)
-			return onSucess(response.data);
-	} catch (err: any) {
-		if (onError) onError(toast_error_messages.send_message_error);
-	}
-}
-
-
-export async function patch_message(message_id: string, content: any) {
-	const auth_token = await get_auth_token();
-
-	const response = await fetch(
-		get_current_host(`/api/messages/${message_id}`),
-		{
-			method: "PATCH",
-			body: JSON.stringify(content),
-			headers: {
-				"Content-Type": "application/json",
-				Authorization: `Bearer ${auth_token}`
-			}
-		}
-	);
-
-	if (!response.ok && !(response.status >= 200 && response.status < 300)) {
-		// error
-		const response_body = await response.json();
-		throw new HttpError(response_body);
-	}
-}
-
-
-export async function delete_message(message_id: string) {
-	const auth_token = await get_auth_token();
-
-	const response = await fetch(
-		get_current_host(`/api/messages/${message_id}`),
-		{
-			method: "DELETE",
-			headers: {
-				Authorization: `Bearer ${auth_token}`
-			}
-		}
-	);
-
-	if (!response.ok && !(response.status >= 200 && response.status < 300)) {
-		// error
-		const response_body = await response.json();
-		throw new HttpError(response_body);
-	}
 }
