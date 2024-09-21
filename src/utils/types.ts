@@ -144,12 +144,14 @@ export type Message = {
 	seen_date: number,
 	sender_id: string,
 	receiver_id: string,
+	attachments: Attachment[],
 };
 
 export type Attachment = {
 	id?: string,
 	message_id?: string,
 	date?: number,
+	path?: string,
 	filename: string,
 	mime_type: string,
 	byte_length: number,

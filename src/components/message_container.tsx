@@ -1,5 +1,6 @@
 import { Message, PositionOffset } from "../utils/types";
 import { SHORT_DATETIME_FORMATTER } from "../utils/constants";
+import AttachmentContainer from "./attachment_container";
 
 interface IProps {
 	msg: Message;
@@ -37,6 +38,9 @@ function MessageContainer({
 					onContextMenu(msg, { offset_top: chat_id === msg.sender_id ? offset_top : offset_top + 125 > window.innerHeight ? window.innerHeight - 135 : offset_top, offset_left: chat_id === msg.sender_id ? rect.left : rect.left + rect.width - 250 });
 				}}
 			>
+				{
+					msg.attachments.map((attachment) => <AttachmentContainer attachment={attachment} /> )
+				}
 				<p className={`m-0 mx-3 ${msg.last_modified_date != msg.creation_date ? "mt-3 mb-1" : "my-3"}`}>{msg.content}</p>
 				{msg.creation_date != msg.last_modified_date && (
 					<p
@@ -55,23 +59,5 @@ function MessageContainer({
 		</div>
 	);
 }
-
-
-// <MessageContextMenu
-// 	visible={showContextMenu}
-// 	msg={msg}
-// 	chat_id={chat_id}
-// 	onAction={(_event, _msg, _onEditContextMenu) =>
-// 		onAction(
-// 			_event,
-// 			_msg,
-// 			onShowMessageInfo,
-// 			_onEditContextMenu,
-// 			closeContextMenu,
-// 		)
-// 	}
-// 	onFocusExit={() => closeContextMenu && closeContextMenu()}
-// 	onEdit={onEdit}
-// />
 
 export default MessageContainer;

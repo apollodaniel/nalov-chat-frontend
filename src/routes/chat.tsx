@@ -13,6 +13,7 @@ import {
 } from "../utils/functions/chat";
 import {
 	DATETIME_FORMATTER,
+	EVENT_EMITTER,
 } from "../utils/constants";
 import { get_current_host, upload_files } from "../utils/functions/functions";
 import MessageContainer from "../components/message_container";
@@ -148,6 +149,11 @@ function Chat() {
 	useEffect(() => {
 		getUser().then(() => {
 			getMessages();
+		});
+		EVENT_EMITTER.on("updated-attachments", () => {
+			if (bottomRef.current) {
+				(bottomRef.current as any).scrollIntoView({ behavior: "smooth" });
+			}
 		});
 	}, []);
 
