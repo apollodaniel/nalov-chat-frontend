@@ -17,10 +17,12 @@ export function get_current_host(args?: string, ws: boolean = false): string {
     if (ws) {
         location = location.replace("http", "ws");
     }
+	const _args = !args ? "" : args?.startsWith('/') ? args.substring(1, args.length) : args;
+	const _location = location.substring(0, location.indexOf(ports));
     return (
-        location.substring(0, location.indexOf(ports)) +
+         _location +
         (ws ? ":8081" : ":8751") +
-        (args || "")
+        (_location.endsWith('/') ? _args : `/${_args}` || "/")
     );
 }
 
