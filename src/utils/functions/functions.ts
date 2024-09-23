@@ -26,10 +26,10 @@ export function get_current_host(args?: string, ws: boolean = false): string {
 	);
 }
 
-export async function get_attachment(path: string): Promise<string | null> {
+export async function get_attachment(path: string): Promise<Blob | null> {
 	const result: Blob | null = await new Promise<any> ((r) => execRequest({ method: "GET", onSucess: r, blob: true, endpoint: path, onFail: () => r(null) }));
 	if(result) {
-		return URL.createObjectURL(result);
+		return result;
 	}
 
 	return null;

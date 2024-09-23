@@ -43,6 +43,13 @@ const router = createBrowserRouter([
 	},
 ]);
 
+import { pdfjs } from 'react-pdf';
+
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  '../node_modules/pdfjs-dist/build/pdf.worker.min.js',
+  import.meta.url,
+).toString();
+
 createRoot(document.getElementById('root')!).render(
 	<RouterProvider router={router} />
 )
