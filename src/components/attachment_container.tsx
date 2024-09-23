@@ -29,7 +29,11 @@ export default function AttachmentContainer({ attachment }: IProps) {
         element = (
             <video className="rounded-2 mw-100" src={get_current_host(attachment.path)}  controls={hovering}></video>
         );
-    }
+    } else if (attachment.mime_type.startsWith("audio")) {
+        element = (
+            <audio className="mw-100" src={get_current_host(attachment.path)} controls></audio>
+        );
+	}
 
     // const get_url = async (tries: number) => {
     //     if (attachmentUrl === "") {
