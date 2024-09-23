@@ -16,9 +16,9 @@ function MessageContainer({
 	return (
 		<div className={`w-100 d-flex flex-column`}>
 			<div
-				className={`card d-flex flex-column justify-content-between p-0 gap-1 ${chat_id === msg.sender_id ? "align-self-start" : "align-self-end"}`}
+				className={`card d-flex flex-column justify-content-center p-0 ${chat_id === msg.sender_id ? "align-self-start" : "align-self-end"}`}
 				style={{
-					minHeight: "50px",
+					minHeight: "40px",
 					minWidth: "150px",
 					maxWidth: "100%",
 				}}
@@ -41,7 +41,7 @@ function MessageContainer({
 				{
 					msg.attachments.map((attachment) => <AttachmentContainer attachment={attachment} /> )
 				}
-				<p className={`m-0 mx-3 ${msg.last_modified_date != msg.creation_date ? "mt-3 mb-1" : "my-3"}`}>{msg.content}</p>
+				<p className={`m-0 mx-3 ${msg.last_modified_date === msg.creation_date && "mb-1"}`}>{msg.content}</p>
 				{msg.creation_date != msg.last_modified_date && (
 					<p
 						className="m-0 mx-2 align-self-end"
