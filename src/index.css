@@ -8,3 +8,14 @@
 	text-overflow: ellipsis;
 	max-width: 100%;
 }
+
+@supports selector(::-webkit-scrollbar) {
+	::-webkit-scrollbar {
+		width: 8px;
+		background-color: transparent;
+	}
+	::-webkit-scrollbar-thumb {
+		border-radius: 12px;
+		background-color: #373b3f;
+	}
+}
