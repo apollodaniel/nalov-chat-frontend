@@ -2,6 +2,7 @@ import { RawData } from "ws";
 import {
 	EVENT_EMITTER,
 	EVENT_ERROR_EMITTER,
+	RETRY_CONNECTION_TIMEOUT,
 	SHORT_TIME_FORMATTER,
 	toast_error_messages,
 } from "../constants";
@@ -27,8 +28,8 @@ export function get_current_host(args?: string, ws: boolean = false): string {
 }
 
 export async function get_attachment(path: string): Promise<Blob | null> {
-	const result: Blob | null = await new Promise<any> ((r) => execRequest({ method: "GET", onSucess: r, blob: true, endpoint: path, onFail: () => r(null) }));
-	if(result) {
+	const result: Blob | null = await new Promise<any>((r) => execRequest({ method: "GET", onSucess: r, blob: true, endpoint: path, onFail: () => r(null) }));
+	if (result) {
 		return result;
 	}
 
@@ -187,7 +188,7 @@ export async function execRequest(obj: {
 	blob?: boolean,
 	onSucess: (data: any | Blob) => void;
 	options?: { content?: any; headers?: any };
-	onFail?: (response: Response) => void;
+	onFail?: (response: Response | undefined) => void;
 }): Promise<void> {
 	const { endpoint, blob = false, method, errorMessage, options, onSucess, onFail } = obj;
 
@@ -214,32 +215,33 @@ export async function execRequest(obj: {
 			: `${url}/?${qs.stringify(options.content)}`;
 	}
 
-	const response = await fetch(url, {
-		method: method,
-		...request_options,
-	});
+	try {
 
-	if (response.status >= 200 && response.status < 300) {
-		if (blob)
-			return onSucess(await response.blob());
-		else
-			return onSucess(await response.json());
-	} else if (response.status === 601) {
-		// expired token
-		await refresh_user_token();
-		return execRequest(obj);
-	} else {
-		if (errorMessage) EVENT_ERROR_EMITTER.emit("add-error", errorMessage);
-		if (onFail) onFail(response);
-	}
+		const response = await fetch(url, {
+			method: method,
+			...request_options,
+		});
 
-	if (response.status === 401) {
-		// reload session in case unauthorized
-		if (onFail) onFail(response);
+
+
+		if (response.status >= 200 && response.status < 300) {
+			if (blob)
+				return onSucess(await response.blob());
+			else
+				return onSucess(await response.json());
+		} else if (response.status === 601) {
+			// expired token
+			await refresh_user_token();
+			return execRequest(obj);
+		} else {
+			console.log("Got unknown error");
+			if (errorMessage) EVENT_ERROR_EMITTER.emit("add-error", errorMessage);
+			if (onFail) onFail(response);
+		}
+	} catch (err: any) {
+		console.log("Got unknown error");
 		if (errorMessage) EVENT_ERROR_EMITTER.emit("add-error", errorMessage);
-		// window.localStorage.clear();
-		// window.sessionStorage.clear();
-		// setTimeout(() => window.open(window.location.href, "_self"), 3000);
+		if (onFail) onFail(undefined);
 	}
 }
 
@@ -271,7 +273,7 @@ export async function listenEvents(obj: {
 			});
 		} else if (msg === "invalid token") {
 			if (onError) onError("invalid token");
-			if (errorMessage) EVENT_EMITTER.emit("add-error", errorMessage);
+			if (errorMessage) EVENT_ERROR_EMITTER.emit("add-error", errorMessage);
 		} else {
 			// valid data and ok response
 			onData(JSON.parse(msg));
@@ -280,15 +282,25 @@ export async function listenEvents(obj: {
 
 	socket.onerror = () => {
 		// retry
+		console.log(`Got an error trying to listen the messages, trying again... tries ${tries} `);
 		if (tries > 0) {
-			listenEvents({ ...obj, tries: tries - 1 });
+			setTimeout(() => {
+				listenEvents({ ...obj, tries: tries - 1 });
+			}, RETRY_CONNECTION_TIMEOUT);
 		} else {
-			if (errorMessage) EVENT_EMITTER.emit("add-error", errorMessage);
+			if (errorMessage) EVENT_ERROR_EMITTER.emit("add-error", errorMessage);
 		}
 	};
 
 	socket.onclose = () => {
-		EVENT_EMITTER.removeAllListeners("close-stream");
+		console.log(`Connection interrupted, trying again... tries ${tries} `);
+		if (tries > 0) {
+			setTimeout(() => {
+				listenEvents({ ...obj, tries: tries - 1 });
+			}, RETRY_CONNECTION_TIMEOUT);
+		} else {
+			if (errorMessage) EVENT_ERROR_EMITTER.emit("add-error", toast_error_messages.connection_interrupted);
+		}
 	};
 }
 

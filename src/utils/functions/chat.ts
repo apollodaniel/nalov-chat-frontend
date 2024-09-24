@@ -16,7 +16,7 @@ export const send_message = (message: {
 	content: string;
 	attachments?: Attachment[];
 }): Promise<any> =>
-	new Promise((r, _rj) => execRequest({ endpoint: '/api/messages', method: "PUT", errorMessage: toast_error_messages.send_message_error, options: { content: message }, onSucess: r }));
+	new Promise((r, _rj) => execRequest({ endpoint: '/api/messages', method: "PUT", errorMessage: toast_error_messages.send_message_error, options: { content: message }, onSucess: r, onFail: r }));
 
 export const patch_message = (message_id: string, content: any): Promise<void> =>
 	new Promise((r, _rj) => execRequest({ endpoint: `/api/messages/${message_id}`, options: { content: content }, method: "PATCH", onSucess: r, onFail: () => r() }));

@@ -50,7 +50,8 @@ export const get_user = (id: string): Promise<User> =>
 	new Promise((r, _rj) => execRequest({
 		endpoint: `/api/users/${id}`,
 		method: "GET",
-		onSucess: r
+		onSucess: r,
+		errorMessage: toast_error_messages.get_users_error,
 	}));
 
 
@@ -58,6 +59,7 @@ export const get_current_user = (): Promise<User> =>
 	new Promise((r, _rj) => execRequest({
 		endpoint: `/api/users/current`,
 		method: "GET",
+		errorMessage: toast_error_messages.get_users_error,
 		onSucess: r
 	}));
 
@@ -114,7 +116,7 @@ export async function get_auth_token(): Promise<string> {
 }
 
 
-export const check_user_logged_in = async () => {
+export const check_user_logged_in = async (onFail: ()=>void) => {
 	const token = await get_auth_token();
 	return await new Promise((r) => execRequest({
 		endpoint: "/auth/check-token",
@@ -125,6 +127,7 @@ export const check_user_logged_in = async () => {
 				type: "Auth"
 			}
 		},
-		onSucess: r
+		onSucess: r,
+		onFail: () => onFail()
 	}));
 };
