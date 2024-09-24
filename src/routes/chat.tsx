@@ -202,14 +202,15 @@ function Chat() {
 					}}
 				>
 					<div className="card-body d-flex flex-column align-items-start gap-2">
-						{messages.map((msg) => (
-							<MessageContainer
-								key={msg.id}
-								msg={msg}
-								chat_id={params["id"]!}
-								onContextMenu={(msg, pos_offset) => setShowContextMenu([msg, pos_offset])}
-							/>
-						))}
+						{messages.map((msg) => {
+							return (
+								<MessageContainer
+									msg={msg}
+									chat_id={params["id"]!}
+									onContextMenu={(msg, pos_offset) => setShowContextMenu([msg, pos_offset])}
+								/>
+							)
+						})}
 						<div ref={bottomRef}></div>
 					</div>
 				</div>

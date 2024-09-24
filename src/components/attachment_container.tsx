@@ -5,6 +5,7 @@ import { EVENT_EMITTER, MAXIMUM_TRIES } from "../utils/constants";
 import { Document, Page } from "react-pdf";
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
+import { LazyLoadImage } from "react-lazy-load-image-component";
 
 interface IProps {
 	attachment: Attachment;
@@ -19,10 +20,12 @@ export default function AttachmentContainer({ attachment }: IProps) {
 	if (attachment.mime_type.startsWith("image")) {
 		element = (
 			<div>
-				<img
-					className="mw-100 rounded-2"
-					style={{ minHeight: "100%" }}
-					onLoad={() => EVENT_EMITTER.emit("updated-attachments")}
+				<LazyLoadImage
+					effect="blur"
+					className="mw-100 mh-100 rounded-2"
+
+					style={{objectFit: "cover"}}
+					// onLoad={() => EVENT_EMITTER.emit("updated-attachments")}
 					src={get_current_host(attachment.path)}
 					alt=""
 				/>
@@ -53,8 +56,8 @@ export default function AttachmentContainer({ attachment }: IProps) {
 				{
 					attachmentFile ?
 						(
-							<div className="overflow-hidden mw-100" style={{ maxHeight: "120px" }} >
-								<Document file={attachmentFile} onError={()=>{}}>
+							<div className="overflow-hidden mw-100 rounded-2" style={{ maxHeight: "120px" }} >
+								<Document file={attachmentFile} onError={() => { }}>
 									<Page width={300} pageNumber={1}></Page>
 								</Document>
 							</div >
@@ -73,7 +76,7 @@ export default function AttachmentContainer({ attachment }: IProps) {
 			className="list-group-item p-2 pb-0"
 			onMouseOver={() => setHovering(true)}
 			onMouseLeave={() => setHovering(false)}
-			style={{ maxWidth: "300px" }}
+			style={{ maxWidth: "300px"}}
 		>
 			{element}
 		</div>
