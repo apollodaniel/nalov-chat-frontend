@@ -1,8 +1,7 @@
-import { get_auth_token, refresh_user_token } from "./user";
-import { Attachment, ChatResult, ChatType, HttpError, HttpResult, Message } from "../types";
-import { execRequest, get_current_host, listenEvents, onReqError } from "./functions";
-import { fetchEventSource } from "@microsoft/fetch-event-source";
-import { ABORT_CONTROLLER, abortControllerRef, EVENT_EMITTER, EVENT_ERROR_EMITTER, MAXIMUM_TRIES, RETRY_CONNECTION_TIMEOUT, toast_error_messages } from "../constants";
+
+import { Attachment, ChatType, Message } from "../types";
+import { execRequest, listenEvents } from "./functions";
+import { MAXIMUM_TRIES, toast_error_messages } from "../constants";
 
 
 
@@ -29,7 +28,6 @@ export async function listen_messages(
 	receiver_id: string,
 	callback: (messages: Message[]) => void,
 ) {
-	console.log("called listen messages");
 	await listenEvents({
 		endpoint: `/api/messages/listen`,
 		args: `receiver_id=${receiver_id}`,

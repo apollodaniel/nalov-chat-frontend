@@ -39,7 +39,7 @@ function MessageContainer({
 				}}
 			>
 				{
-					msg.attachments.map((attachment) => <AttachmentContainer attachment={attachment} /> )
+					msg.attachments.map((attachment) => <AttachmentContainer key={attachment.id!} attachment={attachment} /> )
 				}
 				<p className={`m-0 mx-3 ${msg.last_modified_date === msg.creation_date && "mb-1"}`}>{msg.content}</p>
 				{msg.creation_date != msg.last_modified_date && (
