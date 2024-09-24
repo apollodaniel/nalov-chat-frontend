@@ -4,9 +4,10 @@ interface IProps {
 	msg: Message;
 	chat_id: string;
 	onFocusExit: () => void;
-	onAction: (event: string, msg: Message, onEdit?: (msg: Message) => void) => void;
 	onEdit: (msg: Message) => void;
-	position_offset?: PositionOffset
+	onDelete: (msg: Message) => void;
+	onShowInfo: (msg: Message) => void;
+	position_offset?: PositionOffset;
 }
 
 interface ContextMenuItemProps {
@@ -32,7 +33,8 @@ function MessageContextMenu({
 	msg,
 	chat_id,
 	onFocusExit,
-	onAction,
+	onDelete,
+	onShowInfo,
 	onEdit,
 	position_offset
 }: IProps) {
@@ -58,17 +60,17 @@ function MessageContextMenu({
 				<div>
 					<ContextMenuItem
 						name="Edit"
-						event_callback={() => onAction("edit", msg, onEdit)}
+						event_callback={() => onEdit(msg)}
 					/>
 					<ContextMenuItem
 						name="Delete"
-						event_callback={() => onAction("delete", msg)}
+						event_callback={() => onDelete(msg)}
 					/>
 				</div>
 			)}
 			<ContextMenuItem
 				name="Show message information"
-				event_callback={() => onAction("show", msg)}
+				event_callback={() => onShowInfo(msg)}
 			/>
 		</ul>
 	);

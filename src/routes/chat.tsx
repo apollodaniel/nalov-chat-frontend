@@ -22,30 +22,6 @@ import MessageContextMenu from "../components/message_context_menu";
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import filetypeinfo from "magic-bytes.js";
 
-async function onAction(
-	event: string,
-	msg: Message,
-	onShowMessageInfo: (msg: Message) => void,
-	onEditContextMenu?: (msg: Message) => void,
-	closeContextMenu?: () => void,
-) {
-	if (closeContextMenu) closeContextMenu();
-	switch (event) {
-		case "edit":
-			onEditContextMenu!(msg);
-			break;
-		case "delete":
-			// delete message
-			console.log("deleted");
-			await delete_message(msg.id);
-			break;
-		default:
-			// show message
-			onShowMessageInfo(msg);
-			break;
-	}
-}
-
 function Chat() {
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [user, setUser] = useState<User | undefined>(undefined);
@@ -63,6 +39,9 @@ function Chat() {
 	const location = useLocation();
 
 	const [showMessageInfoPopup, setShowMessageInfoPopup] = useState<
+		Message | undefined
+	>(undefined);
+	const [showMessageDeletePopup, setShowMessageDeletePopup] = useState<
 		Message | undefined
 	>(undefined);
 
@@ -289,7 +268,31 @@ function Chat() {
 					(event) => setSelectedAttachments(event.target.files ? Array.from(event.target.files) : [])
 				} multiple={true} />
 
-			{!!showMessageInfoPopup && (
+
+			{showMessageDeletePopup && (
+				<Modal show={true}>
+					<Modal.Header>
+						<Modal.Title>Aviso!!</Modal.Title>
+						<input
+							type="button"
+							className="btn btn-close"
+							onClick={() => setShowMessageDeletePopup(undefined)}
+						/>
+					</Modal.Header>
+					<Modal.Body>
+						Você <b>realmente</b> deseja apagar esta mensagem?
+					</Modal.Body>
+					<Modal.Footer>
+						<button className="btn btn-primary" onClick={() => setShowMessageDeletePopup(undefined)}>Cancelar</button>
+						<button className="btn btn-secondary" onClick={() => {
+							delete_message(showMessageDeletePopup.id);
+							setShowMessageDeletePopup(undefined);
+						}}>Confirmar</button>
+					</Modal.Footer>
+				</Modal>
+			)}
+
+			{showMessageInfoPopup && (
 				<Modal show={true}>
 					<Modal.Header>
 						<Modal.Title>Informações da mensagem</Modal.Title>
@@ -372,23 +375,19 @@ function Chat() {
 				<MessageContextMenu
 					msg={showContextMenu![0]}
 					chat_id={params["id"]!}
-					onAction={(_event: any, _msg: any, _onEditContextMenu: any) =>
-						onAction(
-							_event,
-							_msg,
-							(msg: any) => {
-								console.log(msg.creation_date);
-								console.log(msg.last_modified_date);
-								return setShowMessageInfoPopup(msg);
-							},
-							_onEditContextMenu,
-							() => setShowContextMenu(undefined),
-						)
-					}
+					onShowInfo={(msg) => {
+						setShowMessageInfoPopup(msg)
+						setShowContextMenu(undefined);
+					}}
+					onDelete={(msg) => {
+						setShowMessageDeletePopup(msg);
+						setShowContextMenu(undefined);
+					}}
 					onFocusExit={() => setShowContextMenu(undefined)}
-					onEdit={() => {
-						setEditingMessage(showContextMenu[0]);
-						setSendMessageContent(showContextMenu[0].content);
+					onEdit={(msg) => {
+						setEditingMessage(msg);
+						setSendMessageContent(msg.content);
+						setShowContextMenu(undefined);
 					}}
 					position_offset={showContextMenu[1]}
 				/>
