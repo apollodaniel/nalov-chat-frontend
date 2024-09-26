@@ -152,6 +152,7 @@ export type Attachment = {
 	message_id?: string,
 	date?: number,
 	path?: string,
+	preview_path?: string,
 	filename: string,
 	mime_type: string,
 	byte_length: number,

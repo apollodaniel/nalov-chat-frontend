@@ -1,8 +1,6 @@
 import { Message, PositionOffset } from "../utils/types";
 import { SHORT_DATETIME_FORMATTER } from "../utils/constants";
 import AttachmentContainer from "./attachment_container";
-import { useRef } from "react";
-import LazyLoad from "react-lazy-load";
 import { LazyLoadComponent } from "react-lazy-load-image-component";
 
 interface IProps {
@@ -18,7 +16,6 @@ function MessageContainer({
 	onContextMenu,
 
 }: IProps) {
-	const lazy_loader_height = 40 * msg.attachments.map((attc) => attc.mime_type === "application/pdf" && attc.byte_length > (3 * 1024 * 1024) ? 0 : 1).reduce((sum: number, current) => sum + current, 0);
 
 	return (
 		<LazyLoadComponent
@@ -42,7 +39,7 @@ function MessageContainer({
 
 						const offset_top = rect.top + element.clientHeight;
 						// calcs the ideal position based on window heigth and message position,
-						maxHeight: 	// if message is on left it receives left offset, but if not it receives
+						// maxHeight: 	// if message is on left it receives left offset, but if not it receives
 						// left offset minus the value of the message container + left space on chat container
 						//
 						// on the height it checks if it would overflow the current viewport, if yes it put a fixed value

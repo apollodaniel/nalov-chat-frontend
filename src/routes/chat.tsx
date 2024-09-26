@@ -110,7 +110,7 @@ function Chat() {
 		);
 
 
-		if (selectedAttachments.length > 0) {
+		if (selectedAttachments.length > 0 && result.message_id) {
 			upload_files(selectedAttachments, result.message_id);
 		}
 

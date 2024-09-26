@@ -103,7 +103,8 @@ export const get_attachments = async (message_id: string): Promise<Attachment[]>
 		method: "GET",
 		onSucess: (attachments: Attachment[]) => r(attachments),
 		onFail(response) {
-			console.log(response.status);
+			if(response)
+				console.log(response.status);
 
 			r([]);
 		},
@@ -133,7 +134,6 @@ export const get_attachments = async (message_id: string): Promise<Attachment[]>
 // }
 
 export async function upload_files(files: File[], message_id: string) {
-	const _onError = () => delete_message(message_id);
 
 	try {
 		const token = await get_auth_token();
@@ -169,14 +169,12 @@ export async function upload_files(files: File[], message_id: string) {
 				self: upload_files(files, message_id),
 				response: request.response,
 				errorMsg: `Could not send your attachment file.`,
-				callback: _onError,
 			}),
 		);
 	} catch (err) {
 		onReqError({
 			self: upload_files(files, message_id),
 			errorMsg: `Could not send your attachment file.`,
-			callback: _onError,
 		});
 	}
 }

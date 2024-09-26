@@ -23,7 +23,7 @@ export default function AttachmentContainer({ attachment }: IProps) {
 				<LazyLoadImage
 					effect="blur"
 					className="mw-100 mh-100 rounded-2"
-
+					loading="lazy"
 					style={{objectFit: "cover"}}
 					// onLoad={() => EVENT_EMITTER.emit("updated-attachments")}
 					src={get_current_host(attachment.path)}
@@ -48,22 +48,19 @@ export default function AttachmentContainer({ attachment }: IProps) {
 			></audio>
 		);
 	} else if (
-		attachment.mime_type === "application/pdf" &&
-		attachment.byte_length < 1024 * 1024 * 3
+		attachment.preview_path
 	) {
 		element = (
 			<div>
-				{
-					attachmentFile ?
-						(
-							<div className="overflow-hidden mw-100 rounded-2" style={{ maxHeight: "120px" }} >
-								<Document file={attachmentFile} onError={() => { }}>
-									<Page width={300} pageNumber={1}></Page>
-								</Document>
-							</div >
-						) :
-						element
-				}
+				<LazyLoadImage
+					effect="blur"
+					className="mw-100 rounded-2"
+					loading="lazy"
+					style={{objectFit: "cover", objectPosition: "0% 0%", maxHeight: "150px", minHeight:"100%", minWidth: "240px"}}
+					// onLoad={() => EVENT_EMITTER.emit("updated-attachments")}
+					src={get_current_host(attachment.preview_path)}
+					alt=""
+				/>
 			</div>
 		);
 	}
