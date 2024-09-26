@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import { get_attachment, get_current_host } from "../utils/functions/functions";
 import { Attachment } from "../utils/types";
-import { EVENT_EMITTER, MAXIMUM_TRIES } from "../utils/constants";
-import { Document, Page } from "react-pdf";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 import { LazyLoadImage } from "react-lazy-load-image-component";
@@ -12,6 +10,7 @@ interface IProps {
 }
 
 export default function AttachmentContainer({ attachment }: IProps) {
+	const [retry, setRetry] = useState(0);
 	function FilenameElement(obj: { loaded?: boolean }) {
 		return (
 			<small
@@ -23,6 +22,9 @@ export default function AttachmentContainer({ attachment }: IProps) {
 			</small>
 		);
 	}
+	const _get_current_host = (path: string) => {
+		return `${get_current_host(path)}?retry=${retry}`; // Cache-busting query parameter
+	};
 	let element = <FilenameElement />;
 	const [hovering, setHovering] = useState(false);
 
@@ -33,6 +35,15 @@ export default function AttachmentContainer({ attachment }: IProps) {
 			<LazyLoadImage
 				effect="blur"
 				className="mw-100 mh-100 rounded-2 mt-2"
+				onError={(event) => {
+					if (retry > 5) {
+						setLoaded(false);
+					} else {
+						setTimeout(() => {
+							setRetry((prev) => prev + 1); // Increment retry to trigger re-render
+						}, 2000);
+					}
+				}}
 				loading="lazy"
 				style={{ objectFit: "cover" }}
 				src={get_current_host(attachment.path)}
@@ -45,15 +56,35 @@ export default function AttachmentContainer({ attachment }: IProps) {
 				className="rounded-2 mw-100 mt-2"
 				src={get_current_host(attachment.path)}
 				controls={hovering}
+				onError={(event) => {
+					if (retry > 5) {
+						setLoaded(false);
+					} else {
+						setTimeout(() => {
+							setRetry((prev) => prev + 1); // Increment retry to trigger re-render
+							event.currentTarget.load(); // Reload the audio after 2 seconds
+						}, 2000);
+					}
+				}}
 			></video>
 		);
 	} else if (attachment.mime_type.startsWith("audio")) {
 		element = (
 			<audio
 				className="mw-100 mt-2"
-				src={get_current_host(attachment.path)}
+				src={_get_current_host(attachment.path!)} // Update src with retry value
+				onError={(event) => {
+					if (retry > 5) {
+						setLoaded(false);
+					} else {
+						setTimeout(() => {
+							setRetry((prev) => prev + 1); // Increment retry to trigger re-render
+							event.currentTarget.load(); // Reload the audio after 2 seconds
+						}, 2000);
+					}
+				}}
 				controls
-			></audio>
+			/>
 		);
 	} else if (attachment.preview_path) {
 		element = (
@@ -62,7 +93,15 @@ export default function AttachmentContainer({ attachment }: IProps) {
 					effect="blur"
 					className={`mw-100 rounded-2 mt-2  ${loaded ? "d-inline-block" : "d-none"}`}
 					loading="lazy"
-					onError={() => setLoaded(false)}
+					onError={(event) => {
+						if (retry > 5) {
+							setLoaded(false);
+						} else {
+							setTimeout(() => {
+								setRetry((prev) => prev + 1); // Increment retry to trigger re-render
+							}, 2000);
+						}
+					}}
 					style={{
 						objectFit: "cover",
 						objectPosition: "0% 0%",

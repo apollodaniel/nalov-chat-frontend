@@ -7,7 +7,8 @@ export const EVENT_ERROR_EMITTER = new EventEmitter2({});
 export const DATETIME_FORMATTER = Intl.DateTimeFormat('pt-BR', {dateStyle: "medium", timeStyle: "short"});
 export const SHORT_DATETIME_FORMATTER = Intl.DateTimeFormat('pt-BR', {dateStyle: "short", timeStyle: "medium"});
 export const SHORT_TIME_FORMATTER = Intl.DateTimeFormat('pt-BR', {timeStyle: "short"});
-
+export const AUDIO_RECORDING_TIME_FORMATTER = Intl.DateTimeFormat('pt-BR', {timeStyle: "medium"});
+export const TEMPLATE_DATE = new Date(Date.now());
 export const ON_ERROR_CALLBACK = (reason: string) => EVENT_ERROR_EMITTER.emit("add-error", reason);
 
 

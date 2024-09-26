@@ -11,6 +11,13 @@ import { delete_message } from "./chat";
 import { get_auth_token, refresh_user_token } from "./user";
 import qs from "qs";
 
+export function format_recording_audio_time(time: number) {
+	const hours = Math.floor(time / 3600);
+	const minutes = Math.floor((time % 3600) / 60);
+	const seconds = Math.floor(time % 60);
+	return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+}
+
 export function get_current_host(args?: string, ws: boolean = false): string {
 	let location = window.location.href;
 	const ports = location.match(/:([0-9]+)\//)![0];
@@ -18,17 +25,29 @@ export function get_current_host(args?: string, ws: boolean = false): string {
 	if (ws) {
 		location = location.replace("http", "ws");
 	}
-	const _args = !args ? "" : args?.startsWith('/') ? args.substring(1, args.length) : args;
+	const _args = !args
+		? ""
+		: args?.startsWith("/")
+			? args.substring(1, args.length)
+			: args;
 	const _location = location.substring(0, location.indexOf(ports));
 	return (
 		_location +
 		(ws ? ":8081" : ":8751") +
-		(_location.endsWith('/') ? _args : `/${_args}` || "/")
+		(_location.endsWith("/") ? _args : `/${_args}` || "/")
 	);
 }
 
 export async function get_attachment(path: string): Promise<Blob | null> {
-	const result: Blob | null = await new Promise<any>((r) => execRequest({ method: "GET", onSucess: r, blob: true, endpoint: path, onFail: () => r(null) }));
+	const result: Blob | null = await new Promise<any>((r) =>
+		execRequest({
+			method: "GET",
+			onSucess: r,
+			blob: true,
+			endpoint: path,
+			onFail: () => r(null),
+		}),
+	);
 	if (result) {
 		return result;
 	}
@@ -97,18 +116,21 @@ export function format_date_user_friendly(date: number): string {
 	else return GENERIC_DATE_FORMATTER.format(date);
 }
 
-export const get_attachments = async (message_id: string): Promise<Attachment[]> =>
-	await new Promise((r, rj) => execRequest({
-		endpoint: `/api/messages/${message_id}/attachments`,
-		method: "GET",
-		onSucess: (attachments: Attachment[]) => r(attachments),
-		onFail(response) {
-			if(response)
-				console.log(response.status);
+export const get_attachments = async (
+	message_id: string,
+): Promise<Attachment[]> =>
+	await new Promise((r, rj) =>
+		execRequest({
+			endpoint: `/api/messages/${message_id}/attachments`,
+			method: "GET",
+			onSucess: (attachments: Attachment[]) => r(attachments),
+			onFail(response) {
+				if (response) console.log(response.status);
 
-			r([]);
-		},
-	}));
+				r([]);
+			},
+		}),
+	);
 
 // export async function get_attachments(
 //     message_id: string,
@@ -133,8 +155,8 @@ export const get_attachments = async (message_id: string): Promise<Attachment[]>
 //     });
 // }
 
-export async function upload_files(files: File[], message_id: string) {
 
+export async function upload_files(files: File[], message_id: string) {
 	try {
 		const token = await get_auth_token();
 		let form_data = new FormData();
@@ -144,7 +166,7 @@ export async function upload_files(files: File[], message_id: string) {
 		for (const attachment of attachments) {
 			const file = files.find(
 				(file) =>
-					file.name == attachment.filename &&
+					(file.name || "") == attachment.filename &&
 					file.size == attachment.byte_length,
 			);
 			if (!file)
@@ -183,12 +205,20 @@ export async function execRequest(obj: {
 	endpoint: string;
 	method: "POST" | "DELETE" | "PATCH" | "GET" | "PUT";
 	errorMessage?: string;
-	blob?: boolean,
+	blob?: boolean;
 	onSucess: (data: any | Blob) => void;
 	options?: { content?: any; headers?: any };
 	onFail?: (response: Response | undefined) => void;
 }): Promise<void> {
-	const { endpoint, blob = false, method, errorMessage, options, onSucess, onFail } = obj;
+	const {
+		endpoint,
+		blob = false,
+		method,
+		errorMessage,
+		options,
+		onSucess,
+		onFail,
+	} = obj;
 
 	let url = get_current_host(endpoint);
 	const token = await get_auth_token();
@@ -214,26 +244,22 @@ export async function execRequest(obj: {
 	}
 
 	try {
-
 		const response = await fetch(url, {
 			method: method,
 			...request_options,
 		});
 
-
-
 		if (response.status >= 200 && response.status < 300) {
-			if (blob)
-				return onSucess(await response.blob());
-			else
-				return onSucess(await response.json());
+			if (blob) return onSucess(await response.blob());
+			else return onSucess(await response.json());
 		} else if (response.status === 601) {
 			// expired token
 			await refresh_user_token();
 			return execRequest(obj);
 		} else {
 			console.log("Got unknown error");
-			if (errorMessage) EVENT_ERROR_EMITTER.emit("add-error", errorMessage);
+			if (errorMessage)
+				EVENT_ERROR_EMITTER.emit("add-error", errorMessage);
 			if (onFail) onFail(response);
 		}
 	} catch (err: any) {
@@ -271,7 +297,8 @@ export async function listenEvents(obj: {
 			});
 		} else if (msg === "invalid token") {
 			if (onError) onError("invalid token");
-			if (errorMessage) EVENT_ERROR_EMITTER.emit("add-error", errorMessage);
+			if (errorMessage)
+				EVENT_ERROR_EMITTER.emit("add-error", errorMessage);
 		} else {
 			// valid data and ok response
 			onData(JSON.parse(msg));
@@ -280,13 +307,16 @@ export async function listenEvents(obj: {
 
 	socket.onerror = () => {
 		// retry
-		console.log(`Got an error trying to listen the messages, trying again... tries ${tries} `);
+		console.log(
+			`Got an error trying to listen the messages, trying again... tries ${tries} `,
+		);
 		if (tries > 0) {
 			setTimeout(() => {
 				listenEvents({ ...obj, tries: tries - 1 });
 			}, RETRY_CONNECTION_TIMEOUT);
 		} else {
-			if (errorMessage) EVENT_ERROR_EMITTER.emit("add-error", errorMessage);
+			if (errorMessage)
+				EVENT_ERROR_EMITTER.emit("add-error", errorMessage);
 		}
 	};
 
@@ -297,7 +327,11 @@ export async function listenEvents(obj: {
 				listenEvents({ ...obj, tries: tries - 1 });
 			}, RETRY_CONNECTION_TIMEOUT);
 		} else {
-			if (errorMessage) EVENT_ERROR_EMITTER.emit("add-error", toast_error_messages.connection_interrupted);
+			if (errorMessage)
+				EVENT_ERROR_EMITTER.emit(
+					"add-error",
+					toast_error_messages.connection_interrupted,
+				);
 		}
 	};
 }
