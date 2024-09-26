@@ -32,6 +32,9 @@ function MessageContainer({
 			<div className={`d-flex flex-column justify-content-center p-0 ${chat_id === msg.sender_id ? "align-self-start" : "align-self-end"}`}>
 				<div
 					className={`card`}
+					style={{
+						minHeight: "50px"
+					}}
 					onContextMenu={(event) => {
 						event.preventDefault();
 						const element = event.currentTarget;
@@ -51,10 +54,10 @@ function MessageContainer({
 					{
 						msg.attachments.map((attachment) => <AttachmentContainer key={attachment.id!} attachment={attachment} />)
 					}
-					<p className={`m-0 mx-3 ${msg.last_modified_date === msg.creation_date && "mb-1"} ${chat_id === msg.sender_id ? "align-self-start" : "align-self-end"} `}>{msg.content}</p>
+					<p className={`m-0 mx-3 mt-auto ${msg.last_modified_date === msg.creation_date && "mb-auto"} ${chat_id === msg.sender_id ? "align-self-start" : "align-self-end"} `}>{msg.content}</p>
 					{msg.creation_date != msg.last_modified_date && (
 						<p
-							className={`m-0 mx-2 align-self-end ${chat_id === msg.sender_id ? "align-self-start" : "align-self-end"} `}
+							className={`m-0 mx-3 align-self-end ${chat_id === msg.sender_id ? "align-self-start" : "align-self-end"} `}
 							style={{ fontSize: "10px" }}
 						>
 							Edited

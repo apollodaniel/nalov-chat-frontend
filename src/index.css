@@ -1,21 +1,52 @@
-.text-break-parent {
-	max-width: 80%;
-	overflow: hidden;
-	white-space: nowrap;
+:root{
+	--secondary-color: #373b3f;
+	--border-radius: 1rem;
+}
+.modal :not(.modal-footer, .modal-header){
+	border-radius: var(--border-radius);
 }
 
-.text-break{
-	text-overflow: ellipsis;
-	max-width: 100%;
+.btn {
+    border-radius: var(--border-radius);
+}
+
+.form-floating {
+    overflow: hidden;
+}
+
+.form-control {
+    border-radius: var(--border-radius);
+}
+
+.card {
+    border-radius: var(--border-radius);
+    box-shadow: 0px 0px 2px 1px var(--secondary-color);
+}
+
+.list-group:last-child{
+	border-bottom-left-radius: var(--border-radius);
+	border-bottom-right-radius: var(--border-radius);
+}
+
+.ellipsis-text {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    max-width: 100%;
+}
+
+.ellipsis-text-parent {
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 @supports selector(::-webkit-scrollbar) {
-	::-webkit-scrollbar {
-		width: 8px;
-		background-color: transparent;
-	}
-	::-webkit-scrollbar-thumb {
-		border-radius: 12px;
-		background-color: #373b3f;
-	}
+    ::-webkit-scrollbar {
+        width: 8px;
+        background-color: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        border-radius: 12px;
+        background-color: var(--secondary-color);
+    }
 }

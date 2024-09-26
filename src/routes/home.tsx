@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import HomeTreeDotsPopup from "../components/home_three_dots_popup";
 import ChatListItem from "../components/chat_list_item";
 import UserListItem from "../components/user_list_item";
+import "../css/home.css";
 
 function Home() {
 	// main page
@@ -38,8 +39,8 @@ function Home() {
 
 	return (
 		<div
-			className="card w-100 d-flex flex-column my-5 gap-3 p-3"
-			style={{ maxWidth: "1200px", height: "90vh" }}
+			id="home-container"
+			className="card d-flex flex-column my-5 gap-3 p-3"
 		>
 			<div
 				className="d-flex flex-row gap-3 align-items-center justify-content-center"
@@ -59,9 +60,9 @@ function Home() {
 					/>
 					<label>Search</label>
 				</div>
-				<button onClick={()=> setMoreActionsPopupVisible(true)} className="btn btn-primary h-100">More actions</button>
+				<button onClick={()=> setMoreActionsPopupVisible(true)} id="more-actions-button" className="btn btn-primary h-100">More actions</button>
 			</div>
-			<ul className="list-group rounded-5">
+			<ul className="list-group border-0 rounded-4">
 				{!focusedSearch && search.length === 0
 					? // chats
 						chats.map((c) => <ChatListItem key={c.user.id} navigate={navigate} chat={c} />)

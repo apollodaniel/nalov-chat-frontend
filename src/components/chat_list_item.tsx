@@ -30,31 +30,25 @@ function ChatListItem({ chat, navigate }: IProps) {
 				alt={`${chat.user.name} profile picture`}
 			/>
 			<div
-				className="h-100 m-0 d-flex flex-column justify-content-between align-items-start gap-1 text-nowrap"
+				className="h-100 m-0 d-flex flex-column justify-content-between align-items-start gap-1 ellipsis-text-parent"
 				style={{
-					overflow: "hidden",
-					whiteSpace: "nowrap",
 					maxWidth: "80%"
 				}}
 			>
-				<div className="d-flex flex-column m-0">
-					<div className="fw-bold h4 m-0">{chat.user.name}</div>
-					<small className="m-0" style={{ fontSize: "12px" }}>
+				<div className="d-flex flex-column m-0 w-100 ellipsis-text-parent">
+					<div className="fw-bold h4 m-0 ellipsis-text">{chat.user.name}</div>
+					<small className="m-0 ellipsis-text" style={{ fontSize: "12px" }}>
 						{chat.user.username}
 					</small>
 				</div>
 				<p
-					className="m-0 mw-100"
-					style={{
-						textOverflow: "ellipsis",
-						overflow: "hidden",
-					}}
+					className="m-0 ellipsis-text"
 				>
 					{`${chat.user.id !== chat.last_message.sender_id ? "Você: " : ""}${chat.last_message.content}`}
 				</p>
 			</div>
-			<div className="ms-auto h-100 d-flex flex-column justify-content-between align-items-end align-self-end">
-				<small style={{ fontSize: "13px" }}>
+			<div className="ms-auto h-100 d-flex flex-column justify-content-between align-items-end align-self-end overflow-hidden">
+				<small>
 					{format_date_user_friendly(
 						chat.last_message.last_modified_date,
 					)}

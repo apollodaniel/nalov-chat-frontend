@@ -16,9 +16,9 @@ function Config(){
 	}, []);
 
 	return (
-		<div className="card w-100 m-3 my-4" style={{maxWidth: "800px"}}>
+		<div className="card w-100 m-3 my-4 p-3" style={{maxWidth: "800px"}}>
 			<h3 className="my-5 text-center">O que deseja configurar{name.length === 0 ? "": `, ${name}`}?</h3>
-			<ul className="list-group m-3">
+			<ul className="list-group rounded-4">
 				<li
 					className="list-group-item list-group-item-action d-flex align-items-center"
 					style={{height: "60px"}}

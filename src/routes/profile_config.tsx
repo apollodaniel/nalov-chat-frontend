@@ -45,7 +45,7 @@ function ProfileConfig() {
 	return (
 		<div
 			className="card w-100 m-5 d-flex flex-column align-items-center justify-content-center"
-			style={{ maxWidth: "800px", minHeight: "400px" }}
+			style={{ maxWidth: "600px", minHeight: "400px" }}
 		>
 			{loading ? (
 				<LoadingBar />

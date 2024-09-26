@@ -26,9 +26,9 @@ function UserListItem({ user, navigate }: IProps) {
 				}}
 				alt={`${user.name} profile picture`}
 			/>
-			<div className="d-flex flex-column justify-content-start align-items-start">
-				<div className="fw-bold h4">{user.name}</div>
-				{user.username}
+			<div className="d-flex flex-column justify-content-start align-items-start ellipsis-text-parent">
+				<div className="fw-bold h4 ellipsis-text">{user.name}</div>
+				<p className="m-0 ellipsis-text">{user.username}</p>
 			</div>
 		</li>
 	);
