@@ -3,8 +3,8 @@ import { get_attachment, get_current_host } from "../utils/functions/functions";
 import { Attachment } from "../utils/types";
 import { EVENT_EMITTER, MAXIMUM_TRIES } from "../utils/constants";
 import { Document, Page } from "react-pdf";
-import 'react-pdf/dist/Page/AnnotationLayer.css';
-import 'react-pdf/dist/Page/TextLayer.css';
+import "react-pdf/dist/Page/AnnotationLayer.css";
+import "react-pdf/dist/Page/TextLayer.css";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 
 interface IProps {
@@ -12,29 +12,37 @@ interface IProps {
 }
 
 export default function AttachmentContainer({ attachment }: IProps) {
-	let element = <p>{attachment.filename}</p>;
+	function FilenameElement(obj: { loaded?: boolean }) {
+		return (
+			<small
+				style={{ fontSize: "12px" }}
+				className={`ms-auto ${obj.loaded ? "d-none" : "d-inline-block mt-1 me-2"}`}
+			>
+				{" "}
+				{attachment.filename}
+			</small>
+		);
+	}
+	let element = <FilenameElement />;
 	const [hovering, setHovering] = useState(false);
 
-	const [attachmentFile, setAttachmentFile] = useState<Blob | undefined>(undefined);
+	const [loaded, setLoaded] = useState(true);
 
 	if (attachment.mime_type.startsWith("image")) {
 		element = (
-			<div>
-				<LazyLoadImage
-					effect="blur"
-					className="mw-100 mh-100 rounded-2"
-					loading="lazy"
-					style={{objectFit: "cover"}}
-					// onLoad={() => EVENT_EMITTER.emit("updated-attachments")}
-					src={get_current_host(attachment.path)}
-					alt=""
-				/>
-			</div>
+			<LazyLoadImage
+				effect="blur"
+				className="mw-100 mh-100 rounded-2 mt-2"
+				loading="lazy"
+				style={{ objectFit: "cover" }}
+				src={get_current_host(attachment.path)}
+				alt=""
+			/>
 		);
 	} else if (attachment.mime_type.startsWith("video")) {
 		element = (
 			<video
-				className="rounded-2 mw-100"
+				className="rounded-2 mw-100 mt-2"
 				src={get_current_host(attachment.path)}
 				controls={hovering}
 			></video>
@@ -42,38 +50,40 @@ export default function AttachmentContainer({ attachment }: IProps) {
 	} else if (attachment.mime_type.startsWith("audio")) {
 		element = (
 			<audio
-				className="mw-100"
+				className="mw-100 mt-2"
 				src={get_current_host(attachment.path)}
 				controls
 			></audio>
 		);
-	} else if (
-		attachment.preview_path
-	) {
+	} else if (attachment.preview_path) {
 		element = (
-			<div>
+			<div className="w-100 d-flex">
 				<LazyLoadImage
 					effect="blur"
-					className="mw-100 rounded-2"
+					className={`mw-100 rounded-2 mt-2  ${loaded ? "d-inline-block" : "d-none"}`}
 					loading="lazy"
-					style={{objectFit: "cover", objectPosition: "0% 0%", maxHeight: "150px", minHeight:"100%", minWidth: "240px"}}
+					onError={() => setLoaded(false)}
+					style={{
+						objectFit: "cover",
+						objectPosition: "0% 0%",
+						maxHeight: "150px",
+						minWidth: "240px",
+					}}
 					// onLoad={() => EVENT_EMITTER.emit("updated-attachments")}
 					src={get_current_host(attachment.preview_path)}
 					alt=""
 				/>
+				<FilenameElement loaded={loaded} />
 			</div>
 		);
 	}
-	useEffect(() => {
-		get_attachment(attachment.path!).then((file) => file && setAttachmentFile(file));
-	}, []);
 
 	return (
 		<div
-			className="list-group-item p-2 pb-0"
+			className="list-group-item p-2 pt-0 pb-0 d-flex"
 			onMouseOver={() => setHovering(true)}
 			onMouseLeave={() => setHovering(false)}
-			style={{ maxWidth: "300px"}}
+			style={{ maxWidth: "300px" }}
 		>
 			{element}
 		</div>
