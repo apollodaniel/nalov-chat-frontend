@@ -83,22 +83,14 @@ function Chat() {
 	const sendMessage = async () => {
 		const message_content = sendMessageContent;
 
-		let attachments: Attachment[] = selectedAttachments.map(
+		let attachments: File[] = Array.from(selectedAttachments);
+
+		const result = await send_message({
+			content: message_content,
+			receiver_id: params["id"]!,
+			attachments: attachments.map(
 			(fileAttachment) => {
 				let mimetype = "text/plain";
-
-				const blob = fileAttachment.slice(0, 1024);
-				const fileReader = new FileReader();
-				fileReader.onloadend = (f) => {
-					if (f.target && f.target.result) {
-						const bytes = new Uint8Array(
-							f.target.result as ArrayBuffer,
-						);
-						const fileinfo = filetypeinfo(bytes)[0];
-						if (fileinfo && fileinfo.mime) mimetype = fileinfo.mime;
-					}
-				};
-				fileReader.readAsArrayBuffer(blob);
 
 				return {
 					filename: fileAttachment.name,
@@ -106,16 +98,11 @@ function Chat() {
 					byte_length: fileAttachment.size,
 				};
 			},
-		);
-
-		const result = await send_message({
-			content: message_content,
-			receiver_id: params["id"]!,
-			attachments: attachments,
+		),
 		});
 
-		if (selectedAttachments.length > 0 && result.message_id) {
-			upload_files(selectedAttachments, result.message_id);
+		if (attachments.length > 0 && result.message_id) {
+			upload_files(attachments, result.message_id);
 		}
 
 		setSendMessageContent("");
