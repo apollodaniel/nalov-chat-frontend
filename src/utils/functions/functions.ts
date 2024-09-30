@@ -202,6 +202,7 @@ export async function execRequest(obj: {
   blob?: boolean;
   onSucess: (data: any | Blob) => void;
   options?: { content?: any; headers?: any };
+	customAuth?: string | null,
   onFail?: (response: Response | undefined) => void;
 }): Promise<void> {
   const {
@@ -213,23 +214,20 @@ export async function execRequest(obj: {
     onFail,
   } = obj;
 
+
   let url = get_current_host(endpoint);
 
   let request_options: { body?: any; headers?: any } = {};
 
-  if (obj.options) {
     let authorization: any;
-    if (
-      obj.options.headers &&
-      obj.options.headers.Authorization &&
-      !Object.is(obj.options.headers.Authorization, null)
-    )
-      authorization = obj.options?.headers.Authorization;
-    else if (!obj.options.headers || !obj.options.headers.Authorization) {
+	if(!Object.is(obj.customAuth, null)){
       const token = await get_auth_token();
       authorization = `Bearer ${token}`;
-    }
+	}else {
+		authorization = undefined;
+	}
 
+  if (obj.options) {
     const headers = obj.options.headers
       ? {
           ...obj.options.headers,
@@ -251,7 +249,7 @@ export async function execRequest(obj: {
   } else {
     request_options = {
       headers: {
-        Authorization: `Bearer ${await get_auth_token()}`,
+        Authorization: authorization,
       },
     };
   }

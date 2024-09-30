@@ -12,15 +12,11 @@ export const register_user = (user: RegisterFormSubmit): Promise<void> =>
     execRequest({
       endpoint: `/auth/register`,
       method: "POST",
+      customAuth: null,
       options: { content: user, headers: { Authorization: null } },
       errorMessage: toast_error_messages.register_error,
-      onSucess: async () => {
-        await login_user({
-          username: user.username,
-          password: user.password,
-        });
-        r();
-      },
+      onSucess: r,
+      onFail: _rj,
     }),
   );
 
@@ -29,7 +25,8 @@ export const login_user = (user: UserCredentials): Promise<void> =>
     execRequest({
       endpoint: `/auth/login`,
       method: "POST",
-      options: { content: user, headers: { Authorization: null } },
+      options: { content: user },
+      customAuth: null,
       errorMessage: toast_error_messages.login_error,
       onSucess: r,
       onFail: _rj,
@@ -133,3 +130,16 @@ export const check_user_logged_in = async (onFail: () => void) => {
     }),
   );
 };
+
+export const delete_user = (onFail: () => void) =>
+  execRequest({
+    endpoint: "/auth/account",
+    method: "DELETE",
+    errorMessage: toast_error_messages.delete_account_error,
+    onSucess: () => {
+      window.localStorage.clear();
+      window.sessionStorage.clear();
+      window.open(window.location.href, "_self");
+    },
+    onFail: onFail,
+  });
