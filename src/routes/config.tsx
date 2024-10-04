@@ -20,7 +20,7 @@ function Config() {
       <h3 className="my-5 text-center">
         O que deseja configurar{name.length === 0 ? "" : `, ${name}`}?
       </h3>
-      <ul className="list-group rounded-4">
+      <ul className="list-group rounded-3">
         <li
           className="list-group-item list-group-item-action d-flex align-items-center"
           style={{ height: "60px" }}
