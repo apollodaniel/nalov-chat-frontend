@@ -34,14 +34,12 @@ function Login() {
 								// error from backend
 								const errors_obj: BackendError[] =
 									errors.errors;
-								let contains_username = false;
-								let contains_password = false;
-								errors_obj.forEach((e) => {
-									if (e.path === 'username')
-										contains_username = true;
-									else if (e.path === 'password')
-										contains_password = true;
-								});
+								let contains_username = errors_obj.find((e) =>
+									e.path.includes('username'),
+								);
+								let contains_password = errors_obj.find((e) =>
+									e.path.includes('password'),
+								);
 
 								if (!contains_username && !contains_password) {
 									// uknown error
