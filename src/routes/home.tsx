@@ -8,7 +8,8 @@ import HomeTreeDotsPopup from '../components/home_three_dots_popup';
 import ChatListItem from '../components/chat_list_item';
 import UserListItem from '../components/user_list_item';
 import '../css/home.css';
-import { toast_error_messages } from '../utils/constants';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import CloseIcon from '@mui/icons-material/Close';
 
 function Home() {
 	// main page
@@ -59,23 +60,39 @@ function Home() {
 			}}
 		>
 			<div
-				className="d-flex flex-row gap-3 align-items-center justify-content-center"
+				className="d-flex flex-row gap-3 align-items-center justify-content-end"
 				style={{
 					height: '60px',
 				}}
 			>
-				<div className="form-floating w-100 h-100">
-					<input
-						type="search"
-						className="form-control h-100"
-						onFocus={() => setFocusedSearch(true)}
-						onChange={(event) => {
-							// setup timeout if it not exists
-							setSearch(event.target.value);
-						}}
-					/>
-					<label>Search</label>
-				</div>
+				{focusedSearch ? (
+					<div className="d-flex flex-row align-items-center justify-content-end w-100 h-100 gap-3">
+						<div className="form-floating w-100">
+							<input
+								type="search"
+								className="form-control"
+								onChange={(event) => {
+									// setup timeout if it not exists
+									setSearch(event.target.value);
+								}}
+							/>
+							<label>Search</label>
+						</div>
+						<button
+							className="btn btn-primary h-100"
+							onClick={() => setFocusedSearch(false)}
+						>
+							<CloseIcon />
+						</button>
+					</div>
+				) : (
+					<button
+						className="btn btn-primary h-100"
+						onClick={() => setFocusedSearch(true)}
+					>
+						<PersonAddIcon />
+					</button>
+				)}
 				<button
 					onClick={() => setMoreActionsPopupVisible(true)}
 					id="more-actions-button"
