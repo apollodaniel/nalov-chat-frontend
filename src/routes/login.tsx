@@ -53,10 +53,6 @@ function Login() {
 							})
 							.then((data: any) => {
 								window.localStorage.setItem(
-									'refresh_token',
-									data.refresh_token,
-								);
-								window.sessionStorage.setItem(
 									'auth_token',
 									data.auth_token,
 								);

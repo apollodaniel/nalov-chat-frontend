@@ -70,7 +70,7 @@ export const logout_user = (): Promise<User> =>
 			method: 'POST',
 			onSucess: () => {
 				window.localStorage.clear();
-				window.sessionStorage.clear();
+				window.localStorage.clear();
 				window.open(window.location.href, '_self');
 			},
 		}),
@@ -78,24 +78,12 @@ export const logout_user = (): Promise<User> =>
 
 // token related functions
 export async function refresh_user_token(): Promise<void> {
-	const refresh_token = window.localStorage.getItem('refresh_token');
-
-	if (!refresh_token) {
-		window.sessionStorage.clear();
-		window.localStorage.clear();
-		throw new Error('unauthorized');
-	}
-
-	const result = await fetch(get_current_host('/auth/token'), {
-		headers: {
-			Authorization: `Bearer ${refresh_token!}`,
-		},
-	});
+	const result = await fetch(get_current_host('/auth/token'));
 
 	if (result.ok) {
-		const refresh_token_result: RefreshAuthTokenResult =
+		const refresh_token_result: { auth_token: string } =
 			await result.json();
-		window.sessionStorage.setItem(
+		window.localStorage.setItem(
 			'auth_token',
 			refresh_token_result.auth_token,
 		);
@@ -103,10 +91,10 @@ export async function refresh_user_token(): Promise<void> {
 }
 
 export async function get_auth_token(): Promise<string> {
-	let auth_token = window.sessionStorage.getItem('auth_token');
+	let auth_token = window.localStorage.getItem('auth_token');
 	if (!auth_token) await refresh_user_token();
 
-	auth_token = window.sessionStorage.getItem('auth_token');
+	auth_token = window.localStorage.getItem('auth_token');
 	if (!auth_token) {
 		throw new Error('error while trying to get user auth token');
 	}
@@ -139,7 +127,7 @@ export const delete_user = (onFail: () => void) =>
 		errorMessage: toast_error_messages.delete_account_error,
 		onSucess: () => {
 			window.localStorage.clear();
-			window.sessionStorage.clear();
+			window.localStorage.clear();
 			window.open(window.location.href, '_self');
 		},
 		onFail: onFail,

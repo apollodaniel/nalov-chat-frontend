@@ -285,7 +285,6 @@ export async function execRequest(obj: {
 			const json = await response.json();
 			if (json && json.error && json.error === 'no active session') {
 				window.localStorage.clear();
-				window.sessionStorage.clear();
 				window.open(window.location.href, '_self');
 			}
 		} else {

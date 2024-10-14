@@ -42,10 +42,6 @@ function Register() {
 							});
 
 							window.localStorage.setItem(
-								'refresh_token',
-								result.refresh_token,
-							);
-							window.sessionStorage.setItem(
 								'auth_token',
 								result.auth_token,
 							);
