@@ -10,6 +10,7 @@ import UserListItem from '../components/user_list_item';
 import '../css/home.css';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import CloseIcon from '@mui/icons-material/Close';
+import MenuIcon from '@mui/icons-material/Menu';
 
 function Home() {
 	// main page
@@ -53,7 +54,7 @@ function Home() {
 	return (
 		<div
 			id="home-container"
-			className="card d-flex flex-column my-5 gap-3 p-3"
+			className="d-flex flex-column my-5 gap-3 p-3"
 			onClick={(event) => {
 				if ((event.target as Element).id === 'home-container')
 					setFocusedSearch(false);
@@ -67,20 +68,23 @@ function Home() {
 			>
 				{focusedSearch ? (
 					<div className="d-flex flex-row align-items-center justify-content-end w-100 h-100 gap-3">
-						<div className="form-floating w-100">
+						<div className="w-100 h-100">
 							<input
 								type="search"
-								className="form-control"
+								className="form-control h-100"
+								placeholder="Nome de usuário"
 								onChange={(event) => {
 									// setup timeout if it not exists
 									setSearch(event.target.value);
 								}}
 							/>
-							<label>Search</label>
 						</div>
 						<button
 							className="btn btn-primary h-100"
-							onClick={() => setFocusedSearch(false)}
+							onClick={() => {
+								setFocusedSearch(false);
+								setSearch('');
+							}}
 						>
 							<CloseIcon />
 						</button>
@@ -98,7 +102,7 @@ function Home() {
 					id="more-actions-button"
 					className="btn btn-primary h-100"
 				>
-					More actions
+					<MenuIcon />
 				</button>
 			</div>
 			<ul className="list-group border-0 rounded-3">

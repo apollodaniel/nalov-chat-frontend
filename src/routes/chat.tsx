@@ -1,34 +1,36 @@
-import { useEffect, useRef, useState } from "react";
-import { Attachment, Message, PositionOffset, User } from "../utils/types";
-import LoadingBar from "../components/loading_bar";
-import { get_user } from "../utils/functions/user";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { isAxiosError } from "axios";
+import { useEffect, useRef, useState } from 'react';
+import { Attachment, Message, PositionOffset, User } from '../utils/types';
+import LoadingBar from '../components/loading_bar';
+import { get_user } from '../utils/functions/user';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { isAxiosError } from 'axios';
 import {
 	delete_message,
 	get_messages,
 	listen_messages,
 	patch_message,
 	send_message,
-} from "../utils/functions/chat";
-import { DATETIME_FORMATTER, EVENT_EMITTER } from "../utils/constants";
+} from '../utils/functions/chat';
+import { DATETIME_FORMATTER, EVENT_EMITTER } from '../utils/constants';
 import {
 	format_recording_audio_time,
 	get_current_host,
 	upload_files,
-} from "../utils/functions/functions";
-import MessageContainer from "../components/message_container";
-import { Modal } from "react-bootstrap";
-import MessageContextMenu from "../components/message_context_menu";
-import AttachFileIcon from "@mui/icons-material/AttachFile";
-import SendIcon from "@mui/icons-material/Send";
-import MicIcon from "@mui/icons-material/Mic";
-import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
+} from '../utils/functions/functions';
+import MessageContainer from '../components/message_container';
+import { Modal } from 'react-bootstrap';
+import MessageContextMenu from '../components/message_context_menu';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
+import SendIcon from '@mui/icons-material/Send';
+import MicIcon from '@mui/icons-material/Mic';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import CloseIcon from '@mui/icons-material/Close';
 
 function Chat() {
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [user, setUser] = useState<User | undefined>(undefined);
-	const [sendMessageContent, setSendMessageContent] = useState<string>("");
+	const [sendMessageContent, setSendMessageContent] = useState<string>('');
 	const [editingMessage, setEditingMessage] = useState<Message | undefined>(
 		undefined,
 	);
@@ -55,10 +57,10 @@ function Chat() {
 	>();
 	const getMessages = async () => {
 		try {
-			const messages = await get_messages(params["id"]!);
+			const messages = await get_messages(params['id']!);
 			setMessages(messages);
 
-			await listen_messages(params["id"]!, (messages: Message[]) => {
+			await listen_messages(params['id']!, (messages: Message[]) => {
 				setMessages(messages);
 			});
 		} catch (err: any) {
@@ -67,13 +69,13 @@ function Chat() {
 	};
 	const getUser = async () => {
 		try {
-			const user = await get_user(params["id"] || "");
+			const user = await get_user(params['id'] || '');
 			setUser(user);
 		} catch (err: any) {
 			if (isAxiosError(err) && err.response) {
 				// erro na response
 				if (!err.status || (err.status && err.status === 404)) {
-					navigate("/");
+					navigate('/');
 				}
 			}
 		}
@@ -86,9 +88,9 @@ function Chat() {
 
 		const result = await send_message({
 			content: message_content,
-			receiver_id: params["id"]!,
+			receiver_id: params['id']!,
 			attachments: attachments.map((fileAttachment) => {
-				let mimetype = "text/plain";
+				let mimetype = 'text/plain';
 
 				return {
 					filename: fileAttachment.name,
@@ -102,12 +104,12 @@ function Chat() {
 			upload_files(attachments, result.message_id);
 		}
 
-		setSendMessageContent("");
+		setSendMessageContent('');
 		setSelectedAttachments([]);
 	};
 	const editMessage = async () => {
 		setEditingMessage(undefined);
-		setSendMessageContent("");
+		setSendMessageContent('');
 		await patch_message(editingMessage!.id, {
 			content: sendMessageContent,
 		});
@@ -142,13 +144,13 @@ function Chat() {
 				mediaRecorder.current = undefined;
 				const audio_file = new File(
 					chunks.current,
-					"audio_record.weba",
+					'audio_record.weba',
 					{
-						type: "audio/webm",
+						type: 'audio/webm',
 					},
 				);
 				const result = await send_message({
-					content: "",
+					content: '',
 					attachments: [
 						{
 							filename: audio_file.name,
@@ -156,7 +158,7 @@ function Chat() {
 							mime_type: audio_file.type,
 						},
 					],
-					receiver_id: params["id"]!,
+					receiver_id: params['id']!,
 				});
 				if (result && result.message_id) {
 					upload_files([audio_file], result.message_id);
@@ -183,10 +185,10 @@ function Chat() {
 		getUser().then(() => {
 			getMessages();
 		});
-		EVENT_EMITTER.on("updated-attachments", () => {
+		EVENT_EMITTER.on('updated-attachments', () => {
 			if (bottomRef.current) {
 				(bottomRef.current as any).scrollIntoView({
-					behavior: "smooth",
+					behavior: 'smooth',
 				});
 			}
 		});
@@ -194,7 +196,7 @@ function Chat() {
 
 	useEffect(() => {
 		if (bottomRef.current) {
-			(bottomRef.current as any).scrollIntoView({ behavior: "smooth" });
+			(bottomRef.current as any).scrollIntoView({ behavior: 'smooth' });
 		}
 	}, [messages]);
 
@@ -206,20 +208,27 @@ function Chat() {
 			onMouseDown={() => setShowContextMenu(undefined)}
 		>
 			<div
-				className="card w-100 h-100 d-flex flex-column "
-				style={{ maxHeight: "90vh", maxWidth: "800px" }}
+				className="w-100 h-100 d-flex flex-column "
+				style={{ maxHeight: '90vh', maxWidth: '800px' }}
 			>
 				<div
-					className="card rounded-0 w-100 p-3 d-flex flex-row gap-3 rounded-top-3"
-					style={{ height: "100px" }}
+					className="rounded-0 w-100 p-3 d-flex flex-row gap-3 rounded-top-3"
+					style={{ height: '100px' }}
 				>
+					<button
+						className="btn btn-dark d-flex align-items-center justify-content-center align-self-start"
+						style={{ height: '50px', width: '50px' }}
+						onClick={() => navigate('/')}
+					>
+						<ArrowBackIcon />
+					</button>
 					<img
 						className="ratio-1x1 rounded-circle"
 						src={get_current_host(user.profile_picture)}
 						style={{
-							height: "50px",
+							height: '50px',
 							aspectRatio: 1 / 1,
-							objectFit: "cover",
+							objectFit: 'cover',
 						}}
 						alt={`${user.name} profile picture`}
 					/>
@@ -229,9 +238,9 @@ function Chat() {
 					</div>
 				</div>
 				<div
-					className="card w-100 h-100 d-flex flex-column-reverse gap-3 p-4 rounded-0"
+					className="card w-100 h-100 d-flex flex-column-reverse gap-3 p-4 rounded-3"
 					style={{
-						overflowY: "auto",
+						overflowY: 'auto',
 					}}
 					onScroll={(event) => {
 						console.log(event.currentTarget.scrollTop);
@@ -245,7 +254,7 @@ function Chat() {
 							return (
 								<MessageContainer
 									msg={msg}
-									chat_id={params["id"]!}
+									chat_id={params['id']!}
 									onContextMenu={(msg, pos_offset) =>
 										setShowContextMenu([msg, pos_offset])
 									}
@@ -259,15 +268,15 @@ function Chat() {
 					<button
 						className="btn btn-primary position-absolute rounded-circle d-flex flex-column justify-content-center align-items-center"
 						style={{
-							width: "60px",
-							height: "60px",
-							right: "32px",
-							bottom: "96px",
-							zIndex: "10",
+							width: '60px',
+							height: '60px',
+							right: '50%',
+							bottom: '20%',
+							zIndex: '10',
 						}}
 						onClick={() => {
 							(bottomRef.current as any).scrollIntoView({
-								behavior: "smooth",
+								behavior: 'smooth',
 							});
 						}}
 					>
@@ -277,24 +286,18 @@ function Chat() {
 				<div className="w-100 rounded-3">
 					{editingMessage ? (
 						// editing message input
-						<div className="w-100 rounded-bottom d-flex flex-row m-0">
-							<div className="form-floating w-100 h-100 m-0">
+						<div className="w-100 rounded-bottom d-flex flex-row gap-1 m-0">
+							<div className="form-floating w-100 h-100 my-1 rounded-3">
 								<input
 									className="form-control h-100 h-100 m-0"
 									type="text"
-									style={{
-										borderEndEndRadius: "0px",
-										borderStartEndRadius: "0px",
-										borderStartStartRadius: "0px",
-										borderEndStartRadius: "0.5em",
-									}}
 									onChange={(event) => {
 										setSendMessageContent(
 											event.target.value,
 										);
 									}}
 									onKeyDownCapture={(event) => {
-										if (event.key == "Enter") {
+										if (event.key == 'Enter') {
 											editMessage();
 										}
 									}}
@@ -303,55 +306,49 @@ function Chat() {
 								<label>Editing message</label>
 							</div>
 							<button
-								className="btn btn-primary w-auto rounded-top-0 rounded-bottom-3 rounded-start-0 m-0"
+								className="btn btn-primary w-auto rounded-3 my-1"
 								onClick={() => {
 									setEditingMessage(undefined);
-									setSendMessageContent("");
+									setSendMessageContent('');
 								}}
 								style={{
-									textWrap: "nowrap",
+									textWrap: 'nowrap',
 								}}
 							>
-								Stop editing
+								<CloseIcon />
 							</button>
 						</div>
 					) : !Object.is(recording, undefined) ? (
 						// recording audio input
 						<div
-							className="card w-100 rounded-0 gap-3 rounded-bottom-3 d-flex flex-row align-items-center justify-content-end"
-							style={{ height: "60px" }}
+							className="w-100 rounded-0 gap-3 rounded-bottom-3 d-flex flex-row align-items-center justify-content-end m-1"
+							style={{ height: '60px' }}
 						>
 							<p className="m-0 p-0">
 								{format_recording_audio_time(recording!)}
 							</p>
 							<button
-								className="btn btn-primary h-100 d-flex align-items-center justify-content-center rounded-0 rounded-bottom-3 rounded-start-0"
+								className="btn btn-primary h-100 d-flex align-items-center justify-content-center rounded-3 m-1"
 								onClick={() => mediaRecorder.current?.stop()}
-								style={{ width: "60px" }}
+								style={{ width: '60px' }}
 							>
 								<SendIcon />
 							</button>
 						</div>
 					) : (
 						// sending message input
-						<div className="d-flex flex-row">
-							<div className="form-floating w-100 ">
+						<div className="d-flex flex-row gap-1">
+							<div className="form-floating w-100 my-1 rounded-3">
 								<input
 									className="form-control"
 									type="text"
-									style={{
-										borderEndEndRadius: "0px",
-										borderStartEndRadius: "0px",
-										borderStartStartRadius: "0px",
-										borderEndStartRadius: "0.5em",
-									}}
 									onChange={(event) => {
 										setSendMessageContent(
 											event.target.value,
 										);
 									}}
 									onKeyDownCapture={(event) => {
-										if (event.key == "Enter") {
+										if (event.key == 'Enter') {
 											sendMessage();
 										}
 									}}
@@ -360,13 +357,13 @@ function Chat() {
 								<label>
 									Message
 									{selectedAttachments.length > 0 &&
-										` + ${selectedAttachments.map((at) => at.name).join(" + ")}`}
+										` + ${selectedAttachments.map((at) => at.name).join(' + ')}`}
 								</label>
 							</div>
 
 							{/* upload file button */}
 							<button
-								className="btn btn-primary rounded-0"
+								className="btn btn-primary rounded-3 my-1"
 								onClick={() =>
 									(
 										filePickerRef.current! as HTMLElement
@@ -378,7 +375,7 @@ function Chat() {
 
 							{/* record audio file button */}
 							<button
-								className="btn btn-primary rounded-0 rounded-top-0 rounded-end"
+								className="btn btn-primary rounded-3 my-1"
 								onClick={() => recordAudio()}
 							>
 								<MicIcon />
@@ -448,16 +445,16 @@ function Chat() {
 					<Modal.Body
 						className="d-flex flex-column gap-3 text-nowrap overflow-hidden"
 						style={{
-							overflow: "hidden",
-							whiteSpace: "nowrap",
+							overflow: 'hidden',
+							whiteSpace: 'nowrap',
 						}}
 					>
 						<div
 							className="mw-100 text-nowrap"
 							style={{
-								overflow: "hidden",
-								whiteSpace: "nowrap",
-								textOverflow: "ellipsis",
+								overflow: 'hidden',
+								whiteSpace: 'nowrap',
+								textOverflow: 'ellipsis',
 							}}
 						>
 							<h6 className="m-0">Conteúdo</h6>
@@ -470,13 +467,13 @@ function Chat() {
 							<p className="m-0 fw-bold">
 								{showMessageInfoPopup?.sender_id === user.id
 									? user.username
-									: "Você"}
+									: 'Você'}
 							</p>
 							<h6 className="m-0 mx-1">para</h6>
 							<p className="m-0 fw-bold">
 								{showMessageInfoPopup?.receiver_id === user.id
 									? user.username
-									: "Você"}
+									: 'Você'}
 							</p>
 						</div>
 						{showMessageInfoPopup!.creation_date <
@@ -516,7 +513,7 @@ function Chat() {
 			{showContextMenu && (
 				<MessageContextMenu
 					msg={showContextMenu![0]}
-					chat_id={params["id"]!}
+					chat_id={params['id']!}
 					onShowInfo={(msg) => {
 						setShowMessageInfoPopup(msg);
 						setShowContextMenu(undefined);
