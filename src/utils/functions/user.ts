@@ -78,46 +78,52 @@ export const logout_user = (): Promise<User> =>
 
 // token related functions
 export async function refresh_user_token(): Promise<void> {
-	const result = await fetch(get_current_host('/auth/token'));
+	const result = await fetch(get_current_host('/auth/token'), {
+		method: 'POST',
+		credentials: 'include',
+	});
 
-	if (result.ok) {
-		const refresh_token_result: { auth_token: string } =
-			await result.json();
-		window.localStorage.setItem(
-			'auth_token',
-			refresh_token_result.auth_token,
-		);
+	if (result.status === 602) {
+		// no session
+		window.open(`${window.location.protocol}/login`, '_self');
 	}
 }
 
 export async function get_auth_token(): Promise<string> {
-	let auth_token = window.localStorage.getItem('auth_token');
-	if (!auth_token) await refresh_user_token();
-
-	auth_token = window.localStorage.getItem('auth_token');
-	if (!auth_token) {
-		throw new Error('error while trying to get user auth token');
+	const result = await fetch(get_current_host('/auth/token'), {
+		method: 'POST',
+		credentials: 'include',
+	});
+	if (result.ok || result.status === 200) {
+		return (await result.json()).token;
 	}
 
-	return auth_token;
+	throw new Error('error while trying to get user auth token');
 }
 
-export const check_user_logged_in = async (onFail: () => void) => {
-	const token = await get_auth_token();
-	return await new Promise((r) =>
-		execRequest({
-			endpoint: '/auth/check-token',
-			method: 'POST',
-			options: {
-				content: {
-					token: token,
-					type: 'Auth',
-				},
-			},
-			onSucess: r,
-			onFail: () => onFail(),
+export const check_user_logged_in = async (
+	onFail: () => void,
+	onSucess: () => void,
+) => {
+	// const token = await get_auth_token();
+	const result = await fetch(get_current_host('/auth/check-token'), {
+		method: 'POST',
+		credentials: 'include',
+		body: JSON.stringify({
+			type: 'Auth',
 		}),
-	);
+		headers: {
+			'Content-Type': 'application/json',
+		},
+	});
+
+	console.log(result.status);
+
+	if (result.status === 602) return onFail();
+	else if (result.status === 601) {
+		await refresh_user_token();
+	}
+	onSucess();
 };
 
 export const delete_user = (onFail: () => void) =>

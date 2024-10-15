@@ -157,7 +157,6 @@ export const get_attachments = async (
 
 export async function upload_files(files: File[], message_id: string) {
 	try {
-		const token = await get_auth_token();
 		let form_data = new FormData();
 
 		const attachments = await get_attachments(message_id);
@@ -180,18 +179,19 @@ export async function upload_files(files: File[], message_id: string) {
 
 		const url = get_current_host(`/api/upload?message_id=${message_id}`);
 		console.log(url);
-		request.open('POST', url);
+		request.withCredentials = true;
 
-		request.setRequestHeader('Authorization', `Bearer ${token}`);
+		request.open('POST', url);
+		// request.setRequestHeader('Authorization', `Bearer ${token}`);
 		request.send(form_data);
 
-		request.addEventListener('error', () =>
+		request.addEventListener('error', () => {
 			onReqError({
 				self: upload_files(files, message_id),
 				response: request.response,
 				errorMsg: `Could not send your attachment file.`,
-			}),
-		);
+			});
+		});
 	} catch (err) {
 		onReqError({
 			self: upload_files(files, message_id),
@@ -223,21 +223,16 @@ export async function execRequest(obj: {
 
 	let request_options: { body?: any; headers?: any } = {};
 
-	let authorization: any;
-	if (!Object.is(obj.customAuth, null)) {
-		const token = await get_auth_token();
-		authorization = `Bearer ${token}`;
-	} else {
-		authorization = undefined;
-	}
+	// let authorization: any;
+	// if (!Object.is(obj.customAuth, null)) {
+	// 	const token = await get_auth_token();
+	// 	authorization = `Bearer ${token}`;
+	// } else {
+	// 	authorization = undefined;
+	// }
 
 	if (obj.options) {
-		const headers = obj.options.headers
-			? {
-					...obj.options.headers,
-					Authorization: authorization,
-				}
-			: { Authorization: authorization };
+		const headers = obj.options.headers || {};
 		let body: any;
 		if (obj.options.content && method === 'GET') {
 			url = url.endsWith('/')
@@ -251,11 +246,7 @@ export async function execRequest(obj: {
 			headers: headers,
 		};
 	} else {
-		request_options = {
-			headers: {
-				Authorization: authorization,
-			},
-		};
+		request_options = {};
 	}
 
 	try {
@@ -266,6 +257,7 @@ export async function execRequest(obj: {
 				...request_options.headers,
 				'Content-Type': 'application/json',
 			},
+			credentials: 'include',
 		});
 
 		if ((response.status >= 200 && response.status < 300) || response.ok) {
@@ -281,12 +273,16 @@ export async function execRequest(obj: {
 			// expired token
 			await refresh_user_token();
 			return execRequest(obj);
+		} else if (response.status === 602) {
+			window.open(`${window.location.protocol}/login`, '_self');
+			if (onFail) onFail(response);
 		} else if (response.status === 401) {
 			const json = await response.json();
 			if (json && json.error && json.error === 'no active session') {
 				window.localStorage.clear();
 				window.open(window.location.href, '_self');
 			}
+			if (onFail) onFail(response);
 		} else {
 			console.log(response);
 			console.log('Got unknown error');
@@ -313,11 +309,16 @@ export async function listenEvents(obj: {
 
 	const token = await get_auth_token();
 	let socket = new WebSocket(
-		get_current_host(`${endpoint}?token=${token}${`&${args}` || ''}`, true),
+		get_current_host(
+			`${endpoint}?token=${token}${args ? `&${args}` : ''}`,
+			true,
+		),
 	);
 
+	let forcedClose = false;
 	EVENT_EMITTER.on('close-stream', () => {
 		console.log('Close socket');
+		forcedClose = true;
 		socket.close();
 	});
 
@@ -354,21 +355,24 @@ export async function listenEvents(obj: {
 
 	socket.onclose = () => {
 		console.log(`Connection interrupted, trying again... tries ${tries} `);
-		if (tries > 0) {
-			setTimeout(() => {
-				listenEvents({ ...obj, tries: tries - 1 });
-			}, RETRY_CONNECTION_TIMEOUT);
-		} else {
-			if (errorMessage)
-				EVENT_ERROR_EMITTER.emit(
-					'add-error',
-					toast_error_messages.connection_interrupted,
-				);
+
+		if (!forcedClose) {
+			if (tries > 0) {
+				setTimeout(() => {
+					listenEvents({ ...obj, tries: tries - 1 });
+				}, RETRY_CONNECTION_TIMEOUT);
+			} else {
+				if (errorMessage)
+					EVENT_ERROR_EMITTER.emit(
+						'add-error',
+						toast_error_messages.connection_interrupted,
+					);
+			}
 		}
 	};
 }
 
-export function onReqError({
+export async function onReqError({
 	self,
 	response,
 	errorMsg,
@@ -379,7 +383,12 @@ export function onReqError({
 	errorMsg?: string;
 	callback?: () => void;
 }) {
-	if (response && response.status === 601) self();
+	if (response && response.status === 601) {
+		await refresh_user_token();
+		self();
+	} else if (response?.status === 602) {
+		window.open(`${window.location.protocol}/login`, '_self');
+	}
 	if (errorMsg) EVENT_ERROR_EMITTER.emit('add-error', errorMsg);
 	if (callback) callback();
 }

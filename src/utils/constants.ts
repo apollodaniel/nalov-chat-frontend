@@ -58,6 +58,8 @@ export const toast_error_messages = {
 		'Não foi possível obter os usuários, tente novamente mais tarde.',
 	delete_account_error:
 		'Não foi possível realizar a remoção da sua conta, por favor tente novamente mais tarde.',
+	config_save_error:
+		'Não foi possível salvar as configurações, por favor tente novamente mais tarde.',
 };
 
 export const MAXIMUM_TRIES = 4;
