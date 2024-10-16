@@ -117,8 +117,6 @@ export const check_user_logged_in = async (
 		},
 	});
 
-	console.log(result.status);
-
 	if (result.status === 602) return onFail();
 	else if (result.status === 601) {
 		await refresh_user_token();

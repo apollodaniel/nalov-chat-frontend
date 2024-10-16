@@ -11,6 +11,7 @@ import '../css/home.css';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import CloseIcon from '@mui/icons-material/Close';
 import MenuIcon from '@mui/icons-material/Menu';
+import debounce from 'lodash.debounce';
 
 function Home() {
 	// main page
@@ -23,32 +24,37 @@ function Home() {
 
 	const navigate = useNavigate();
 
-	const get_users = async () => {
-		const args =
-			search.trim().length === 0
-				? ''
-				: `?filter_field=username&filter_value=${search}`;
-		const users = await get_available_users(args);
-		setUsers(users);
-	};
+	const get_users = useRef(
+		debounce(
+			(query: string) => {
+				const args =
+					query.trim().length === 0
+						? ''
+						: `?filter_field=username&filter_value=${query.toLowerCase()}`;
+				get_available_users(args).then((users) => setUsers(users));
+			},
+			250,
+			{
+				trailing: true,
+			},
+		),
+	).current;
 
-	const get_chats = async () => {
+	const get_chats = useRef(async () => {
 		const chat_result = await get_user_chats();
 		setChats(chat_result);
 
 		listen_chats((chats: ChatType[]) => setChats(chats));
-	};
+	}).current;
 
 	useEffect(() => {
 		get_chats().then(() => {
-			get_users();
+			get_users('');
 		});
 	}, []);
 
 	useEffect(() => {
-		setTimeout(() => {
-			get_users();
-		}, 1000);
+		get_users(search);
 	}, [search]);
 
 	return (

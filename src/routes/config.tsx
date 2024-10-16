@@ -6,18 +6,14 @@ import { useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 function Config() {
-	const [name, setName] = useState('');
 	const [showDeleteAccountPopup, setShowDeleteAccountPopup] = useState(false);
 	const navigate = useNavigate();
 
-	useEffect(() => {
-		get_current_user().then((user) => {
-			setName(user.name.split(' ')[0]);
-		});
-	}, []);
-
 	return (
-		<div className="m-3 my-4" style={{ maxWidth: '800px' }}>
+		<div
+			className="m-3 my-4"
+			style={{ maxWidth: '800px', minWidth: '500px' }}
+		>
 			<button
 				className="btn btn-dark d-flex align-items-center justify-content-center align-self-start"
 				style={{ height: '50px', width: '50px' }}
@@ -25,9 +21,7 @@ function Config() {
 			>
 				<ArrowBackIcon />
 			</button>
-			<h3 className="my-5 text-center mx-4">
-				O que deseja configurar{name.length === 0 ? '' : `, ${name}`}?
-			</h3>
+			<h3 className="my-5 text-center mx-4">Configurações</h3>
 			<ul className="list-group rounded-3 mx-3">
 				<li
 					className="list-group-item list-group-item-action d-flex align-items-center"

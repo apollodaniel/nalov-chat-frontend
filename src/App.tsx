@@ -21,7 +21,7 @@ function App() {
 	useEffect(() => {
 		const lastLocation = location.pathname;
 		let currentLocation = location.pathname;
-		if (!loading || firstTime.current) {
+		if (firstTime.current) {
 			check_user_logged_in(
 				() => {
 					// on fail

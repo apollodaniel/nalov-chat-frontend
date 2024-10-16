@@ -125,8 +125,6 @@ export const get_attachments = async (
 			method: 'GET',
 			onSucess: (attachments: Attachment[]) => r(attachments),
 			onFail(response) {
-				if (response) console.log(response.status);
-
 				r([]);
 			},
 		}),

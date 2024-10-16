@@ -135,14 +135,24 @@ function ProfileConfig() {
 												'/config/profile',
 												'_self',
 											);
-										} else {
+										} else if (request.status === 601)
+											refresh_user_token()
+												.then(() => {
+													execRequest();
+												})
+												.catch(() => {
+													EVENT_ERROR_EMITTER.emit(
+														'add-error',
+														toast_error_messages.config_save_error,
+													);
+												});
+										else
 											console.error(
 												'Upload failed:',
 												request.status,
 												request.statusText,
 											);
-											setLoading(false);
-										}
+										setLoading(false);
 									}
 								};
 
