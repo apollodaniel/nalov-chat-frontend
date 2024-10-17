@@ -69,8 +69,6 @@ export const logout_user = (): Promise<User> =>
 			endpoint: `/auth/logout`,
 			method: 'POST',
 			onSucess: () => {
-				window.localStorage.clear();
-				window.localStorage.clear();
 				window.open(window.location.href, '_self');
 			},
 		}),
@@ -130,8 +128,6 @@ export const delete_user = (onFail: () => void) =>
 		method: 'DELETE',
 		errorMessage: toast_error_messages.delete_account_error,
 		onSucess: () => {
-			window.localStorage.clear();
-			window.localStorage.clear();
 			window.open(window.location.href, '_self');
 		},
 		onFail: onFail,

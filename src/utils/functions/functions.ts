@@ -257,11 +257,16 @@ export async function execRequest(obj: {
 			},
 			credentials: 'include',
 		});
+		const response_content = await response.text();
+		let result;
+		try {
+			result = JSON.parse(response_content);
+		} catch (err) {}
 
-		if ((response.status >= 200 && response.status < 300) || response.ok) {
-			const response_content = await response.text();
+		if (response.status >= 200 && response.status < 300) {
 			if (
-				response_content === 'OK' ||
+				!result ||
+				typeof result !== 'object' ||
 				response_content.trim().length === 0
 			)
 				return onSucess(undefined);
@@ -275,18 +280,26 @@ export async function execRequest(obj: {
 			window.open(`${window.location.protocol}/login`, '_self');
 			if (onFail) onFail(response);
 		} else if (response.status === 401) {
-			const json = await response.json();
-			if (json && json.error && json.error === 'no active session') {
-				window.localStorage.clear();
+			if (errorMessage)
+				EVENT_ERROR_EMITTER.emit('add-error', errorMessage);
+
+			if (
+				result &&
+				typeof result === 'object' &&
+				result.error === 'no active session'
+			) {
 				window.open(window.location.href, '_self');
 			}
+
+			if (onFail && result && typeof result === 'object') onFail(result);
 			if (onFail) onFail(response);
 		} else {
 			console.log(response);
 			console.log('Got unknown error');
+
 			if (errorMessage)
 				EVENT_ERROR_EMITTER.emit('add-error', errorMessage);
-			if (onFail) onFail(await response.json());
+			if (onFail && result && typeof result === 'object') onFail(result);
 		}
 	} catch (err: any) {
 		console.log(`Got unknown error: ${err.message}`);

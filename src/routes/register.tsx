@@ -41,10 +41,6 @@ function Register() {
 								password: data.password,
 							});
 
-							window.localStorage.setItem(
-								'auth_token',
-								result.auth_token,
-							);
 							navigate('/');
 						} catch (err: any) {
 							const errors_obj: BackendError[] = err.errors;

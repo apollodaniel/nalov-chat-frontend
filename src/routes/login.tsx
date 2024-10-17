@@ -30,6 +30,9 @@ function Login() {
 					className="d-flex flex-column h-100 w-100 justify-content-center gap-2 p-4"
 					onSubmit={handleSubmit(async (result: LoginFormSubmit) => {
 						login_user({ ...result })
+							.then((data: any) => {
+								navigate('/');
+							})
 							.catch(async (errors: any) => {
 								// error from backend
 								const errors_obj: BackendError[] =
@@ -50,13 +53,6 @@ function Login() {
 								else clearErrors('username');
 								if (contains_password) setError('password', {});
 								else clearErrors('password');
-							})
-							.then((data: any) => {
-								window.localStorage.setItem(
-									'auth_token',
-									data.auth_token,
-								);
-								navigate('/');
 							});
 					})}
 				>
