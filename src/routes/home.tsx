@@ -112,8 +112,13 @@ function Home() {
 				</button>
 			</div>
 			<ul className="list-group border-0 rounded-3">
-				{!focusedSearch
-					? // chats
+				{!focusedSearch ? (
+					chats.length === 0 ? (
+						<span className="align-self-center mt-5 fs-5">
+							<b>Nenhum</b> chat iniciado.
+						</span>
+					) : (
+						// chats
 						chats.map((c) => (
 							<ChatListItem
 								key={c.user.id}
@@ -121,14 +126,16 @@ function Home() {
 								chat={c}
 							/>
 						))
-					: // users
-						users.map((u) => (
-							<UserListItem
-								key={u.id}
-								navigate={navigate}
-								user={u}
-							/>
-						))}
+					) // users
+				) : users.length === 0 ? (
+					<span className="align-self-center mt-5 fs-5">
+						<b>Nenhum</b> usuário encontrado!
+					</span>
+				) : (
+					users.map((u) => (
+						<UserListItem key={u.id} navigate={navigate} user={u} />
+					))
+				)}
 			</ul>
 			{moreActionsPopupVisible && (
 				<HomeTreeDotsPopup
