@@ -1,6 +1,5 @@
-# App Chat Frontend
+# Nalov Chat Frontend
 
-### Todo
-- Implement solid for app state
-- Mover os textos do resto dos popups para uma constante em constants.ts
-- Adicionar criptografia no envio e recebimento de informações
+This a sub repository dedicated to Nalov Chat Frontend.
+
+Please go to the main repository to get the complete app.
