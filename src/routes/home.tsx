@@ -12,6 +12,7 @@ import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import CloseIcon from '@mui/icons-material/Close';
 import MenuIcon from '@mui/icons-material/Menu';
 import debounce from 'lodash.debounce';
+import { Card } from '@nextui-org/react';
 
 function Home() {
 	// main page
@@ -58,16 +59,16 @@ function Home() {
 	}, [search]);
 
 	return (
-		<div
+		<Card
 			id="home-container"
-			className="d-flex flex-column my-5 gap-3 p-3"
+			className="flex flex-column my-5 gap-3 p-3"
 			onClick={(event) => {
 				if ((event.target as Element).id === 'home-container')
 					setFocusedSearch(false);
 			}}
 		>
 			<div
-				className="d-flex flex-row gap-3 align-items-center justify-content-end"
+				className="flex flex-row gap-3 align-items-center justify-content-end"
 				style={{
 					height: '60px',
 				}}
@@ -144,7 +145,7 @@ function Home() {
 					navigate={navigate}
 				/>
 			)}
-		</div>
+		</Card>
 	);
 }
 

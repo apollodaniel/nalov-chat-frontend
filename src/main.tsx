@@ -8,6 +8,7 @@ import Home from './routes/home.tsx';
 import Chat from './routes/chat.tsx';
 import Config from './routes/config.tsx';
 import ProfileConfig from './routes/profile_config.tsx';
+import { NextUIProvider } from '@nextui-org/react';
 
 const router = createBrowserRouter([
 	{
@@ -44,5 +45,9 @@ const router = createBrowserRouter([
 ]);
 
 createRoot(document.getElementById('root')!).render(
-	<RouterProvider router={router} />,
+	<NextUIProvider>
+		<main className="dark text-foreground bg-background">
+			<RouterProvider router={router} />
+		</main>
+	</NextUIProvider>,
 );
