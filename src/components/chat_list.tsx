@@ -16,8 +16,8 @@ export default function ChatList({ chats, navigate }: IProps) {
 	return (
 		<Listbox
 			classNames={{
-				base: 'max-w-full ',
-				list: 'max-h-full overflow-scroll',
+				base: 'max-w-full  ',
+				list: 'max-h-full overflow-scroll ',
 			}}
 			items={chats}
 			selectionMode="none"

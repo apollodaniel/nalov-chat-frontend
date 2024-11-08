@@ -83,7 +83,7 @@ function Home() {
 				<div className="flex flex-row gap-3 max-sm:w-full justify-end">
 					{focusedSearch ? (
 						<Button
-							className="p-[28px] max-sm:p-[16px] bg-background bg-opacity-40"
+							className="p-[28px] max-sm:p-[16px] bg-background bg-opacity-25 "
 							onClick={() => {
 								setFocusedSearch(false);
 								setSearch('');
@@ -96,7 +96,7 @@ function Home() {
 						</Button>
 					) : (
 						<Button
-							className="aspect-square p-[28px] bg-background bg-opacity-40"
+							className="aspect-square p-[28px] bg-background bg-opacity-25 "
 							onClick={() => setFocusedSearch(true)}
 							color="default"
 							variant="ghost"
@@ -108,7 +108,7 @@ function Home() {
 					<Button
 						onClick={() => setMoreActionsPopupVisible(true)}
 						id="more-actions-Button"
-						className={`aspect-square p-[28px]  bg-background bg-opacity-40${focusedSearch ? 'max-sm:p-[16px]' : ''}`}
+						className={`aspect-square p-[28px]  bg-background bg-opacity-25 ${focusedSearch ? 'max-sm:p-[16px]' : ''}`}
 						color="default"
 						variant="ghost"
 						isIconOnly
@@ -123,7 +123,7 @@ function Home() {
 						<b>Nenhum</b> chat iniciado.
 					</h2>
 				) : (
-					<div className="w-full h-full bg-background bg-opacity-20 border-small px-1 py-2 rounded-small border-default-200 dark:border-default-100">
+					<div className="w-full h-full bg-background bg-opacity-20 border rounded px-1 py-2  ">
 						<ChatList chats={chats} navigate={navigate} />
 					</div>
 				) // users
@@ -132,7 +132,7 @@ function Home() {
 					<b>Nenhum</b> usuário encontrado!
 				</h2>
 			) : (
-				<div className="w-full h-full  border-small px-1 py-2 rounded-small border-default-200 dark:border-default-100">
+				<div className="w-full h-full px-1 py-2   border rounded ">
 					<UserList users={users} navigate={navigate} />
 				</div>
 			)}

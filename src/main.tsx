@@ -9,6 +9,7 @@ import Chat from './routes/chat.tsx';
 import Config from './routes/config.tsx';
 import ProfileConfig from './routes/profile_config.tsx';
 import { NextUIProvider } from '@nextui-org/react';
+import { createTheme } from '@mui/material';
 
 const router = createBrowserRouter([
 	{
