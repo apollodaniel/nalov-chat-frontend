@@ -13,8 +13,20 @@ import { NextUIProvider } from '@nextui-org/react';
 const router = createBrowserRouter([
 	{
 		path: '/',
-		errorElement: <NotFound />,
-		element: <App />,
+		errorElement: (
+			<NextUIProvider>
+				<main className="h-[100vh] w-[100vw] flex flex-column justify-center dark text-foreground bg-background">
+					<NotFound />
+				</main>
+			</NextUIProvider>
+		),
+		element: (
+			<NextUIProvider>
+				<main className="h-[100vh] w-[100vw] flex flex-column justify-center dark text-foreground background-gradient">
+					<App />
+				</main>
+			</NextUIProvider>
+		),
 		children: [
 			{
 				path: '/',
@@ -45,9 +57,5 @@ const router = createBrowserRouter([
 ]);
 
 createRoot(document.getElementById('root')!).render(
-	<NextUIProvider>
-		<main className="dark text-foreground bg-background">
-			<RouterProvider router={router} />
-		</main>
-	</NextUIProvider>,
+	<RouterProvider router={router} />,
 );

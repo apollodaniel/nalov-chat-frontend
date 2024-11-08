@@ -20,7 +20,7 @@ function HomeTreeDotsPopup({ show, navigate, onCancel }: IProps) {
 
 	return (
 		<div>
-			<Modal show={show} size="sm">
+			<Modal show={show} size="sm" centered={true}>
 				<Modal.Body className="d-flex flex-column align-items-center justify-content-center gap-2">
 					<button
 						className="btn btn-close align-self-end mb-3"
