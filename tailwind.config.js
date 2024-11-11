@@ -37,9 +37,9 @@ export default {
 					large: '1.75rem', // text-large
 				},
 				radius: {
-					small: '8px', // rounded-small
-					medium: '8px', // rounded-medium
-					large: '14px', // rounded-large
+					small: '12px', // rounded-small
+					medium: '16px', // rounded-medium
+					large: '24px', // rounded-large
 				},
 				borderWidth: {
 					small: '1px', // border-small
