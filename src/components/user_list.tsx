@@ -12,13 +12,19 @@ interface IProps {
 export default function UserList({ users, navigate }: IProps) {
 	return (
 		<Listbox
+			className="overflow-y-scroll"
 			classNames={{
 				base: 'max-w-full',
-				list: 'max-h-full overflow-scroll',
+				list: 'max-h-full',
 			}}
 			items={users}
 			selectionMode="none"
 			variant="flat"
+			emptyContent={
+				<h2 className="self-center my-auto md:text-xl  max-sm:text-md">
+					<b>Nenhum</b> usuário encontrado!
+				</h2>
+			}
 		>
 			{(user: User) => (
 				<ListboxItem

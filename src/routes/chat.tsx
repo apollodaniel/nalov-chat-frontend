@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Attachment, Message, PositionOffset, User } from '../utils/types';
+import { Message, User } from '../utils/types';
 import LoadingBar from '../components/loading_bar';
 import { get_user } from '../utils/functions/user';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -12,20 +12,15 @@ import {
 	send_message,
 } from '../utils/functions/chat';
 import { DATETIME_FORMATTER, EVENT_EMITTER } from '../utils/constants';
-import {
-	format_recording_audio_time,
-	get_current_host,
-	upload_files,
-} from '../utils/functions/functions';
+import { get_current_host, upload_files } from '../utils/functions/functions';
 import MessageContainer from '../components/message_container';
 import { Modal } from 'react-bootstrap';
-import MessageContextMenu from '../components/message_context_menu';
-import AttachFileIcon from '@mui/icons-material/AttachFile';
-import SendIcon from '@mui/icons-material/Send';
-import MicIcon from '@mui/icons-material/Mic';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import CloseIcon from '@mui/icons-material/Close';
+import { Button, User as UserWrapper } from '@nextui-org/react';
+import NormalMessageInput from '../components/message_input/normal';
+import RecordAudioInput from '../components/message_input/record_audio';
+import EditMessageInput from '../components/message_input/edit';
 
 function Chat() {
 	const [messages, setMessages] = useState<Message[]>([]);
@@ -52,9 +47,6 @@ function Chat() {
 		Message | undefined
 	>(undefined);
 
-	const [showContextMenu, setShowContextMenu] = useState<
-		[Message, PositionOffset] | undefined
-	>();
 	const getMessages = async () => {
 		try {
 			const messages = await get_messages(params['id']!);
@@ -107,7 +99,7 @@ function Chat() {
 		setSendMessageContent('');
 		setSelectedAttachments([]);
 	};
-	const editMessage = async () => {
+	const sendEditedMessage = async () => {
 		setEditingMessage(undefined);
 		setSendMessageContent('');
 		await patch_message(editingMessage!.id, {
@@ -167,6 +159,7 @@ function Chat() {
 					],
 					receiver_id: params['id']!,
 				});
+
 				if (result && result.message_id) {
 					upload_files([audio_file], result.message_id);
 				}
@@ -210,42 +203,41 @@ function Chat() {
 	return !user ? (
 		<LoadingBar />
 	) : (
-		<div
-			className="w-100 h-100 d-flex flex-column align-items-center justify-content-center"
-			onMouseDown={() => setShowContextMenu(undefined)}
-		>
+		<div className="w-100 h-100 d-flex flex-column align-items-center justify-content-center">
 			<div
 				className="w-100 h-100 d-flex flex-column "
 				style={{ maxHeight: '90vh', maxWidth: '800px' }}
 			>
 				<div
-					className="rounded-0 w-100 p-3 d-flex flex-row gap-3 rounded-top-3"
+					className="rounded-0 w-100 p-3 flex flex-row gap-5 items-center justify-start rounded-top-3"
 					style={{ height: '100px' }}
 				>
-					<button
-						className="btn btn-dark d-flex align-items-center justify-content-center align-self-start"
+					<Button
+						className="flex items-center justify-center"
 						style={{ height: '50px', width: '50px' }}
 						onClick={() => navigate('/')}
+						isIconOnly
+						variant="ghost"
 					>
 						<ArrowBackIcon />
-					</button>
-					<img
-						className="ratio-1x1 rounded-circle"
-						src={get_current_host(user.profile_picture)}
-						style={{
-							height: '50px',
-							aspectRatio: 1 / 1,
-							objectFit: 'cover',
+					</Button>
+					<UserWrapper
+						className="h-full"
+						avatarProps={{
+							src: get_current_host(user.profile_picture),
+							alt: `${user.name} profile picture`,
+							className: 'h-full w-auto my-1 me-2',
 						}}
-						alt={`${user.name} profile picture`}
+						name={user.name}
+						description={user.username}
+						classNames={{
+							name: 'text-xl',
+							description: 'text-sm',
+						}}
 					/>
-					<div className="d-flex flex-column align-items-start justify-content-start">
-						<div className="fs-5 fw-bold">{user.name}</div>
-						{user.username}
-					</div>
 				</div>
 				<div
-					className="card w-100 h-100 d-flex flex-column-reverse gap-3 p-4 rounded-3"
+					className="w-full h-full flex flex-col-reverse gap-3 p-4 rounded-2xl border bg-background bg-opacity-25"
 					style={{
 						overflowY: 'auto',
 					}}
@@ -262,9 +254,16 @@ function Chat() {
 								<MessageContainer
 									msg={msg}
 									chat_id={params['id']!}
-									onContextMenu={(msg, pos_offset) =>
-										setShowContextMenu([msg, pos_offset])
-									}
+									onShowInfo={(msg) => {
+										setShowMessageInfoPopup(msg);
+									}}
+									onDelete={(msg) => {
+										setShowMessageDeletePopup(msg);
+									}}
+									onEdit={(msg) => {
+										setEditingMessage(msg);
+										setSendMessageContent(msg.content);
+									}}
 								/>
 							);
 						})}
@@ -293,114 +292,36 @@ function Chat() {
 				<div className="w-100 rounded-3">
 					{editingMessage ? (
 						// editing message input
-						<div className="w-100 rounded-bottom d-flex flex-row gap-1 m-0">
-							<div className="form-floating w-100 h-100 my-1 rounded-3">
-								<input
-									className="form-control h-100 h-100 m-0"
-									type="text"
-									onChange={(event) => {
-										setSendMessageContent(
-											event.target.value,
-										);
-									}}
-									onKeyDownCapture={(event) => {
-										if (event.key == 'Enter') {
-											editMessage();
-										}
-									}}
-									value={sendMessageContent}
-								/>
-								<label>Editing message</label>
-							</div>
-							<button
-								className="btn btn-primary w-auto rounded-3 my-1"
-								onClick={() => {
-									setEditingMessage(undefined);
-									setSendMessageContent('');
-								}}
-								style={{
-									textWrap: 'nowrap',
-								}}
-							>
-								<CloseIcon />
-							</button>
-						</div>
+						<EditMessageInput
+							inputMessageContent={sendMessageContent}
+							setInputMessageContent={setSendMessageContent}
+							setEditingMessage={setEditingMessage}
+							sendEditedMessage={sendEditedMessage}
+						/>
 					) : !Object.is(recording, undefined) ? (
 						// recording audio input
-						<div
-							className="w-100 rounded-0 gap-1 rounded-bottom-3 d-flex flex-row align-items-center justify-content-end m-1"
-							style={{ height: '60px' }}
-						>
-							<p className="m-0 p-0 me-2">
-								{format_recording_audio_time(recording!)}
-							</p>
-							<button
-								className="btn btn-primary h-100 d-flex align-items-center justify-content-center rounded-3 my-1"
-								onClick={() => {
-									cancelAudio.current = true;
-									mediaRecorder.current?.stop();
-								}}
-								style={{ width: '60px' }}
-							>
-								<CloseIcon />
-							</button>
-							<button
-								className="btn btn-primary h-100 d-flex align-items-center justify-content-center rounded-3 my-1"
-								onClick={() => {
-									cancelAudio.current = false;
-									mediaRecorder.current?.stop();
-								}}
-								style={{ width: '60px' }}
-							>
-								<SendIcon />
-							</button>
-						</div>
+						<RecordAudioInput
+							onCancelRecording={() => {
+								cancelAudio.current = true;
+								mediaRecorder.current?.stop();
+							}}
+							onFinishRecording={() => {
+								// sucess
+								cancelAudio.current = false;
+								mediaRecorder.current?.stop();
+							}}
+							recordingTime={recording!}
+						/>
 					) : (
 						// sending message input
-						<div className="d-flex flex-row gap-1">
-							<div className="form-floating w-100 my-1 rounded-3">
-								<input
-									className="form-control"
-									type="text"
-									onChange={(event) => {
-										setSendMessageContent(
-											event.target.value,
-										);
-									}}
-									onKeyDownCapture={(event) => {
-										if (event.key == 'Enter') {
-											sendMessage();
-										}
-									}}
-									value={sendMessageContent}
-								/>
-								<label>
-									Message
-									{selectedAttachments.length > 0 &&
-										` + ${selectedAttachments.map((at) => at.name).join(' + ')}`}
-								</label>
-							</div>
-
-							{/* upload file button */}
-							<button
-								className="btn btn-primary rounded-3 my-1"
-								onClick={() =>
-									(
-										filePickerRef.current! as HTMLElement
-									).click()
-								}
-							>
-								<AttachFileIcon />
-							</button>
-
-							{/* record audio file button */}
-							<button
-								className="btn btn-primary rounded-3 my-1"
-								onClick={() => recordAudio()}
-							>
-								<MicIcon />
-							</button>
-						</div>
+						<NormalMessageInput
+							recordAudio={recordAudio}
+							filePicker={filePickerRef.current! as HTMLElement}
+							inputMessageContent={sendMessageContent}
+							setInputMessageContent={setSendMessageContent}
+							sendMessage={sendMessage}
+							selectedAttachments={selectedAttachments}
+						/>
 					)}
 				</div>
 			</div>
@@ -529,27 +450,6 @@ function Chat() {
 						)}
 					</Modal.Body>
 				</Modal>
-			)}
-			{showContextMenu && (
-				<MessageContextMenu
-					msg={showContextMenu![0]}
-					chat_id={params['id']!}
-					onShowInfo={(msg) => {
-						setShowMessageInfoPopup(msg);
-						setShowContextMenu(undefined);
-					}}
-					onDelete={(msg) => {
-						setShowMessageDeletePopup(msg);
-						setShowContextMenu(undefined);
-					}}
-					onFocusExit={() => setShowContextMenu(undefined)}
-					onEdit={(msg) => {
-						setEditingMessage(msg);
-						setSendMessageContent(msg.content);
-						setShowContextMenu(undefined);
-					}}
-					position_offset={showContextMenu[1]}
-				/>
 			)}
 		</div>
 	);

@@ -118,20 +118,11 @@ function Home() {
 				</div>
 			</div>
 			{!focusedSearch ? (
-				chats.length === 0 ? (
-					<h2 className="self-center my-auto lg:text-2xl md:text-xl max-sm:text-md">
-						<b>Nenhum</b> chat iniciado.
-					</h2>
-				) : (
-					<div className="w-full h-full bg-background bg-opacity-20 border rounded-2xl px-1 py-2">
-						<ChatList chats={chats} navigate={navigate} />
-					</div>
-				) // users
-			) : users.length === 0 ? (
-				<h2 className="self-center my-auto lg:text-2xl md:text-xl  max-sm:text-md">
-					<b>Nenhum</b> usuário encontrado!
-				</h2>
+				<div className="w-full h-full bg-background bg-opacity-20 border rounded-2xl px-1 py-2">
+					<ChatList chats={chats} navigate={navigate} />
+				</div>
 			) : (
+				// users
 				<div className="w-full h-full px-1 py-2   border rounded-2xl ">
 					<UserList users={users} navigate={navigate} />
 				</div>

@@ -15,13 +15,19 @@ interface IProps {
 export default function ChatList({ chats, navigate }: IProps) {
 	return (
 		<Listbox
+			className="overflow-y-scroll"
 			classNames={{
-				base: 'max-w-full  ',
-				list: 'max-h-full overflow-scroll ',
+				base: 'max-w-full',
+				list: 'max-h-full ',
 			}}
 			items={chats}
 			selectionMode="none"
 			variant="flat"
+			emptyContent={
+				<h2 className="self-center my-auto md:text-xl max-sm:text-md">
+					<b>Nenhum</b> chat iniciado.
+				</h2>
+			}
 		>
 			{(c: ChatType) => (
 				<ListboxItem
