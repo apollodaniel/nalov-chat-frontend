@@ -29,6 +29,7 @@ function ConfirmationPopup({
 			isDismissable
 			size="sm"
 			onClose={onCancel}
+			className="dark"
 		>
 			<ModalContent>
 				<ModalHeader>

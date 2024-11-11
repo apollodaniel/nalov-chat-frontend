@@ -9,7 +9,6 @@ import Chat from './routes/chat.tsx';
 import Config from './routes/config.tsx';
 import ProfileConfig from './routes/profile_config.tsx';
 import { NextUIProvider } from '@nextui-org/react';
-import { createTheme } from '@mui/material';
 
 const router = createBrowserRouter([
 	{
@@ -22,7 +21,7 @@ const router = createBrowserRouter([
 			</NextUIProvider>
 		),
 		element: (
-			<NextUIProvider>
+			<NextUIProvider className="dark">
 				<main className="h-[100vh] w-[100vw] flex flex-column justify-center dark text-foreground background-gradient">
 					<App />
 				</main>

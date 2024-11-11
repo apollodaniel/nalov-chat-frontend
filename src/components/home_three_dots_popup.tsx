@@ -31,6 +31,7 @@ function HomeTreeDotsPopup({ show, navigate, onCancel }: IProps) {
 				isDismissable
 				size="sm"
 				onClose={onCancel}
+				className="dark"
 			>
 				<ModalContent>
 					<ModalHeader>
