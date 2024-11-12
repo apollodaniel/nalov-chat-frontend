@@ -205,13 +205,10 @@ function Chat() {
 	) : (
 		<div className="w-100 h-100 d-flex flex-column align-items-center justify-content-center">
 			<div
-				className="w-100 h-100 d-flex flex-column "
+				className="w-100 h-100 flex flex-col gap-3"
 				style={{ maxHeight: '90vh', maxWidth: '800px' }}
 			>
-				<div
-					className="rounded-0 w-100 p-3 flex flex-row gap-5 items-center justify-start rounded-top-3"
-					style={{ height: '100px' }}
-				>
+				<div className="rounded-0 w-100 flex flex-row gap-5 max-sm:gap-2 max-h-[100px] items-center justify-start rounded-top-3">
 					<Button
 						className="flex items-center justify-center"
 						style={{ height: '50px', width: '50px' }}
@@ -222,17 +219,17 @@ function Chat() {
 						<ArrowBackIcon />
 					</Button>
 					<UserWrapper
-						className="h-full"
+						className="h-full m-0"
 						avatarProps={{
 							src: get_current_host(user.profile_picture),
 							alt: `${user.name} profile picture`,
-							className: 'h-full w-auto my-1 me-2',
+							className: 'h-[70px] max-sm:h-[50px] w-auto m-0',
 						}}
 						name={user.name}
 						description={user.username}
 						classNames={{
-							name: 'text-xl',
-							description: 'text-sm',
+							name: 'text-xl max-sm:text-medium m-0',
+							description: 'text-sm max-sm:text-xs m-0',
 						}}
 					/>
 				</div>
@@ -243,12 +240,12 @@ function Chat() {
 					}}
 					onScroll={(event) => {
 						console.log(event.currentTarget.scrollTop);
-						if (Math.abs(event.currentTarget.scrollTop) > 700)
+						if (Math.abs(event.currentTarget.scrollTop) > 500)
 							setShowBottomArrowButton(true);
 						else setShowBottomArrowButton(false);
 					}}
 				>
-					<div className="card-body d-flex flex-column gap-2">
+					<div className="flex flex-column gap-2">
 						{messages.map((msg) => {
 							return (
 								<MessageContainer
@@ -271,25 +268,24 @@ function Chat() {
 					</div>
 				</div>
 				{showBottomArrowButton && (
-					<button
-						className="btn btn-primary position-absolute rounded-circle d-flex flex-column justify-content-center align-items-center"
+					<Button
+						className="absolute size-[60px] left-0 right-0 mx-auto rounded-full z-50 "
+						color="default"
+						variant="solid"
 						style={{
-							width: '60px',
-							height: '60px',
-							right: '50%',
 							bottom: '20%',
-							zIndex: '10',
 						}}
 						onClick={() => {
 							(bottomRef.current as any).scrollIntoView({
 								behavior: 'smooth',
 							});
 						}}
+						isIconOnly
 					>
 						<ArrowDownwardIcon />
-					</button>
+					</Button>
 				)}
-				<div className="w-100 rounded-3">
+				<div className="w-full">
 					{editingMessage ? (
 						// editing message input
 						<EditMessageInput
