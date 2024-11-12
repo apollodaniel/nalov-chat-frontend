@@ -1,5 +1,9 @@
 import CloseIcon from '@mui/icons-material/Close';
 import { Message } from '../../utils/types';
+import { Button, Input } from '@nextui-org/react';
+import SendMessageIcon from '@mui/icons-material/Send';
+import ClearMessageIcon from '@mui/icons-material/Close';
+import { useRef } from 'react';
 
 interface IProps {
 	inputMessageContent: string;
@@ -14,36 +18,48 @@ export default function EditMessageInput({
 	setEditingMessage,
 	sendEditedMessage,
 }: IProps) {
+	const oldMessageContent = useRef(inputMessageContent);
 	return (
-		<div className="w-100 rounded-bottom d-flex flex-row gap-1 m-0">
-			<div className="form-floating w-100 h-100 my-1 rounded-3">
-				<input
-					className="form-control h-100 h-100 m-0"
-					type="text"
-					onChange={(event) => {
-						setInputMessageContent(event.target.value);
+		<div className="flex flex-row gap-1 h-full">
+			<Input
+				type="text"
+				onChange={(event) => {
+					setInputMessageContent(event.target.value);
+				}}
+				onKeyDownCapture={(event) => {
+					if (event.key == 'Enter') {
+						sendEditedMessage();
+					}
+				}}
+				value={inputMessageContent}
+				label={`Editing message: ${oldMessageContent.current}`}
+				classNames={{
+					label: 'text-ellipsis w-full whitespace-nowrap',
+				}}
+			/>
+			<div className="h-full max-sm:h-[80%] flex flex-row aspect-[2/1] w-auto self-center gap-1">
+				<Button
+					className="rounded-lg aspect-square h-full w-auto"
+					onClick={() => {
+						setEditingMessage(undefined);
+						setInputMessageContent('');
 					}}
-					onKeyDownCapture={(event) => {
-						if (event.key == 'Enter') {
-							sendEditedMessage();
-						}
-					}}
-					value={inputMessageContent}
-				/>
-				<label>Editing message</label>
+					isIconOnly
+					color="default"
+					variant="flat"
+				>
+					<ClearMessageIcon />
+				</Button>
+				<Button
+					className="rounded-lg aspect-square h-full w-auto "
+					onClick={() => sendEditedMessage()}
+					isIconOnly
+					color="default"
+					variant="flat"
+				>
+					<SendMessageIcon />
+				</Button>
 			</div>
-			<button
-				className="btn btn-primary w-auto rounded-3 my-1"
-				onClick={() => {
-					setEditingMessage(undefined);
-					setInputMessageContent('');
-				}}
-				style={{
-					textWrap: 'nowrap',
-				}}
-			>
-				<CloseIcon />
-			</button>
 		</div>
 	);
 }

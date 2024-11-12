@@ -1,6 +1,7 @@
 import CloseIcon from '@mui/icons-material/Close';
 import SendIcon from '@mui/icons-material/Send';
 import { format_recording_audio_time } from '../../utils/functions/functions';
+import { Button } from '@nextui-org/react';
 
 interface IProps {
 	onCancelRecording: () => void;
@@ -15,26 +16,34 @@ export default function RecordAudioInput({
 }: IProps) {
 	return (
 		<div
-			className="w-100 rounded-0 gap-1 rounded-bottom-3 d-flex flex-row align-items-center justify-content-end m-1"
+			className="w-full gap-1 flex flex-row items-center justify-end m-1"
 			style={{ height: '60px' }}
 		>
+			<h3 className="me-auto text-lg font-bold max-md:hidden">
+				Recording
+			</h3>
 			<p className="m-0 p-0 me-2">
 				{format_recording_audio_time(recordingTime!)}
 			</p>
-			<button
-				className="btn btn-primary h-100 d-flex align-items-center justify-content-center rounded-3 my-1"
+
+			<Button
+				className="rounded-lg aspect-square h-full w-auto "
 				onClick={onCancelRecording}
-				style={{ width: '60px' }}
+				isIconOnly
+				color="default"
+				variant="flat"
 			>
 				<CloseIcon />
-			</button>
-			<button
-				className="btn btn-primary h-100 d-flex align-items-center justify-content-center rounded-3 my-1"
+			</Button>
+			<Button
+				className="rounded-lg aspect-square h-full w-auto "
 				onClick={onFinishRecording}
-				style={{ width: '60px' }}
+				isIconOnly
+				color="default"
+				variant="flat"
 			>
 				<SendIcon />
-			</button>
+			</Button>
 		</div>
 	);
 }

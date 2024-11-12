@@ -321,6 +321,7 @@ function Chat() {
 							setInputMessageContent={setSendMessageContent}
 							sendMessage={sendMessage}
 							selectedAttachments={selectedAttachments}
+							setSelectedAttachments={setSelectedAttachments}
 						/>
 					)}
 				</div>
