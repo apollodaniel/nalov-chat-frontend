@@ -233,38 +233,40 @@ function Chat() {
 						}}
 					/>
 				</div>
-				<div
-					className="w-full h-full flex flex-col-reverse gap-3 p-4 rounded-2xl border bg-background bg-opacity-25"
-					style={{
-						overflowY: 'auto',
-					}}
-					onScroll={(event) => {
-						console.log(event.currentTarget.scrollTop);
-						if (Math.abs(event.currentTarget.scrollTop) > 500)
-							setShowBottomArrowButton(true);
-						else setShowBottomArrowButton(false);
-					}}
-				>
-					<div className="flex flex-column gap-2">
-						{messages.map((msg) => {
-							return (
-								<MessageContainer
-									msg={msg}
-									chat_id={params['id']!}
-									onShowInfo={(msg) => {
-										setShowMessageInfoPopup(msg);
-									}}
-									onDelete={(msg) => {
-										setShowMessageDeletePopup(msg);
-									}}
-									onEdit={(msg) => {
-										setEditingMessage(msg);
-										setSendMessageContent(msg.content);
-									}}
-								/>
-							);
-						})}
-						<div ref={bottomRef}></div>
+				<div className="w-full h-full rounded-2xl border bg-background bg-opacity-25 overflow-hidden">
+					<div
+						className="w-full h-full flex flex-col-reverse"
+						style={{
+							overflowY: 'auto',
+						}}
+						onScroll={(event) => {
+							console.log(event.currentTarget.scrollTop);
+							if (Math.abs(event.currentTarget.scrollTop) > 500)
+								setShowBottomArrowButton(true);
+							else setShowBottomArrowButton(false);
+						}}
+					>
+						<div className="flex flex-column gap-2 p-4">
+							{messages.map((msg) => {
+								return (
+									<MessageContainer
+										msg={msg}
+										chat_id={params['id']!}
+										onShowInfo={(msg) => {
+											setShowMessageInfoPopup(msg);
+										}}
+										onDelete={(msg) => {
+											setShowMessageDeletePopup(msg);
+										}}
+										onEdit={(msg) => {
+											setEditingMessage(msg);
+											setSendMessageContent(msg.content);
+										}}
+									/>
+								);
+							})}
+							<div ref={bottomRef}></div>
+						</div>
 					</div>
 				</div>
 				{showBottomArrowButton && (
