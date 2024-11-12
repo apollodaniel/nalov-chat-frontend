@@ -161,7 +161,7 @@ function Chat() {
 				});
 
 				if (result && result.message_id) {
-					upload_files([audio_file], result.message_id);
+					await upload_files([audio_file], result.message_id);
 				}
 
 				chunks.current = [];
@@ -171,7 +171,7 @@ function Chat() {
 				setRecording(undefined);
 			};
 
-			mediaRecorder.current.start();
+			mediaRecorder.current.start(1000);
 		} catch (err: any) {
 			try {
 				clearInterval(time_interval.current);
@@ -181,9 +181,19 @@ function Chat() {
 		}
 	};
 
+	const firstTime = useRef(true);
 	useEffect(() => {
 		getUser().then(() => {
-			getMessages();
+			getMessages().then(() => {
+				setTimeout(() => {
+					if (bottomRef.current) {
+						(bottomRef.current as any).scrollIntoView({
+							behavior: 'smooth',
+						});
+					}
+					firstTime.current = false;
+				}, 500);
+			});
 		});
 		EVENT_EMITTER.on('updated-attachments', () => {
 			if (bottomRef.current) {
@@ -195,7 +205,7 @@ function Chat() {
 	}, []);
 
 	useEffect(() => {
-		if (bottomRef.current) {
+		if (bottomRef.current && !firstTime.current) {
 			(bottomRef.current as any).scrollIntoView({ behavior: 'smooth' });
 		}
 	}, [messages]);
@@ -235,7 +245,7 @@ function Chat() {
 				</div>
 				<div className="w-full h-full rounded-2xl border bg-background bg-opacity-25 overflow-hidden">
 					<div
-						className="w-full h-full flex flex-col-reverse"
+						className="h-full w-full flex flex-col-reverse"
 						style={{
 							overflowY: 'auto',
 						}}
@@ -246,26 +256,34 @@ function Chat() {
 							else setShowBottomArrowButton(false);
 						}}
 					>
-						<div className="flex flex-column gap-2 p-4">
-							{messages.map((msg) => {
-								return (
-									<MessageContainer
-										msg={msg}
-										chat_id={params['id']!}
-										onShowInfo={(msg) => {
-											setShowMessageInfoPopup(msg);
-										}}
-										onDelete={(msg) => {
-											setShowMessageDeletePopup(msg);
-										}}
-										onEdit={(msg) => {
-											setEditingMessage(msg);
-											setSendMessageContent(msg.content);
-										}}
-									/>
-								);
-							})}
-							<div ref={bottomRef}></div>
+						<div className="flex flex-col gap-2 p-4">
+							{[
+								...messages.map((msg) => {
+									return (
+										<MessageContainer
+											msg={msg}
+											chat_id={params['id']!}
+											onShowInfo={(msg) => {
+												setShowMessageInfoPopup(msg);
+											}}
+											onDelete={(msg) => {
+												setShowMessageDeletePopup(msg);
+											}}
+											onEdit={(msg) => {
+												setEditingMessage(msg);
+												setSendMessageContent(
+													msg.content,
+												);
+											}}
+										/>
+									);
+								}),
+
+								<div
+									className="h-[8px] w-full"
+									ref={bottomRef}
+								></div>,
+							]}
 						</div>
 					</div>
 				</div>

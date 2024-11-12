@@ -4,6 +4,7 @@ import { Attachment } from '../utils/types';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
+import { Skeleton } from '@nextui-org/react';
 
 interface IProps {
 	attachment: Attachment;
@@ -27,14 +28,13 @@ export default function AttachmentContainer({ attachment }: IProps) {
 	};
 	let element = <FilenameElement />;
 	const [hovering, setHovering] = useState(false);
-
-	const [loaded, setLoaded] = useState(true);
+	const [loaded, setLoaded] = useState(false);
 
 	if (attachment.mime_type.startsWith('image')) {
 		element = (
 			<LazyLoadImage
-				effect="blur"
-				className="mw-100 mh-100 rounded-2 mt-2"
+				className="w-full h-full rounded-2"
+				onLoad={() => setLoaded(true)}
 				onError={(event) => {
 					if (retry > 5) {
 						setLoaded(false);
@@ -53,9 +53,10 @@ export default function AttachmentContainer({ attachment }: IProps) {
 	} else if (attachment.mime_type.startsWith('video')) {
 		element = (
 			<video
-				className="rounded-2 mw-100 mt-2"
+				className="rounded-2 w-full h-full"
 				src={_get_current_host(attachment.path!)}
 				controls={hovering}
+				onCanPlay={() => setLoaded(true)}
 				onError={(event) => {
 					if (retry > 5) {
 						setLoaded(false);
@@ -71,7 +72,7 @@ export default function AttachmentContainer({ attachment }: IProps) {
 	} else if (attachment.mime_type.startsWith('audio')) {
 		element = (
 			<audio
-				className="mw-100 mt-2"
+				className="w-full"
 				src={_get_current_host(attachment.path!)} // Update src with retry value
 				onError={(event) => {
 					if (retry > 5) {
@@ -83,14 +84,14 @@ export default function AttachmentContainer({ attachment }: IProps) {
 						}, 2000);
 					}
 				}}
+				onLoad={() => setLoaded(true)}
 				controls
 			/>
 		);
 	} else if (attachment.preview_path) {
 		element = (
-			<div className="w-100 d-flex">
+			<div className="w-100 flex">
 				<LazyLoadImage
-					effect="blur"
 					className={`mw-100 rounded-2 mt-2  ${loaded ? 'd-inline-block' : 'd-none'}`}
 					loading="lazy"
 					onError={() => {
@@ -108,7 +109,7 @@ export default function AttachmentContainer({ attachment }: IProps) {
 						maxHeight: '150px',
 						minWidth: '240px',
 					}}
-					// onLoad={() => EVENT_EMITTER.emit("updated-attachments")}
+					onLoad={() => setLoaded(true)}
 					src={_get_current_host(attachment.preview_path)}
 					alt=""
 				/>
@@ -118,13 +119,14 @@ export default function AttachmentContainer({ attachment }: IProps) {
 	}
 
 	return (
-		<div
-			className="list-group-item p-2 pt-0 pb-0 d-flex"
+		<Skeleton
+			className="flex rounded-lg"
+			isLoaded={loaded}
 			onMouseOver={() => setHovering(true)}
 			onMouseLeave={() => setHovering(false)}
 			style={{ maxWidth: '300px' }}
 		>
 			{element}
-		</div>
+		</Skeleton>
 	);
 }

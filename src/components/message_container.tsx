@@ -50,7 +50,6 @@ function MessageContainer({
 					>
 						<Card
 							isHoverable
-							isPressable
 							className={`gap-1 min-h-[50px] px-3 max-w-full ${chat_id === msg.sender_id ? 'align-items-start' : 'align-items-end'}`}
 							onContextMenu={(event) => {
 								event.preventDefault();

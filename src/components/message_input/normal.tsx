@@ -100,7 +100,7 @@ export default function NormalMessageInput({
 						? ` + ${selectedAttachments.map((at) => at.name).join(' + ')}`
 						: '')
 				}
-				onKeyDownCapture={(event) => {
+				onKeyDown={(event) => {
 					if (event.key == 'Enter') {
 						sendMessage();
 					}
