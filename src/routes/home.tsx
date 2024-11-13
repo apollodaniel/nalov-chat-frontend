@@ -61,7 +61,7 @@ function Home() {
 	return (
 		<div
 			id="home-container"
-			className="flex flex-column my-5 gap-3 p-3 "
+			className="flex flex-column my-5 gap-3 p-3 max-sm:p-0"
 			onClick={(event) => {
 				if ((event.target as Element).id === 'home-container')
 					setFocusedSearch(false);

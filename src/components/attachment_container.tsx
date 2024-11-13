@@ -4,7 +4,7 @@ import { Attachment } from '../utils/types';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
-import { Skeleton } from '@nextui-org/react';
+import { Card, Skeleton } from '@nextui-org/react';
 
 interface IProps {
 	attachment: Attachment;
@@ -33,7 +33,7 @@ export default function AttachmentContainer({ attachment }: IProps) {
 	if (attachment.mime_type.startsWith('image')) {
 		element = (
 			<LazyLoadImage
-				className="w-full h-full rounded-2"
+				className="w-full h-full aspect-square rounded-2"
 				onLoad={() => setLoaded(true)}
 				onError={(event) => {
 					if (retry > 5) {
@@ -53,7 +53,7 @@ export default function AttachmentContainer({ attachment }: IProps) {
 	} else if (attachment.mime_type.startsWith('video')) {
 		element = (
 			<video
-				className="rounded-2 w-full h-full"
+				className="w-full h-full aspect-square rounded-2"
 				src={_get_current_host(attachment.path!)}
 				controls={hovering}
 				onCanPlay={() => setLoaded(true)}
@@ -119,14 +119,15 @@ export default function AttachmentContainer({ attachment }: IProps) {
 	}
 
 	return (
-		<Skeleton
-			className="flex rounded-lg"
-			isLoaded={loaded}
-			onMouseOver={() => setHovering(true)}
-			onMouseLeave={() => setHovering(false)}
-			style={{ maxWidth: '300px' }}
-		>
-			{element}
-		</Skeleton>
+		<Card>
+			<Skeleton
+				className="rounded-lg w-[300px] h-full aspect-square"
+				isLoaded={loaded}
+				onMouseOver={() => setHovering(true)}
+				onMouseLeave={() => setHovering(false)}
+			>
+				{element}
+			</Skeleton>
+		</Card>
 	);
 }

@@ -14,10 +14,17 @@ import {
 import { DATETIME_FORMATTER, EVENT_EMITTER } from '../utils/constants';
 import { get_current_host, upload_files } from '../utils/functions/functions';
 import MessageContainer from '../components/message_container';
-import { Modal } from 'react-bootstrap';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { Button, User as UserWrapper } from '@nextui-org/react';
+import {
+	Button,
+	Modal,
+	ModalBody,
+	ModalContent,
+	ModalFooter,
+	ModalHeader,
+	User as UserWrapper,
+} from '@nextui-org/react';
 import NormalMessageInput from '../components/message_input/normal';
 import RecordAudioInput from '../components/message_input/record_audio';
 import EditMessageInput from '../components/message_input/edit';
@@ -250,7 +257,6 @@ function Chat() {
 							overflowY: 'auto',
 						}}
 						onScroll={(event) => {
-							console.log(event.currentTarget.scrollTop);
 							if (Math.abs(event.currentTarget.scrollTop) > 500)
 								setShowBottomArrowButton(true);
 							else setShowBottomArrowButton(false);
@@ -357,117 +363,138 @@ function Chat() {
 				multiple={true}
 			/>
 
-			{showMessageDeletePopup && (
-				<Modal show={true}>
-					<Modal.Header>
-						<Modal.Title>Aviso!!</Modal.Title>
-						<input
-							type="button"
-							className="btn btn-close"
-							onClick={() => setShowMessageDeletePopup(undefined)}
-						/>
-					</Modal.Header>
-					<Modal.Body>
+			<Modal
+				isOpen={!!showMessageDeletePopup}
+				onOpenChange={(open) =>
+					setShowMessageDeletePopup(
+						open ? showMessageDeletePopup : undefined,
+					)
+				}
+				className="dark"
+			>
+				<ModalContent>
+					<ModalHeader>
+						<h1>Aviso!</h1>
+					</ModalHeader>
+					<ModalBody className="inline">
 						Você <b>realmente</b> deseja apagar esta mensagem?
-					</Modal.Body>
-					<Modal.Footer>
-						<button
-							className="btn btn-primary"
-							onClick={() => setShowMessageDeletePopup(undefined)}
-						>
-							Cancelar
-						</button>
-						<button
-							className="btn btn-secondary"
-							onClick={() => {
-								delete_message(showMessageDeletePopup.id);
-								setShowMessageDeletePopup(undefined);
-							}}
-						>
-							Confirmar
-						</button>
-					</Modal.Footer>
-				</Modal>
-			)}
+					</ModalBody>
+					{showMessageDeletePopup && (
+						<ModalFooter>
+							<Button
+								color="default"
+								onClick={() =>
+									setShowMessageDeletePopup(undefined)
+								}
+							>
+								Cancelar
+							</Button>
+							<Button
+								color="danger"
+								onClick={() => {
+									delete_message(showMessageDeletePopup!.id);
+									setShowMessageDeletePopup(undefined);
+								}}
+							>
+								Confirmar
+							</Button>
+						</ModalFooter>
+					)}
+				</ModalContent>
+			</Modal>
 
-			{showMessageInfoPopup && (
-				<Modal show={true}>
-					<Modal.Header>
-						<Modal.Title>Informações da mensagem</Modal.Title>
-						<input
-							type="button"
-							className="btn btn-close"
-							onClick={() => setShowMessageInfoPopup(undefined)}
-						/>
-					</Modal.Header>
-					<Modal.Body
-						className="d-flex flex-column gap-3 text-nowrap overflow-hidden"
-						style={{
-							overflow: 'hidden',
-							whiteSpace: 'nowrap',
-						}}
-					>
-						<div
-							className="mw-100 text-nowrap"
+			<Modal
+				isOpen={!!showMessageInfoPopup}
+				className="dark"
+				onOpenChange={(open) =>
+					setShowMessageInfoPopup(
+						open ? showMessageInfoPopup : undefined,
+					)
+				}
+			>
+				<ModalContent>
+					<ModalHeader>
+						<h2>informações da mensagem</h2>
+					</ModalHeader>
+
+					{showMessageInfoPopup && (
+						<ModalBody
+							className="flex flex-col gap-3 text-nowrap overflow-hidden"
 							style={{
 								overflow: 'hidden',
 								whiteSpace: 'nowrap',
-								textOverflow: 'ellipsis',
 							}}
 						>
-							<h6 className="m-0">Conteúdo</h6>
-							<small className="mw-100">
-								{showMessageInfoPopup?.content}
-							</small>
-						</div>
-						<div className="d-flex flex-row gap-1 align-items-center">
-							<h6 className="m-0 me-1">Enviado por</h6>
-							<p className="m-0 fw-bold">
-								{showMessageInfoPopup?.sender_id === user.id
-									? user.username
-									: 'Você'}
-							</p>
-							<h6 className="m-0 mx-1">para</h6>
-							<p className="m-0 fw-bold">
-								{showMessageInfoPopup?.receiver_id === user.id
-									? user.username
-									: 'Você'}
-							</p>
-						</div>
-						{showMessageInfoPopup!.creation_date <
-						showMessageInfoPopup!.last_modified_date ? (
+							<div
+								className="mw-100 text-nowrap"
+								style={{
+									overflow: 'hidden',
+									whiteSpace: 'nowrap',
+									textOverflow: 'ellipsis',
+								}}
+							>
+								<h5 className="m-0">Conteúdo</h5>
+								<small className="mw-100">
+									{showMessageInfoPopup?.content.length == 0
+										? 'Sem conteúdo'
+										: showMessageInfoPopup?.content}
+								</small>
+								<h5 className="m-0">Arquivos</h5>
+								<small className="mw-100">
+									{showMessageInfoPopup!.attachments.length ==
+									0
+										? 'Nenhum anexo enviado'
+										: showMessageInfoPopup?.attachments
+												.map((at) => at.filename)
+												.join(', ')}
+								</small>
+							</div>
+							<div className="d-flex flex-row gap-1 align-items-center">
+								<h6 className="m-0 me-1">
+									Enviado{' '}
+									{showMessageInfoPopup!.sender_id != user.id
+										? 'para'
+										: 'por'}{' '}
+									{user.username}
+								</h6>
+							</div>
+							{showMessageInfoPopup!.creation_date <
+							showMessageInfoPopup!.last_modified_date ? (
+								<div>
+									<h6 className="m-0">
+										Modificado por ultimo
+									</h6>
+									<small>
+										{DATETIME_FORMATTER.format(
+											showMessageInfoPopup?.last_modified_date,
+										)}
+									</small>
+								</div>
+							) : (
+								<div></div>
+							)}
 							<div>
-								<h6 className="m-0">Modificado por ultimo</h6>
+								<h6 className="m-0">Data de criação</h6>
 								<small>
 									{DATETIME_FORMATTER.format(
-										showMessageInfoPopup?.last_modified_date,
+										showMessageInfoPopup?.creation_date,
 									)}
 								</small>
 							</div>
-						) : (
-							<div></div>
-						)}
-						<div>
-							<h6 className="m-0">Data de criação</h6>
-							<small>
-								{DATETIME_FORMATTER.format(
-									showMessageInfoPopup?.creation_date,
-								)}
-							</small>
-						</div>
-						{showMessageInfoPopup.seen_date && (
-							<div>
-								<h6 className="m-0">Visualizado em</h6>
-								<small>
-									{DATETIME_FORMATTER.format(
-										showMessageInfoPopup?.seen_date,
-									)}
-								</small>
-							</div>
-						)}
-					</Modal.Body>
-				</Modal>
-			)}
+							{showMessageInfoPopup!.seen_date && (
+								<div>
+									<h6 className="m-0">Visualizado em</h6>
+									<small>
+										{DATETIME_FORMATTER.format(
+											showMessageInfoPopup?.seen_date,
+										)}
+									</small>
+								</div>
+							)}
+						</ModalBody>
+					)}
+				</ModalContent>
+			</Modal>
 		</div>
 	);
 }

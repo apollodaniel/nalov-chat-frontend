@@ -8,8 +8,9 @@ import {
 	DropdownItem,
 	DropdownMenu,
 	DropdownTrigger,
+	Skeleton,
 } from '@nextui-org/react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 interface IProps {
 	msg: Message;
@@ -28,6 +29,7 @@ function MessageContainer({
 }: IProps) {
 	const [contextMenuOpened, setContextMenuOpened] = useState(false);
 
+	const messageRef = useRef(null);
 	return (
 		<LazyLoadComponent
 			style={{
@@ -49,12 +51,16 @@ function MessageContainer({
 						className={`flex flex-column justify-center max-w-[80%] max-md:max-w-full h-auto p-0 ${chat_id === msg.sender_id ? 'self-start' : 'self-end'} `}
 					>
 						<Card
-							isHoverable
-							className={`gap-1 min-h-[50px] px-3 max-w-full ${chat_id === msg.sender_id ? 'align-items-start' : 'align-items-end'}`}
+							className={`gap-2 min-h-[50px] p-3 pb-1 max-w-full ${chat_id === msg.sender_id ? 'align-items-start' : 'align-items-end'}`}
 							onContextMenu={(event) => {
 								event.preventDefault();
 
-								setContextMenuOpened(true);
+								if (messageRef.current) {
+									(
+										messageRef.current as Element
+									).scrollIntoView({ behavior: 'instant' });
+									setContextMenuOpened(true);
+								}
 							}}
 						>
 							{msg.attachments.map((attachment) => (
@@ -89,6 +95,7 @@ function MessageContainer({
 						>
 							{SHORT_DATETIME_FORMATTER.format(msg.creation_date)}
 						</p>
+						<div ref={messageRef}></div>
 					</div>
 				</DropdownTrigger>
 				<DropdownMenu
