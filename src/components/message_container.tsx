@@ -51,7 +51,7 @@ function MessageContainer({
 						className={`flex flex-column justify-center max-w-[80%] max-md:max-w-full h-auto p-0 ${chat_id === msg.sender_id ? 'self-start' : 'self-end'} `}
 					>
 						<Card
-							className={`gap-2 min-h-[50px] p-3 pb-1 max-w-full ${chat_id === msg.sender_id ? 'align-items-start' : 'align-items-end'}`}
+							className={`gap-1 min-h-[50px] px-3  max-w-full ${chat_id === msg.sender_id ? 'align-items-start' : 'align-items-end'}`}
 							onContextMenu={(event) => {
 								event.preventDefault();
 
@@ -63,12 +63,14 @@ function MessageContainer({
 								}
 							}}
 						>
-							{msg.attachments.map((attachment) => (
-								<AttachmentContainer
-									key={attachment.id!}
-									attachment={attachment}
-								/>
-							))}
+							<div className="flex flex-col gap-2">
+								{msg.attachments.map((attachment) => (
+									<AttachmentContainer
+										key={attachment.id!}
+										attachment={attachment}
+									/>
+								))}
+							</div>
 							<p
 								className={`m-0 max-w-full h-auto mt-auto ${msg.last_modified_date === msg.creation_date ? (msg.attachments.length === 0 ? 'mb-auto' : 'mb-1') : 'mb-0'} ${chat_id === msg.sender_id ? 'align-self-start' : 'align-self-end'} `}
 								style={{
@@ -119,6 +121,7 @@ function MessageContainer({
 					<DropdownItem key="info">Mais informações</DropdownItem>
 					<DropdownItem
 						key="delete"
+						isDisabled={msg.sender_id == chat_id}
 						className="text-danger"
 						color="danger"
 					>

@@ -120,6 +120,7 @@ function Chat() {
 	const cancelAudio = useRef(false);
 	const chunks = useRef<Blob[]>([]);
 	const time_interval = useRef<NodeJS.Timeout>();
+	const recordedAudioMimeType = useRef<string | undefined>(undefined);
 	const recordAudio = async () => {
 		try {
 			const stream = await navigator.mediaDevices.getUserMedia({
@@ -133,6 +134,9 @@ function Chat() {
 				);
 			};
 			mediaRecorder.current.ondataavailable = (blob_event: BlobEvent) => {
+				if (!recordedAudioMimeType.current) {
+					recordedAudioMimeType.current = blob_event.data.type;
+				}
 				if (blob_event.data.size > 0)
 					chunks.current.push(blob_event.data);
 			};
@@ -145,6 +149,7 @@ function Chat() {
 				if (cancelAudio.current) {
 					chunks.current = [];
 					cancelAudio.current = false;
+					recordedAudioMimeType.current = undefined;
 					return;
 				}
 
@@ -152,7 +157,7 @@ function Chat() {
 					chunks.current,
 					'audio_record.weba',
 					{
-						type: 'audio/webm',
+						type: recordedAudioMimeType.current,
 					},
 				);
 				const result = await send_message({
@@ -172,6 +177,7 @@ function Chat() {
 				}
 
 				chunks.current = [];
+				recordedAudioMimeType.current = undefined;
 			};
 
 			mediaRecorder.current.onerror = () => {
