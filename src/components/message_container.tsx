@@ -51,7 +51,7 @@ function MessageContainer({
 						className={`flex flex-column justify-center max-w-[80%] max-md:max-w-full h-auto p-0 ${chat_id === msg.sender_id ? 'self-start' : 'self-end'} `}
 					>
 						<Card
-							className={`gap-1 min-h-[50px] px-3  max-w-full ${chat_id === msg.sender_id ? 'align-items-start' : 'align-items-end'}`}
+							className={`gap-1 min-h-[50px] px-3 ${msg.attachments.length > 0 ? 'pt-3' : ''} max-w-full ${chat_id === msg.sender_id ? 'align-items-start' : 'align-items-end'}`}
 							onContextMenu={(event) => {
 								event.preventDefault();
 
@@ -117,7 +117,12 @@ function MessageContainer({
 						setContextMenuOpened(false);
 					}}
 				>
-					<DropdownItem key="edit">Editar mensagem</DropdownItem>
+					<DropdownItem
+						key="edit"
+						isDisabled={msg.sender_id == chat_id}
+					>
+						Editar mensagem
+					</DropdownItem>
 					<DropdownItem key="info">Mais informações</DropdownItem>
 					<DropdownItem
 						key="delete"

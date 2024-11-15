@@ -4,7 +4,9 @@ import { Attachment } from '../utils/types';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
-import { Card, Skeleton } from '@nextui-org/react';
+import { Card } from '@nextui-org/react';
+import AudioPlayer from './audio_player';
+import Skeleton from './Skeleton';
 
 interface IProps {
 	attachment: Attachment;
@@ -32,67 +34,77 @@ export default function AttachmentContainer({ attachment }: IProps) {
 
 	if (attachment.mime_type.startsWith('image')) {
 		element = (
-			<LazyLoadImage
-				className="w-full h-full aspect-square rounded-2"
-				onLoad={() => setLoaded(true)}
-				onError={(event) => {
-					if (retry > 5) {
-						setLoaded(false);
-					} else {
-						setTimeout(() => {
-							setRetry((prev) => prev + 1); // Increment retry to trigger re-render
-						}, 2000);
-					}
-				}}
-				loading="lazy"
-				style={{ objectFit: 'cover' }}
-				src={_get_current_host(attachment.path!)}
-				alt=""
-			/>
+			<Skeleton isLoaded={loaded}>
+				<LazyLoadImage
+					className="w-full h-full aspect-square rounded-2xl"
+					onLoad={() => setLoaded(true)}
+					onError={(event) => {
+						if (retry > 5) {
+							setLoaded(false);
+						} else {
+							setTimeout(() => {
+								setRetry((prev) => prev + 1); // Increment retry to trigger re-render
+							}, 2000);
+						}
+					}}
+					loading="lazy"
+					style={{ objectFit: 'cover' }}
+					src={_get_current_host(attachment.path!)}
+					alt=""
+				/>
+			</Skeleton>
 		);
 	} else if (attachment.mime_type.startsWith('video')) {
 		element = (
-			<video
-				className="w-full h-full aspect-square rounded-2"
-				src={_get_current_host(attachment.path!)}
-				controls={hovering}
-				onCanPlay={() => setLoaded(true)}
-				onError={(event) => {
-					if (retry > 5) {
-						setLoaded(false);
-					} else {
-						setTimeout(() => {
-							setRetry((prev) => prev + 1); // Increment retry to trigger re-render
-							event.currentTarget.load(); // Reload the audio after 2 seconds
-						}, 2000);
-					}
-				}}
-			></video>
+			<Skeleton isLoaded={loaded}>
+				<video
+					className="w-full h-full aspect-square rounded-2xl"
+					src={_get_current_host(attachment.path!)}
+					controls={hovering}
+					onCanPlay={() => setLoaded(true)}
+					onError={(event) => {
+						if (retry > 5) {
+							setLoaded(false);
+						} else {
+							setTimeout(() => {
+								setRetry((prev) => prev + 1); // Increment retry to trigger re-render
+								event.currentTarget.load(); // Reload the audio after 2 seconds
+							}, 2000);
+						}
+					}}
+				></video>
+			</Skeleton>
 		);
 	} else if (attachment.mime_type.startsWith('audio')) {
+		//element = (
+		//	<audio
+		//		className="w-full"
+		//		src={_get_current_host(attachment.path!)} // Update src with retry value
+		//		onError={(event) => {
+		//			if (retry > 5) {
+		//				setLoaded(false);
+		//			} else {
+		//				setTimeout(() => {
+		//					setRetry((prev) => prev + 1); // Increment retry to trigger re-render
+		//					event.currentTarget.load(); // Reload the audio after 2 seconds
+		//				}, 2000);
+		//			}
+		//		}}
+		//		onLoad={() => setLoaded(true)}
+		//		controls
+		//	/>
+		//);
 		element = (
-			<audio
-				className="w-full"
-				src={_get_current_host(attachment.path!)} // Update src with retry value
-				onError={(event) => {
-					if (retry > 5) {
-						setLoaded(false);
-					} else {
-						setTimeout(() => {
-							setRetry((prev) => prev + 1); // Increment retry to trigger re-render
-							event.currentTarget.load(); // Reload the audio after 2 seconds
-						}, 2000);
-					}
-				}}
-				onLoad={() => setLoaded(true)}
-				controls
+			<AudioPlayer
+				attachment={attachment}
+				onReady={() => setLoaded(true)}
 			/>
 		);
 	} else if (attachment.preview_path) {
 		element = (
-			<div className="w-100 flex">
+			<Skeleton className="w-100 flex" isLoaded={loaded}>
 				<LazyLoadImage
-					className={`mw-100 rounded-2 mt-2  ${loaded ? 'd-inline-block' : 'd-none'}`}
+					className={`mw-100 rounded-2xl mt-2  ${loaded ? 'd-inline-block' : 'd-none'}`}
 					loading="lazy"
 					onError={() => {
 						if (retry > 5) {
@@ -114,20 +126,17 @@ export default function AttachmentContainer({ attachment }: IProps) {
 					alt=""
 				/>
 				<FilenameElement loaded={loaded} />
-			</div>
+			</Skeleton>
 		);
 	}
 
 	return (
-		<Card>
-			<Skeleton
-				className="rounded-lg w-[300px] h-full aspect-square"
-				isLoaded={loaded}
-				onMouseOver={() => setHovering(true)}
-				onMouseLeave={() => setHovering(false)}
-			>
-				{element}
-			</Skeleton>
-		</Card>
+		<div
+			className="w-[300px] h-auto"
+			onMouseOver={() => setHovering(true)}
+			onMouseLeave={() => setHovering(false)}
+		>
+			{element}
+		</div>
 	);
 }
