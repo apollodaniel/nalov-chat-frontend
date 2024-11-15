@@ -7,6 +7,7 @@ import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { Card } from '@nextui-org/react';
 import AudioPlayer from './audio_player';
 import Skeleton from './Skeleton';
+import VideoPlayer from './video_player';
 
 interface IProps {
 	attachment: Attachment;
@@ -36,7 +37,7 @@ export default function AttachmentContainer({ attachment }: IProps) {
 		element = (
 			<Skeleton isLoaded={loaded}>
 				<LazyLoadImage
-					className="w-full h-full aspect-square rounded-2xl"
+					className="w-full h-full px-2 aspect-square rounded-2xl"
 					onLoad={() => setLoaded(true)}
 					onError={(event) => {
 						if (retry > 5) {
@@ -57,22 +58,10 @@ export default function AttachmentContainer({ attachment }: IProps) {
 	} else if (attachment.mime_type.startsWith('video')) {
 		element = (
 			<Skeleton isLoaded={loaded}>
-				<video
-					className="w-full h-full aspect-square rounded-2xl"
-					src={_get_current_host(attachment.path!)}
-					controls={hovering}
-					onCanPlay={() => setLoaded(true)}
-					onError={(event) => {
-						if (retry > 5) {
-							setLoaded(false);
-						} else {
-							setTimeout(() => {
-								setRetry((prev) => prev + 1); // Increment retry to trigger re-render
-								event.currentTarget.load(); // Reload the audio after 2 seconds
-							}, 2000);
-						}
-					}}
-				></video>
+				<VideoPlayer
+					attachment={attachment}
+					onReady={() => setLoaded(true)}
+				/>
 			</Skeleton>
 		);
 	} else if (attachment.mime_type.startsWith('audio')) {
@@ -102,7 +91,7 @@ export default function AttachmentContainer({ attachment }: IProps) {
 		);
 	} else if (attachment.preview_path) {
 		element = (
-			<Skeleton className="w-100 flex" isLoaded={loaded}>
+			<Skeleton className="w-100 flex px-2" isLoaded={loaded}>
 				<LazyLoadImage
 					className={`mw-100 rounded-2xl mt-2  ${loaded ? 'd-inline-block' : 'd-none'}`}
 					loading="lazy"

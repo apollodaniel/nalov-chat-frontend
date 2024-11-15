@@ -25,6 +25,7 @@ export default function AudioPlayer({ attachment, onReady }: IProps) {
 		loaded: 0,
 		loadedSeconds: 0,
 	});
+	const [playbackRate, setPlaybackRate] = useState(1);
 	const playerRef = useRef<ReactPlayer | null>(null);
 	const [position, setPosition] = useState(0);
 	const [isReady, setIsReady] = useState(false);
@@ -47,11 +48,32 @@ export default function AudioPlayer({ attachment, onReady }: IProps) {
 				onDuration={(duration) => setDuration(duration)}
 				onProgress={(prog) => !seeking && setProgress(prog)}
 				volume={1}
+				playbackRate={playbackRate}
 			/>
 
-			<p className="text-small text-ellipsis whitespace-nowrap max-w-full overflow-hidden">
-				{attachment.filename}
-			</p>
+			<div className="flex flex-row gap-1 justify-between items-center">
+				<p className="text-small text-ellipsis whitespace-nowrap max-w-full overflow-hidden">
+					{attachment.filename}
+				</p>
+
+				<Skeleton isLoaded={isReady} className=" rounded">
+					<Button
+						className="h-[32px] flex flex-col justify-center items-center"
+						color="primary"
+						variant="flat"
+						isIconOnly
+						onClick={() => {
+							if (playbackRate == 2) {
+								setPlaybackRate(1);
+							} else {
+								setPlaybackRate(playbackRate + 0.5);
+							}
+						}}
+					>
+						{playbackRate}x
+					</Button>
+				</Skeleton>
+			</div>
 			<Skeleton isLoaded={isReady} className="rounded mt-1">
 				<Slider
 					size="sm"
@@ -72,16 +94,16 @@ export default function AudioPlayer({ attachment, onReady }: IProps) {
 					}}
 				/>
 			</Skeleton>
-			<div className="flex flex-row justify-between">
-				<Skeleton isLoaded={isReady} className="h-[8px] mt-1 rounded">
+			<div className="flex flex-row justify-between mt-1">
+				<Skeleton isLoaded={isReady} className="h-[8px]  rounded">
 					<p className="text-small">
 						{format_audio_duration(position)}
 					</p>
 				</Skeleton>
-				<Skeleton isLoaded={isReady} className="mt-1 rounded">
+				<Skeleton isLoaded={isReady} className=" rounded">
 					<Button
 						isIconOnly
-						variant="solid"
+						variant="flat"
 						color="primary"
 						onClick={() => {
 							setPlaying(!playing);
@@ -90,7 +112,7 @@ export default function AudioPlayer({ attachment, onReady }: IProps) {
 						{playing ? <PauseIcon /> : <PlayIcon />}
 					</Button>
 				</Skeleton>
-				<Skeleton isLoaded={isReady} className="h-[8px] mt-1 rounded">
+				<Skeleton isLoaded={isReady} className="h-[8px] rounded">
 					<p className="text-small">
 						{format_audio_duration(duration)}
 					</p>

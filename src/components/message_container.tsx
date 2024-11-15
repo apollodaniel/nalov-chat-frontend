@@ -51,7 +51,7 @@ function MessageContainer({
 						className={`flex flex-column justify-center max-w-[80%] max-md:max-w-full h-auto p-0 ${chat_id === msg.sender_id ? 'self-start' : 'self-end'} `}
 					>
 						<Card
-							className={`gap-1 min-h-[50px] px-3 ${msg.attachments.length > 0 ? 'pt-3' : ''} max-w-full ${chat_id === msg.sender_id ? 'align-items-start' : 'align-items-end'}`}
+							className={`min-h-[48px]  max-w-full ${chat_id === msg.sender_id ? 'align-items-start' : 'align-items-end'}`}
 							onContextMenu={(event) => {
 								event.preventDefault();
 
@@ -63,7 +63,9 @@ function MessageContainer({
 								}
 							}}
 						>
-							<div className="flex flex-col gap-2">
+							<div
+								className={`flex flex-col gap-2 ${msg.attachments.length > 0 && !msg.attachments[0].mime_type.startsWith('video') ? 'mt-3' : ''}`}
+							>
 								{msg.attachments.map((attachment) => (
 									<AttachmentContainer
 										key={attachment.id!}
@@ -72,7 +74,7 @@ function MessageContainer({
 								))}
 							</div>
 							<p
-								className={`m-0 max-w-full h-auto mt-auto ${msg.last_modified_date === msg.creation_date ? (msg.attachments.length === 0 ? 'mb-auto' : 'mb-1') : 'mb-0'} ${chat_id === msg.sender_id ? 'align-self-start' : 'align-self-end'} `}
+								className={`m-0 max-w-full h-auto mt-auto mx-3 ${msg.last_modified_date === msg.creation_date ? (msg.content.length === 0 ? 'mb-0' : 'mb-1') : 'mb-0'} ${chat_id === msg.sender_id ? 'align-self-start' : 'align-self-end'} `}
 								style={{
 									textAlign:
 										chat_id === msg.sender_id
@@ -85,7 +87,7 @@ function MessageContainer({
 							</p>
 							{msg.creation_date != msg.last_modified_date && (
 								<p
-									className={`m-0 mx-1 text-[13px] ${chat_id === msg.sender_id ? 'align-self-start' : 'align-self-end'} `}
+									className={`m-0 mx-3 text-[13px]  ${chat_id === msg.sender_id ? 'align-self-start' : 'align-self-end'} mb-1 `}
 								>
 									Edited
 								</p>
