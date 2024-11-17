@@ -37,7 +37,7 @@ export default function AttachmentContainer({ attachment }: IProps) {
 		element = (
 			<Skeleton isLoaded={loaded}>
 				<LazyLoadImage
-					className="w-full h-full px-2 aspect-square rounded-2xl"
+					className="w-full h-full aspect-square rounded-2xl"
 					onLoad={() => setLoaded(true)}
 					onError={(event) => {
 						if (retry > 5) {
@@ -91,7 +91,7 @@ export default function AttachmentContainer({ attachment }: IProps) {
 		);
 	} else if (attachment.preview_path) {
 		element = (
-			<Skeleton className="w-100 flex px-2" isLoaded={loaded}>
+			<Skeleton className="w-100 flex" isLoaded={loaded}>
 				<LazyLoadImage
 					className={`mw-100 rounded-2xl mt-2  ${loaded ? 'd-inline-block' : 'd-none'}`}
 					loading="lazy"

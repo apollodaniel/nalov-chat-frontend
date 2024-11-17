@@ -34,7 +34,6 @@ function MessageContainer({
 		<LazyLoadComponent
 			style={{
 				alignSelf: chat_id === msg.sender_id ? 'start' : 'end',
-
 				minHeight: '40px',
 				minWidth: '150px',
 				maxWidth: '100%',
@@ -51,7 +50,7 @@ function MessageContainer({
 						className={`flex flex-column justify-center max-w-[80%] max-md:max-w-full h-auto p-0 ${chat_id === msg.sender_id ? 'self-start' : 'self-end'} `}
 					>
 						<Card
-							className={`min-h-[48px]  max-w-full ${chat_id === msg.sender_id ? 'align-items-start' : 'align-items-end'}`}
+							className={`min-h-[48px] max-w-full  ${chat_id === msg.sender_id ? 'align-items-start' : 'align-items-end'}`}
 							onContextMenu={(event) => {
 								event.preventDefault();
 
@@ -64,7 +63,7 @@ function MessageContainer({
 							}}
 						>
 							<div
-								className={`flex flex-col gap-2 ${msg.attachments.length > 0 && !msg.attachments[0].mime_type.startsWith('video') ? 'mt-3' : ''}`}
+								className={`flex flex-col gap-2 ${msg.attachments.length == 1 && msg.attachments[0].mime_type.startsWith('video') && msg.content.length == 0 ? 'p-0' : 'p-2'}`}
 							>
 								{msg.attachments.map((attachment) => (
 									<AttachmentContainer
