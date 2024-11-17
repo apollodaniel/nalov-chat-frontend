@@ -256,9 +256,9 @@ function Chat() {
 						}}
 					/>
 				</div>
-				<div className="w-full h-full rounded-2xl border bg-background bg-opacity-25 overflow-hidden">
+				<div className="w-full h-full rounded-2xl border bg-background bg-opacity-25 overflow-hidden chat-container">
 					<div
-						className="h-full w-full flex flex-col-reverse"
+						className="h-full w-full flex flex-col-reverse chat-scrollable-container"
 						style={{
 							overflowY: 'auto',
 						}}
@@ -268,7 +268,7 @@ function Chat() {
 							else setShowBottomArrowButton(false);
 						}}
 					>
-						<div className="flex flex-col gap-2 p-4">
+						<div className="flex flex-col gap-2 p-4 ">
 							{[
 								...messages.map((msg) => {
 									return (

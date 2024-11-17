@@ -11,6 +11,7 @@ import {
 	Skeleton,
 } from '@nextui-org/react';
 import { useRef, useState } from 'react';
+import { getOffsetTop } from '@mui/material';
 
 interface IProps {
 	msg: Message;
@@ -29,7 +30,7 @@ function MessageContainer({
 }: IProps) {
 	const [contextMenuOpened, setContextMenuOpened] = useState(false);
 
-	const messageRef = useRef(null);
+	const messageRef = useRef<HTMLDivElement>(null);
 	return (
 		<LazyLoadComponent
 			style={{
@@ -51,13 +52,42 @@ function MessageContainer({
 					>
 						<Card
 							className={`min-h-[48px] max-w-full  ${chat_id === msg.sender_id ? 'align-items-start' : 'align-items-end'}`}
+							ref={messageRef}
 							onContextMenu={(event) => {
 								event.preventDefault();
 
 								if (messageRef.current) {
-									(
-										messageRef.current as Element
-									).scrollIntoView({ behavior: 'instant' });
+									console.log(messageRef.current.offsetTop);
+									console.log(
+										Math.floor(
+											messageRef.current.offsetTop +
+												messageRef.current.getBoundingClientRect()
+													.height /
+													2,
+										),
+									);
+									const messageElementSize =
+										messageRef.current.getBoundingClientRect()
+											.height;
+									const elementPos =
+										messageElementSize +
+										messageRef.current.offsetTop;
+									const scrollableContainer =
+										document.getElementsByClassName(
+											'chat-scrollable-container',
+										)[0];
+									const chatContainer =
+										document.getElementsByClassName(
+											'chat-container',
+										)[0];
+									scrollableContainer.scrollTo({
+										behavior: 'instant',
+										top:
+											Math.floor(elementPos) -
+											chatContainer.getBoundingClientRect()
+												.height /
+												2,
+									});
 									setContextMenuOpened(true);
 								}
 							}}
@@ -98,7 +128,6 @@ function MessageContainer({
 						>
 							{SHORT_DATETIME_FORMATTER.format(msg.creation_date)}
 						</p>
-						<div ref={messageRef}></div>
 					</div>
 				</DropdownTrigger>
 				<DropdownMenu

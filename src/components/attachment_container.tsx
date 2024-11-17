@@ -15,11 +15,11 @@ interface IProps {
 
 export default function AttachmentContainer({ attachment }: IProps) {
 	const [retry, setRetry] = useState(0);
-	function FilenameElement(obj: { loaded?: boolean }) {
+	function FilenameElement({ loaded = false }: { loaded?: boolean }) {
 		return (
 			<small
 				style={{ fontSize: '12px' }}
-				className={`ms-auto ${obj.loaded ? 'd-none' : 'd-inline-block mt-1 me-2'}`}
+				className={`ms-auto ${loaded ? 'd-none' : 'd-inline-block mt-1 me-2'}`}
 			>
 				{' '}
 				{attachment.filename}
@@ -35,7 +35,7 @@ export default function AttachmentContainer({ attachment }: IProps) {
 
 	if (attachment.mime_type.startsWith('image')) {
 		element = (
-			<Skeleton isLoaded={loaded}>
+			<Skeleton className="w-100 flex flex-col" isLoaded={loaded}>
 				<LazyLoadImage
 					className="w-full h-full aspect-square rounded-2xl"
 					onLoad={() => setLoaded(true)}
@@ -53,15 +53,17 @@ export default function AttachmentContainer({ attachment }: IProps) {
 					src={_get_current_host(attachment.path!)}
 					alt=""
 				/>
+				<FilenameElement />
 			</Skeleton>
 		);
 	} else if (attachment.mime_type.startsWith('video')) {
 		element = (
-			<Skeleton isLoaded={loaded}>
+			<Skeleton isLoaded={loaded} className="w-full flex flex-col">
 				<VideoPlayer
 					attachment={attachment}
 					onReady={() => setLoaded(true)}
 				/>
+				<FilenameElement />
 			</Skeleton>
 		);
 	} else if (attachment.mime_type.startsWith('audio')) {
@@ -91,11 +93,11 @@ export default function AttachmentContainer({ attachment }: IProps) {
 		);
 	} else if (attachment.preview_path) {
 		element = (
-			<Skeleton className="w-100 flex" isLoaded={loaded}>
+			<Skeleton className="w-100 flex flex-col" isLoaded={loaded}>
 				<LazyLoadImage
-					className={`mw-100 rounded-2xl mt-2  ${loaded ? 'd-inline-block' : 'd-none'}`}
-					loading="lazy"
-					onError={() => {
+					className="w-full h-full aspect-square rounded-2xl"
+					onLoad={() => setLoaded(true)}
+					onError={(event) => {
 						if (retry > 5) {
 							setLoaded(false);
 						} else {
@@ -104,17 +106,12 @@ export default function AttachmentContainer({ attachment }: IProps) {
 							}, 2000);
 						}
 					}}
-					style={{
-						objectFit: 'cover',
-						objectPosition: '0% 0%',
-						maxHeight: '150px',
-						minWidth: '240px',
-					}}
-					onLoad={() => setLoaded(true)}
-					src={_get_current_host(attachment.preview_path)}
+					loading="lazy"
+					style={{ objectFit: 'cover' }}
+					src={_get_current_host(attachment.preview_path!)}
 					alt=""
 				/>
-				<FilenameElement loaded={loaded} />
+				<FilenameElement />
 			</Skeleton>
 		);
 	}
