@@ -6,30 +6,25 @@ import {
 } from '../utils/functions/functions';
 import { useEffect, useRef, useState } from 'react';
 import { OnProgressProps } from 'react-player/base';
-import {
-	Button,
-	Card,
-	CardFooter,
-	CardHeader,
-	Modal,
-	ModalContent,
-	Slider,
-} from '@nextui-org/react';
+import { Button, Card, CardFooter, Slider } from '@nextui-org/react';
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import PauseIcon from '@mui/icons-material/Pause';
 import PlayIcon from '@mui/icons-material/PlayArrow';
 import Skeleton from './Skeleton';
-import ForwardIcon from '@mui/icons-material/Forward5';
-import ReplayIcon from '@mui/icons-material/Replay5';
 import Replay5 from '@mui/icons-material/Replay5';
 import Forward5 from '@mui/icons-material/Forward5';
 
 interface IProps {
 	attachment: Attachment;
 	onReady: () => void;
+	isPreviewOnly?: boolean;
 }
 
-export default function VideoPlayer({ attachment, onReady }: IProps) {
+export default function VideoPlayer({
+	attachment,
+	onReady,
+	isPreviewOnly = false,
+}: IProps) {
 	const [playing, setPlaying] = useState(false);
 	const [duration, setDuration] = useState(0);
 	const [progress, setProgress] = useState<OnProgressProps>({
@@ -44,7 +39,6 @@ export default function VideoPlayer({ attachment, onReady }: IProps) {
 
 	const [seeking, setSeeking] = useState(false);
 
-	const [showPlayPauseIcon, setShowPlayPauseIcon] = useState(false);
 	useEffect(() => setPosition(progress.playedSeconds), [progress]);
 	const [playbackRate, setPlaybackRate] = useState(1);
 
@@ -62,10 +56,10 @@ export default function VideoPlayer({ attachment, onReady }: IProps) {
 	return (
 		<Card
 			ref={playerWrapperRef}
-			className={`p-0 max-h-full rounded-2xl ${!showPlayPauseIcon ? '[&>.overlay]:hover:opacity-100' : ''} [&>.overlay]:opacity-0`}
+			className={`p-0 max-h-full ${isPreviewOnly ? 'rounded-none' : 'rounded-2xl'} [&>.overlay]:hover:opacity-100 [&>.overlay]:opacity-0 bg-background`}
 			isFooterBlurred
 		>
-			<div className="w-full h-full aspect-video *:*:!rounded">
+			<div className="w-full h-full aspect-square *:*:!rounded">
 				<ReactPlayer
 					ref={playerRef}
 					url={get_current_host(attachment.path)}
@@ -89,7 +83,7 @@ export default function VideoPlayer({ attachment, onReady }: IProps) {
 			</div>
 
 			<CardFooter
-				className={`overlay flex flex-col absolute z-10 bottom-0 gap-1 p-0 py-1 px-2 bg-background bg-opacity-75 transition ease-in-out ${showPlayPauseIcon ? 'opacity-0' : ''}`}
+				className={`overlay ${isPreviewOnly ? 'hidden' : 'flex flex-col'}  absolute z-10 bottom-0 gap-1 p-0 py-1 px-2 bg-background bg-opacity-75 transition ease-in-out`}
 				onClick={(event) => {
 					event.preventDefault();
 					event.stopPropagation();

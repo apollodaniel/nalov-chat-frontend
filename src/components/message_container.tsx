@@ -12,6 +12,7 @@ import {
 } from '@nextui-org/react';
 import { useRef, useState } from 'react';
 import { getOffsetTop } from '@mui/material';
+import AttachmentGroup from './attachment_group';
 
 interface IProps {
 	msg: Message;
@@ -31,6 +32,12 @@ function MessageContainer({
 	const [contextMenuOpened, setContextMenuOpened] = useState(false);
 
 	const messageRef = useRef<HTMLDivElement>(null);
+	const isCompactedView =
+		msg.attachments.filter(
+			(att) =>
+				att.mime_type.startsWith('video') ||
+				att.mime_type.startsWith('image'),
+		).length > 3;
 	return (
 		<LazyLoadComponent
 			style={{
@@ -92,18 +99,60 @@ function MessageContainer({
 								}
 							}}
 						>
-							<div
-								className={`flex flex-col gap-2 ${msg.attachments.length == 1 && msg.attachments[0].mime_type.startsWith('video') && msg.content.length == 0 ? 'p-0' : 'p-2'}`}
-							>
-								{msg.attachments.map((attachment) => (
-									<AttachmentContainer
-										key={attachment.id!}
-										attachment={attachment}
+							<div className={`flex flex-col gap-2 p-2`}>
+								{isCompactedView && (
+									<AttachmentGroup
+										attachments={msg.attachments.filter(
+											(att) =>
+												att.mime_type.startsWith(
+													'video',
+												) ||
+												att.mime_type.startsWith(
+													'image',
+												),
+										)}
 									/>
-								))}
+								)}
+								{isCompactedView
+									? msg.attachments
+											.filter(
+												(att) =>
+													!att.mime_type.startsWith(
+														'video',
+													) &&
+													!att.mime_type.startsWith(
+														'image',
+													),
+											)
+											.map((attachment) => (
+												<AttachmentContainer
+													key={attachment.id!}
+													attachment={attachment}
+												/>
+											))
+									: msg.attachments
+											.sort((att) => {
+												if (
+													att.mime_type.startsWith(
+														'video',
+													) ||
+													att.mime_type.startsWith(
+														'image',
+													)
+												) {
+													return -1;
+												}
+												return 1;
+											})
+											.map((attachment) => (
+												<AttachmentContainer
+													key={attachment.id!}
+													attachment={attachment}
+												/>
+											))}
 							</div>
 							<p
-								className={`m-0 max-w-full h-auto mt-auto mx-3 ${msg.last_modified_date === msg.creation_date ? (msg.content.length === 0 ? 'mb-0' : 'mb-1') : 'mb-0'} ${chat_id === msg.sender_id ? 'align-self-start' : 'align-self-end'} `}
+								className={`m-0 max-w-full h-full px-3 ${msg.last_modified_date === msg.creation_date ? 'pb-3' : 'pb-0'} ${chat_id === msg.sender_id ? 'align-self-start' : 'align-self-end'} `}
 								style={{
 									textAlign:
 										chat_id === msg.sender_id

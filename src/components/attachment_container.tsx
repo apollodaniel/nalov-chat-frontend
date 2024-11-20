@@ -11,9 +11,13 @@ import VideoPlayer from './video_player';
 
 interface IProps {
 	attachment: Attachment;
+	isPreviewOnly?: boolean;
 }
 
-export default function AttachmentContainer({ attachment }: IProps) {
+export default function AttachmentContainer({
+	attachment,
+	isPreviewOnly = false,
+}: IProps) {
 	const [retry, setRetry] = useState(0);
 	function FilenameElement({ loaded = false }: { loaded?: boolean }) {
 		return (
@@ -37,7 +41,7 @@ export default function AttachmentContainer({ attachment }: IProps) {
 		element = (
 			<Skeleton className="w-100 flex flex-col" isLoaded={loaded}>
 				<LazyLoadImage
-					className="w-full h-full aspect-square rounded-2xl"
+					className={`w-full h-full aspect-square ${isPreviewOnly ? 'rounded-none' : 'rounded-2xl'}`}
 					onLoad={() => setLoaded(true)}
 					onError={(event) => {
 						if (retry > 5) {
@@ -53,7 +57,7 @@ export default function AttachmentContainer({ attachment }: IProps) {
 					src={_get_current_host(attachment.path!)}
 					alt=""
 				/>
-				<FilenameElement />
+				{!isPreviewOnly && <FilenameElement />}
 			</Skeleton>
 		);
 	} else if (attachment.mime_type.startsWith('video')) {
@@ -62,8 +66,9 @@ export default function AttachmentContainer({ attachment }: IProps) {
 				<VideoPlayer
 					attachment={attachment}
 					onReady={() => setLoaded(true)}
+					isPreviewOnly={isPreviewOnly}
 				/>
-				<FilenameElement />
+				{!isPreviewOnly && <FilenameElement />}
 			</Skeleton>
 		);
 	} else if (attachment.mime_type.startsWith('audio')) {
@@ -118,9 +123,7 @@ export default function AttachmentContainer({ attachment }: IProps) {
 
 	return (
 		<div
-			className="w-[300px] h-auto"
-			onMouseOver={() => setHovering(true)}
-			onMouseLeave={() => setHovering(false)}
+			className={`w-[300px] h-auto ${isPreviewOnly ? 'pointer-events-none' : ''}`}
 		>
 			{element}
 		</div>
