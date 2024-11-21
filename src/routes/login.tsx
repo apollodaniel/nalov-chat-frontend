@@ -6,6 +6,10 @@ import { useNavigate } from 'react-router-dom';
 import { login_user } from '../utils/functions/user';
 import { parse_errors } from '../utils/functions/functions';
 import { isAxiosError } from 'axios';
+import { Button, Card, Input, Link } from '@nextui-org/react';
+import LoginIcon from '@mui/icons-material/Login';
+import RevealPassIcon from '@mui/icons-material/Visibility';
+import RevealPassIconOff from '@mui/icons-material/VisibilityOff';
 
 function Login() {
 	const {
@@ -20,14 +24,15 @@ function Login() {
 	);
 
 	const navigate = useNavigate();
+	const [passwordVisible, setPasswordVisible] = useState(false);
 	return (
 		<main className="d-flex flex-column w-100 h-100 justify-content-center align-items-center">
-			<div
-				className="card w-100"
-				style={{ maxWidth: '600px', maxHeight: '800px' }}
+			<Card
+				className="w-100 bg-opacity-40 border rounded-2xl p-3"
+				style={{ maxWidth: '600px', maxHeight: '900px' }}
 			>
 				<form
-					className="d-flex flex-column h-100 w-100 justify-content-center gap-2 p-4"
+					className="flex flex-col h-100 w-100 justify-content-center gap-2 p-4"
 					onSubmit={handleSubmit(async (result: LoginFormSubmit) => {
 						login_user({ ...result })
 							.then((data: any) => {
@@ -56,42 +61,57 @@ function Login() {
 							});
 					})}
 				>
-					<div className="form-floating m-0">
-						<input
-							className="form-control"
-							type="text"
-							{...register('username')}
-						/>
-						<label>Username</label>
-						{errors.username && (
-							<p className="m-0 fs-6 text-danger">
-								{field_errors.unknown_username}
-							</p>
-						)}
-					</div>
-					<div className="form-floating m-0">
-						<input
-							className="form-control"
-							type="password"
-							{...register('password')}
-						/>
-						<label>Password</label>
-						{errors.password && (
-							<p className="m-0 fs-6 text-danger">
-								{field_errors.wrong_password}
-							</p>
-						)}
-					</div>
-					<a href="/register" className="align-self-end link-primary">
-						não tem uma conta? Crie uma!
-					</a>
-					<input
-						className="mt-3 btn btn-primary"
-						type="submit"
-						value="Login"
+					<Input
+						type="text"
+						label="Username"
+						isInvalid={!!errors.username}
+						errorMessage={field_errors.unknown_username}
+						{...register('username')}
 					/>
+
+					<Input
+						type={passwordVisible ? 'text' : 'password'}
+						endContent={
+							<button
+								className="focus:outline-none"
+								type="button"
+								onClick={() =>
+									setPasswordVisible(!passwordVisible)
+								}
+								aria-label="toggle password visibility"
+							>
+								{passwordVisible ? (
+									<RevealPassIcon className="text-2xl text-default-400 pointer-events-none" />
+								) : (
+									<RevealPassIconOff className="text-2xl text-default-400 pointer-events-none" />
+								)}
+							</button>
+						}
+						{...register('password')}
+						label="Password"
+						classNames={{
+							errorMessage: 'm-0 fs-6 text-danger',
+						}}
+						isInvalid={!!errors.password}
+						errorMessage={field_errors.wrong_password}
+					/>
+					<Button
+						variant="solid"
+						className="mt-1 flex flex-row gap-2 h-[48px] text-md"
+						type="submit"
+						color="primary"
+					>
+						Entrar
+						<LoginIcon className="text-lg" />
+					</Button>
+					<Link
+						href="/register"
+						className="align-self-end text-[16px] mt-1"
+					>
+						não tem uma conta? Crie uma!
+					</Link>
 				</form>
-			</div>
+			</Card>
 		</main>
 	);
 }

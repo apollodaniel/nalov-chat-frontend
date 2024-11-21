@@ -1,4 +1,10 @@
-import { Modal } from 'react-bootstrap';
+import {
+	Modal,
+	ModalContent,
+	Button,
+	ModalBody,
+	ModalHeader,
+} from '@nextui-org/react';
 import '../../node_modules/bootstrap/dist/css/bootstrap.min.css';
 import { useState } from 'react';
 import { confirmation_modals, more_actions_modal } from '../utils/constants';
@@ -7,7 +13,6 @@ import { logout_user } from '../utils/functions/user';
 import { NavigateFunction } from 'react-router-dom';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import SettingsIcon from '@mui/icons-material/Settings';
-import CloseIcon from '@mui/icons-material/Close';
 
 interface IProps {
 	show: boolean;
@@ -20,29 +25,41 @@ function HomeTreeDotsPopup({ show, navigate, onCancel }: IProps) {
 
 	return (
 		<div>
-			<Modal show={show} size="sm">
-				<Modal.Body className="d-flex flex-column align-items-center justify-content-center gap-2">
-					<button
-						className="btn btn-close align-self-end mb-3"
-						onClick={() => onCancel()}
-					></button>
-					<button
-						className="btn btn-secondary d-flex flex-row gap-2 align-items-center justify-content-center w-100"
-						onClick={() => navigate('/config')}
-					>
-						{more_actions_modal.content.open_config_button}{' '}
-						<SettingsIcon />
-					</button>
-					<button
-						className="btn btn-danger d-flex flex-row gap-2 align-items-center justify-content-center w-100"
-						onClick={() => {
-							setLogoutPopupVisible(true);
-						}}
-					>
-						{more_actions_modal.content.logout_button}
-						<ExitToAppIcon />
-					</button>
-				</Modal.Body>
+			<Modal
+				isOpen={show}
+				backdrop="blur"
+				isDismissable
+				size="sm"
+				onClose={onCancel}
+				className="dark"
+			>
+				<ModalContent>
+					<ModalHeader>
+						<h2>Mais opções</h2>
+					</ModalHeader>
+					<ModalBody className="flex flex-col items-center justify-center gap-2 ">
+						<Button
+							className="flex flex-row gap-2 items-center justify-center w-100"
+							variant="flat"
+							color="default"
+							onClick={() => navigate('/config')}
+						>
+							{more_actions_modal.content.open_config_button}{' '}
+							<SettingsIcon />
+						</Button>
+						<Button
+							className="flex flex-row gap-2 items-center justify-center w-100"
+							onClick={() => {
+								setLogoutPopupVisible(true);
+							}}
+							variant="flat"
+							color="danger"
+						>
+							{more_actions_modal.content.logout_button}
+							<ExitToAppIcon />
+						</Button>
+					</ModalBody>
+				</ModalContent>
 			</Modal>
 			<ConfirmationPopup
 				title={confirmation_modals.logout.title}

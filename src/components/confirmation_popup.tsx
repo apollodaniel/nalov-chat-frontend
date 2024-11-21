@@ -1,35 +1,53 @@
-import { Button, Modal } from "react-bootstrap";
+import {
+	Button,
+	Modal,
+	ModalFooter,
+	ModalHeader,
+	ModalBody,
+	ModalContent,
+} from '@nextui-org/react';
 
-interface Props{
-	onConfirm: ()=>void,
-	onCancel: ()=>void,
-	visible: boolean,
-	title: string,
-	content: string
+interface Props {
+	onConfirm: () => void;
+	onCancel: () => void;
+	visible: boolean;
+	title: string;
+	content: string;
 }
 
-function ConfirmationPopup({title, content, visible, onConfirm, onCancel}: Props){
+function ConfirmationPopup({
+	title,
+	content,
+	visible,
+	onConfirm,
+	onCancel,
+}: Props) {
 	return (
-			<Modal
-				size="sm"
-				centered={true}
-				show={visible}
-			>
-				<Modal.Header>
-					<Modal.Title>{title}</Modal.Title>
-				</Modal.Header>
-				<Modal.Body>
-					<p style={{textWrap: "wrap"}}>{content}</p>
-				</Modal.Body>
-				<Modal.Footer>
-					<Button onClick={onCancel} variant="secondary">
+		<Modal
+			isOpen={visible}
+			backdrop="blur"
+			isDismissable
+			size="sm"
+			onClose={onCancel}
+			className="dark"
+		>
+			<ModalContent>
+				<ModalHeader>
+					<h2>{title}</h2>
+				</ModalHeader>
+				<ModalBody className="flex flex-col items-center justify-center gap-2 ">
+					<p style={{ textWrap: 'wrap' }}>{content}</p>
+				</ModalBody>
+				<ModalFooter>
+					<Button onClick={onCancel} color="default" variant="flat">
 						Cancelar
 					</Button>
-					<Button onClick={onConfirm} variant="danger">
+					<Button onClick={onConfirm} color="danger" variant="flat">
 						Confirmar
 					</Button>
-				</Modal.Footer>
-			</Modal>
+				</ModalFooter>
+			</ModalContent>
+		</Modal>
 	);
 }
 

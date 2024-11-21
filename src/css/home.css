@@ -1,10 +1,4 @@
-@media (width > 600px){
-	#more-actions-button{
-		white-space: nowrap;
-	}
-}
-
-#home-container{
+#home-container {
 	padding: 0px 0px;
 	min-height: 60vh;
 	max-height: 90vh;
