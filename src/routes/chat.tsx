@@ -28,6 +28,7 @@ import {
 import NormalMessageInput from '../components/message_input/normal';
 import RecordAudioInput from '../components/message_input/record_audio';
 import EditMessageInput from '../components/message_input/edit';
+import AttachmentDownloadPopup from '../components/attachment_download';
 
 function Chat() {
 	const [messages, setMessages] = useState<Message[]>([]);
@@ -53,6 +54,10 @@ function Chat() {
 	const [showMessageDeletePopup, setShowMessageDeletePopup] = useState<
 		Message | undefined
 	>(undefined);
+	const [
+		showMessageAttachmentDownloadPopup,
+		setShowMessageAttachmentDownloadPopup,
+	] = useState<Message | undefined>(undefined);
 
 	const getMessages = async () => {
 		try {
@@ -281,6 +286,11 @@ function Chat() {
 											onDelete={(msg) => {
 												setShowMessageDeletePopup(msg);
 											}}
+											onDownloadAttachment={(msg) => {
+												setShowMessageAttachmentDownloadPopup(
+													msg,
+												);
+											}}
 											onEdit={(msg) => {
 												setEditingMessage(msg);
 												setSendMessageContent(
@@ -409,6 +419,19 @@ function Chat() {
 				</ModalContent>
 			</Modal>
 
+			<AttachmentDownloadPopup
+				attachments={
+					showMessageAttachmentDownloadPopup
+						? showMessageAttachmentDownloadPopup.attachments
+						: []
+				}
+				isOpen={
+					!Object.is(showMessageAttachmentDownloadPopup, undefined)
+				}
+				onOpenChange={(open) =>
+					!open && setShowMessageAttachmentDownloadPopup(undefined)
+				}
+			/>
 			<Modal
 				isOpen={!!showMessageInfoPopup}
 				className="dark"

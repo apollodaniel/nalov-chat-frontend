@@ -7,10 +7,8 @@ import {
 } from '@nextui-org/react';
 import { Attachment } from '../utils/types';
 import AttachmentContainer from './attachment_container';
-import { ReactElement, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import Carousel from './carousel';
-import CarouselArrow from './carousel_arrow';
-import { ModalTitle } from 'react-bootstrap';
 
 interface IProps {
 	attachments: Attachment[];
@@ -53,17 +51,18 @@ export default function AttachmentGroup({ attachments }: IProps) {
 			<Modal
 				isOpen={isFocused}
 				onOpenChange={(open) => setIsFocused(open)}
-				className="aspect-square"
 				placement="center"
 				size="lg"
 			>
-				<ModalContent className="flex flex-col px-5">
+				<ModalContent>
 					<ModalHeader>
-						<ModalTitle className="text-ellipsis w-full whitespace-nowrap overflow-hidden me-3">
+						<h1 className="text-ellipsis w-full whitespace-nowrap overflow-hidden me-3">
 							{attachments.length} Anexos
-						</ModalTitle>
+						</h1>
 					</ModalHeader>
-					<Carousel attachments={attachments} />
+					<ModalBody>
+						<Carousel attachments={attachments} />
+					</ModalBody>
 				</ModalContent>
 			</Modal>
 		</div>

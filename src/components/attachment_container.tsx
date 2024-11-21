@@ -100,7 +100,7 @@ export default function AttachmentContainer({
 		element = (
 			<Skeleton className="w-100 flex flex-col" isLoaded={loaded}>
 				<LazyLoadImage
-					className="w-full h-full aspect-square rounded-2xl"
+					className={`w-full h-full aspect-square ${isPreviewOnly ? 'rounded-none' : 'rounded-2xl'}`}
 					onLoad={() => setLoaded(true)}
 					onError={(event) => {
 						if (retry > 5) {

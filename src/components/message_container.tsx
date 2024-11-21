@@ -20,6 +20,7 @@ interface IProps {
 	onEdit: (msg: Message) => void;
 	onDelete: (msg: Message) => void;
 	onShowInfo: (msg: Message) => void;
+	onDownloadAttachment: (msg: Message) => void;
 }
 
 function MessageContainer({
@@ -28,6 +29,7 @@ function MessageContainer({
 	onEdit,
 	onDelete,
 	onShowInfo,
+	onDownloadAttachment,
 }: IProps) {
 	const [contextMenuOpened, setContextMenuOpened] = useState(false);
 
@@ -109,6 +111,9 @@ function MessageContainer({
 												) ||
 												att.mime_type.startsWith(
 													'image',
+												) ||
+												att.mime_type.startsWith(
+													'application/pdf',
 												),
 										)}
 									/>
@@ -122,6 +127,9 @@ function MessageContainer({
 													) &&
 													!att.mime_type.startsWith(
 														'image',
+													) &&
+													!att.mime_type.startsWith(
+														'application/pdf',
 													),
 											)
 											.map((attachment) => (
@@ -138,6 +146,9 @@ function MessageContainer({
 													) ||
 													att.mime_type.startsWith(
 														'image',
+													) ||
+													att.mime_type.startsWith(
+														'application/pdf',
 													)
 												) {
 													return -1;
@@ -192,6 +203,9 @@ function MessageContainer({
 							case 'info':
 								onShowInfo(msg);
 								break;
+							case 'download':
+								onDownloadAttachment(msg);
+								break;
 						}
 						setContextMenuOpened(false);
 					}}
@@ -203,6 +217,12 @@ function MessageContainer({
 						Editar mensagem
 					</DropdownItem>
 					<DropdownItem key="info">Mais informações</DropdownItem>
+					<DropdownItem
+						key="download"
+						isDisabled={msg.attachments.length == 0}
+					>
+						Baixar anexos
+					</DropdownItem>
 					<DropdownItem
 						key="delete"
 						isDisabled={msg.sender_id == chat_id}
