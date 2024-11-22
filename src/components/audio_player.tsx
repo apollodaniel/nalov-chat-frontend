@@ -13,10 +13,17 @@ import Skeleton from './Skeleton';
 
 interface IProps {
 	attachment: Attachment;
+	url: string;
 	onReady: () => void;
+	onError: () => void;
 }
 
-export default function AudioPlayer({ attachment, onReady }: IProps) {
+export default function AudioPlayer({
+	attachment,
+	url,
+	onReady,
+	onError,
+}: IProps) {
 	const [playing, setPlaying] = useState(false);
 	const [duration, setDuration] = useState(0);
 	const [progress, setProgress] = useState<OnProgressProps>({
@@ -37,12 +44,13 @@ export default function AudioPlayer({ attachment, onReady }: IProps) {
 			<ReactPlayer
 				ref={playerRef}
 				height={0}
-				url={get_current_host(attachment.path)}
+				url={url}
 				playing={playing}
 				onReady={() => {
 					onReady();
 					setIsReady(true);
 				}}
+				onError={onError}
 				onPlay={() => setPlaying(true)}
 				onEnded={() => setPlaying(false)}
 				onDuration={(duration) => setDuration(duration)}

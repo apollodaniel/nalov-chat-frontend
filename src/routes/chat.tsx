@@ -11,8 +11,17 @@ import {
 	patch_message,
 	send_message,
 } from '../utils/functions/chat';
-import { DATETIME_FORMATTER, EVENT_EMITTER } from '../utils/constants';
-import { get_current_host, upload_files } from '../utils/functions/functions';
+import {
+	DATETIME_FORMATTER,
+	EVENT_EMITTER,
+	EVENT_ERROR_EMITTER,
+	toast_error_messages,
+} from '../utils/constants';
+import {
+	convert_audio,
+	get_current_host,
+	upload_files,
+} from '../utils/functions/functions';
 import MessageContainer from '../components/message_container';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -40,7 +49,7 @@ function Chat() {
 
 	const [showBottomArrowButton, setShowBottomArrowButton] = useState(false);
 
-	const bottomRef = useRef(null);
+	const bottomRef = useRef<HTMLDivElement>(null);
 	const filePickerRef = useRef(null);
 	const [selectedAttachments, setSelectedAttachments] = useState<File[]>([]);
 
@@ -125,8 +134,9 @@ function Chat() {
 	const cancelAudio = useRef(false);
 	const chunks = useRef<Blob[]>([]);
 	const time_interval = useRef<NodeJS.Timeout>();
-	const recordedAudioMimeType = useRef<string | undefined>(undefined);
+	//const recordedAudioMimeType = useRef<string | undefined>(undefined);
 	const recordAudio = async () => {
+		const mimeType = 'audio/wav';
 		try {
 			const stream = await navigator.mediaDevices.getUserMedia({
 				audio: true,
@@ -138,59 +148,73 @@ function Chat() {
 					1000,
 				);
 			};
+
 			mediaRecorder.current.ondataavailable = (blob_event: BlobEvent) => {
-				if (!recordedAudioMimeType.current) {
-					recordedAudioMimeType.current = blob_event.data.type;
-				}
-				if (blob_event.data.size > 0)
-					chunks.current.push(blob_event.data);
+				//if (!recordedAudioMimeType.current) {
+				//	recordedAudioMimeType.current = blob_event.data.type;
+				//}
+				chunks.current.push(blob_event.data);
 			};
 
 			mediaRecorder.current.onstop = async () => {
 				clearInterval(time_interval.current);
 				setRecording(undefined);
-				mediaRecorder.current = undefined;
 
 				if (cancelAudio.current) {
 					chunks.current = [];
 					cancelAudio.current = false;
-					recordedAudioMimeType.current = undefined;
+					//recordedAudioMimeType.current = undefined;
+					mediaRecorder.current = undefined;
 					return;
 				}
 
-				const audio_file = new File(
+				let audio_file = new File(
 					chunks.current,
-					'audio_record.weba',
+					`${new Date(Date.now()).toLocaleDateString(navigator.languages[0])}.weba`,
 					{
-						type: recordedAudioMimeType.current,
+						type: mediaRecorder.current?.mimeType,
 					},
 				);
-				const result = await send_message({
-					content: '',
-					attachments: [
-						{
-							filename: audio_file.name,
-							byte_length: audio_file.size,
-							mime_type: audio_file.type,
-						},
-					],
-					receiver_id: params['id']!,
-				});
+				convert_audio(
+					audio_file,
+					async (file) => {
+						const result = await send_message({
+							content: '',
+							attachments: [
+								{
+									filename: file.name,
+									byte_length: file.size,
+									mime_type: file.type,
+								},
+							],
+							receiver_id: params['id']!,
+						});
 
-				if (result && result.message_id) {
-					await upload_files([audio_file], result.message_id);
-				}
+						if (result && result.message_id) {
+							await upload_files([file], result.message_id);
+						}
+					},
+
+					() => {
+						EVENT_ERROR_EMITTER.emit(
+							'add-error',
+							toast_error_messages.cannot_send_audio_error,
+						);
+					},
+				);
 
 				chunks.current = [];
-				recordedAudioMimeType.current = undefined;
+				//recordedAudioMimeType.current = undefined;
+				mediaRecorder.current = undefined;
 			};
 
 			mediaRecorder.current.onerror = () => {
 				setRecording(undefined);
 			};
 
-			mediaRecorder.current.start(1000);
+			mediaRecorder.current.start();
 		} catch (err: any) {
+			console.log(err.message);
 			try {
 				clearInterval(time_interval.current);
 			} finally {
@@ -214,18 +238,16 @@ function Chat() {
 			});
 		});
 		EVENT_EMITTER.on('updated-attachments', () => {
-			if (bottomRef.current) {
-				(bottomRef.current as any).scrollIntoView({
-					behavior: 'smooth',
-				});
-			}
+			bottomRef.current?.scrollIntoView({
+				behavior: 'smooth',
+			});
 		});
 	}, []);
 
 	useEffect(() => {
-		if (bottomRef.current && !firstTime.current) {
-			(bottomRef.current as any).scrollIntoView({ behavior: 'smooth' });
-		}
+		bottomRef.current?.scrollIntoView({
+			behavior: 'smooth',
+		});
 	}, [messages]);
 
 	return !user ? (
@@ -251,7 +273,8 @@ function Chat() {
 						avatarProps={{
 							src: get_current_host(user.profile_picture),
 							alt: `${user.name} profile picture`,
-							className: 'h-[70px] max-sm:h-[50px] w-auto m-0',
+							className:
+								'h-[70px] aspect-square max-sm:h-[50px] w-auto m-0',
 						}}
 						name={user.name}
 						description={user.username}
@@ -278,6 +301,7 @@ function Chat() {
 								...messages.map((msg) => {
 									return (
 										<MessageContainer
+											key={msg.id}
 											msg={msg}
 											chat_id={params['id']!}
 											onShowInfo={(msg) => {
@@ -302,6 +326,7 @@ function Chat() {
 								}),
 
 								<div
+									key="bottom-ref"
 									className="h-[8px] w-full"
 									ref={bottomRef}
 								></div>,

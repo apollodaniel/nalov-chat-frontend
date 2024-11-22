@@ -16,13 +16,17 @@ import Forward5 from '@mui/icons-material/Forward5';
 
 interface IProps {
 	attachment: Attachment;
+	url: string;
 	onReady: () => void;
+	onError: () => void;
 	isPreviewOnly?: boolean;
 }
 
 export default function VideoPlayer({
 	attachment,
+	url,
 	onReady,
+	onError,
 	isPreviewOnly = false,
 }: IProps) {
 	const [playing, setPlaying] = useState(false);
@@ -62,12 +66,13 @@ export default function VideoPlayer({
 			<div className="w-full h-full aspect-square *:*:!rounded">
 				<ReactPlayer
 					ref={playerRef}
-					url={get_current_host(attachment.path)}
+					url={url}
 					playing={playing}
 					onReady={() => {
 						onReady();
 						setIsReady(true);
 					}}
+					onError={onError}
 					height={'100%'}
 					width={'100%'}
 					onPlay={() => setPlaying(true)}
