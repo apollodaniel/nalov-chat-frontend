@@ -7,9 +7,36 @@ import {
 	toast_error_messages,
 } from '../constants';
 import { Attachment, BackendError, FieldError, HttpResult } from '../types';
-import { delete_message } from './chat';
 import { get_auth_token, refresh_user_token } from './user';
 import qs from 'qs';
+import { FFmpeg } from '@diffusion-studio/ffmpeg-js';
+
+export async function convert_audio(
+	audio: File,
+	onSuccess: (result: File) => void,
+	onFail: () => void,
+) {
+	const ffmpeg = new FFmpeg({
+		log: true,
+	});
+
+	ffmpeg.whenReady(async () => {
+		try {
+			const data = await ffmpeg
+				.input({ source: audio })
+				.ouput({ format: 'wav' })
+				.export();
+			onSuccess(
+				new File([data!], audio.name.replace('.weba', '.wav'), {
+					type: 'audio/wav',
+				}),
+			);
+		} catch (e: any) {
+			console.log(e.message);
+			onFail();
+		}
+	});
+}
 
 export function format_audio_duration(time: number) {
 	const hours = Math.floor(time / 3600);
@@ -37,12 +64,13 @@ export function get_current_host(args?: string, ws: boolean = false): string {
 		: args?.startsWith('/')
 			? args.substring(1, args.length)
 			: args;
-	const _location = location.substring(0, location.indexOf(ports));
-	return (
-		_location +
-		(ws ? ':8081' : ':8751') +
-		(_location.endsWith('/') ? _args : `/${_args}` || '/')
+	const _location = location.substring(
+		0,
+		location.indexOf(ports) + ports.length - 1,
 	);
+	const result_url = `${_location}/v1/${_args}`;
+	console.log(result_url);
+	return result_url;
 }
 
 export async function get_attachment(path: string): Promise<Blob | null> {
@@ -326,6 +354,12 @@ export async function listenEvents(obj: {
 	const { onData, endpoint, onError, errorMessage, tries, args } = obj;
 
 	const token = await get_auth_token();
+	console.log(
+		get_current_host(
+			`${endpoint}?token=${token}${args ? `&${args}` : ''}`,
+			true,
+		),
+	);
 	let socket = new WebSocket(
 		get_current_host(
 			`${endpoint}?token=${token}${args ? `&${args}` : ''}`,

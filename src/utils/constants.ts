@@ -36,6 +36,8 @@ export const field_errors = {
 };
 
 export const toast_error_messages = {
+	cannot_send_audio_error:
+		'Não foi possível processar seu áudio, tente novamente mais tarde!',
 	send_message_error:
 		'Não foi possível enviar sua mensagem, tente novamente mais tarde!',
 	connection_interrupted:
