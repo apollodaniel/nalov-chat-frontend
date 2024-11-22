@@ -65,7 +65,17 @@ export default function AttachmentContainer({
 			<Skeleton isLoaded={loaded} className="w-full flex flex-col">
 				<VideoPlayer
 					attachment={attachment}
+					url={_get_current_host(attachment.path!)}
 					onReady={() => setLoaded(true)}
+					onError={() => {
+						if (retry > 5) {
+							setLoaded(false);
+						} else {
+							setTimeout(() => {
+								setRetry((prev) => prev + 1); // Increment retry to trigger re-render
+							}, 2000);
+						}
+					}}
 					isPreviewOnly={isPreviewOnly}
 				/>
 				{!isPreviewOnly && <FilenameElement />}
@@ -93,7 +103,17 @@ export default function AttachmentContainer({
 		element = (
 			<AudioPlayer
 				attachment={attachment}
+				url={_get_current_host(attachment.path!)}
 				onReady={() => setLoaded(true)}
+				onError={() => {
+					if (retry > 5) {
+						setLoaded(false);
+					} else {
+						setTimeout(() => {
+							setRetry((prev) => prev + 1); // Increment retry to trigger re-render
+						}, 2000);
+					}
+				}}
 			/>
 		);
 	} else if (attachment.preview_path) {

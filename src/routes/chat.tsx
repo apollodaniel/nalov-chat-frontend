@@ -273,7 +273,8 @@ function Chat() {
 						avatarProps={{
 							src: get_current_host(user.profile_picture),
 							alt: `${user.name} profile picture`,
-							className: 'h-[70px] max-sm:h-[50px] w-auto m-0',
+							className:
+								'h-[70px] aspect-square max-sm:h-[50px] w-auto m-0',
 						}}
 						name={user.name}
 						description={user.username}
