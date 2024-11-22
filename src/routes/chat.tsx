@@ -49,7 +49,7 @@ function Chat() {
 
 	const [showBottomArrowButton, setShowBottomArrowButton] = useState(false);
 
-	const bottomRef = useRef(null);
+	const bottomRef = useRef<HTMLDivElement>(null);
 	const filePickerRef = useRef(null);
 	const [selectedAttachments, setSelectedAttachments] = useState<File[]>([]);
 
@@ -238,18 +238,16 @@ function Chat() {
 			});
 		});
 		EVENT_EMITTER.on('updated-attachments', () => {
-			if (bottomRef.current) {
-				(bottomRef.current as any).scrollIntoView({
-					behavior: 'smooth',
-				});
-			}
+			bottomRef.current?.scrollIntoView({
+				behavior: 'smooth',
+			});
 		});
 	}, []);
 
 	useEffect(() => {
-		if (bottomRef.current && !firstTime.current) {
-			(bottomRef.current as any).scrollIntoView({ behavior: 'smooth' });
-		}
+		bottomRef.current?.scrollIntoView({
+			behavior: 'smooth',
+		});
 	}, [messages]);
 
 	return !user ? (
@@ -302,6 +300,7 @@ function Chat() {
 								...messages.map((msg) => {
 									return (
 										<MessageContainer
+											key={msg.id}
 											msg={msg}
 											chat_id={params['id']!}
 											onShowInfo={(msg) => {
@@ -326,6 +325,7 @@ function Chat() {
 								}),
 
 								<div
+									key="bottom-ref"
 									className="h-[8px] w-full"
 									ref={bottomRef}
 								></div>,

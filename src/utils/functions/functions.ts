@@ -68,9 +68,7 @@ export function get_current_host(args?: string, ws: boolean = false): string {
 		0,
 		location.indexOf(ports) + ports.length - 1,
 	);
-	const result_url = `${_location}/v1/${_args}`;
-	console.log(result_url);
-	return result_url;
+	return `${_location}/v1/${_args}`;
 }
 
 export async function get_attachment(path: string): Promise<Blob | null> {
@@ -354,12 +352,6 @@ export async function listenEvents(obj: {
 	const { onData, endpoint, onError, errorMessage, tries, args } = obj;
 
 	const token = await get_auth_token();
-	console.log(
-		get_current_host(
-			`${endpoint}?token=${token}${args ? `&${args}` : ''}`,
-			true,
-		),
-	);
 	let socket = new WebSocket(
 		get_current_host(
 			`${endpoint}?token=${token}${args ? `&${args}` : ''}`,

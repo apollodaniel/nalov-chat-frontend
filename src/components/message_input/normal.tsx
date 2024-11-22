@@ -111,7 +111,6 @@ export default function NormalMessageInput({
 			{/*large screen view*/}
 			<div className="hidden flex-row gap-1 aspect-[19/9] max-sm:hidden">
 				{/* upload file button */}
-
 				<Dropdown>
 					<DropdownTrigger>
 						<Button
@@ -163,6 +162,7 @@ export default function NormalMessageInput({
 				{inputMessageContent.length > 0
 					? [
 							<Button
+								key={'clear-message'}
 								className="rounded-lg h-full w-full"
 								onClick={() => setInputMessageContent('')}
 								isIconOnly
@@ -172,6 +172,7 @@ export default function NormalMessageInput({
 								<ClearMessageIcon />
 							</Button>,
 							<Button
+								key={'send-message'}
 								className="rounded-lg h-full w-full "
 								onClick={() => sendMessage()}
 								isIconOnly
@@ -183,6 +184,7 @@ export default function NormalMessageInput({
 						]
 					: [
 							<Button
+								key={'pick-file'}
 								className="rounded-lg h-full w-full"
 								onClick={() => filePicker.click()}
 								isIconOnly
@@ -192,6 +194,7 @@ export default function NormalMessageInput({
 								<AttachFileIcon />
 							</Button>,
 							<Button
+								key={'record-audio'}
 								className="rounded-lg h-full w-full"
 								onClick={recordAudio}
 								isIconOnly
