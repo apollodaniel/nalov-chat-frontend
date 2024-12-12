@@ -1,9 +1,6 @@
 import { Attachment, ChatType, Message } from '../Types';
 import { execRequest, listenEvents } from './Functions';
-import {
-	MAXIMUM_TRIES,
-	TOAST_ERROR_MESSAGES as TOAST_ERROR_MESSAGES,
-} from '../Constants';
+import { AllErrors, MAXIMUM_TRIES } from '../Constants';
 
 export const getUserChats = (): Promise<ChatType[]> =>
 	new Promise((r, _rj) =>
@@ -29,7 +26,6 @@ export const sendMessage = (message: {
 		execRequest({
 			endpoint: '/api/messages',
 			method: 'POST',
-			errorMessage: TOAST_ERROR_MESSAGES.SEND_MESSAGE_ERROR,
 			options: { content: message },
 			onSucess: r,
 			onFail: r,
@@ -65,7 +61,6 @@ export async function listenMessages(
 		args: `receiverId=${receiverId}`,
 		onData: callback,
 		tries: MAXIMUM_TRIES,
-		errorMessage: TOAST_ERROR_MESSAGES.LISTEN_MESSAGES_ERROR,
 	});
 }
 
@@ -74,6 +69,5 @@ export async function listenChats(callback: (chats: ChatType[]) => void) {
 		endpoint: '/ws/api/chats/listen',
 		onData: callback,
 		tries: MAXIMUM_TRIES,
-		errorMessage: TOAST_ERROR_MESSAGES.LISTEN_MESSAGES_ERROR,
 	});
 }

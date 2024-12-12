@@ -1,14 +1,19 @@
 import { useEffect, useState } from 'react';
 import { getCurrentUser, refreshUserToken } from '../Utils/Functions/User';
-import { User } from '../Utils/Types';
+import { RegisterFormSubmit, User } from '../Utils/Types';
 import LoadingBar from '../Components/LoadingBar';
 import { getCurrentHost } from '../Utils/Functions/Functions';
 import ProfilePicture from '../Components/ProfilePicture';
 import { useBlocker, useNavigate } from 'react-router-dom';
 import ConfirmationPopup from '../Components/ConfirmationPopup';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { EVENT_ERROR_EMITTER, TOAST_ERROR_MESSAGES } from '../Utils/Constants';
+import {
+	AllErrors,
+	EVENT_ERROR_EMITTER,
+	FIELD_PATTERNS,
+} from '../Utils/Constants';
 import { Button, Input } from '@nextui-org/react';
+import { useForm } from 'react-hook-form';
 
 function ProfileConfig() {
 	const [user, setUser] = useState<User | undefined>();
@@ -23,6 +28,13 @@ function ProfileConfig() {
 
 	let blocker = useBlocker(changed);
 	let navigate = useNavigate();
+
+	const {
+		register,
+		formState: { errors },
+	} = useForm<RegisterFormSubmit>({
+		mode: 'onChange',
+	});
 
 	useEffect(() => {
 		if (user) {
@@ -79,6 +91,7 @@ function ProfileConfig() {
 						onSubmit={async (event) => {
 							event.preventDefault();
 
+							if (errors.name) return;
 							const execRequest = () => {
 								let formData = new FormData();
 								formData.append('userName', name!);
@@ -137,7 +150,9 @@ function ProfileConfig() {
 												.catch(() => {
 													EVENT_ERROR_EMITTER.emit(
 														'add-error',
-														TOAST_ERROR_MESSAGES.CONFIG_SAVE_ERROR,
+														AllErrors[
+															'CONFIG_SAVE_ERROR'
+														].message.ptBr,
 													);
 												});
 										else
@@ -159,13 +174,16 @@ function ProfileConfig() {
 											.catch(() => {
 												EVENT_ERROR_EMITTER.emit(
 													'add-error',
-													TOAST_ERROR_MESSAGES.CONFIG_SAVE_ERROR,
+													AllErrors[
+														'CONFIG_SAVE_ERROR'
+													].message.ptBr,
 												);
 											});
 									} else {
 										EVENT_ERROR_EMITTER.emit(
 											'add-error',
-											TOAST_ERROR_MESSAGES.CONFIG_SAVE_ERROR,
+											AllErrors['CONFIG_SAVE_ERROR']
+												.message.ptBr,
 										);
 									}
 								};
@@ -198,11 +216,20 @@ function ProfileConfig() {
 							type="text"
 							value={name!}
 							maxLength={100}
-							onChange={(event) => {
-								setChanged(true);
-								setName(event.target.value);
-							}}
 							label="Name"
+							isInvalid={!!errors.name}
+							errorMessage={
+								errors.name && errors.name.message
+									? errors.name.message
+									: AllErrors['INVALID_FULLNAME'].message.ptBr
+							}
+							{...register('name', {
+								pattern: FIELD_PATTERNS.name,
+								onChange: (event) => {
+									setChanged(true);
+									setName(event.target.value);
+								},
+							})}
 						/>
 						<Button
 							className="mt-3"

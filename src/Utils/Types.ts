@@ -1,8 +1,3 @@
-import { AxiosResponse } from 'axios';
-import { getAuthToken, refreshUserToken } from './Functions/User';
-import { EVENT_ERROR_EMITTER, TOAST_ERROR_MESSAGES } from './Constants';
-import axios from 'axios';
-
 export type PositionOffset = {
 	offsetLeft: number;
 	offsetTop: number;
@@ -112,6 +107,14 @@ export type FieldError = {
 //};
 //
 // forms
+
+export interface ErrorEntry {
+	code: string;
+	field?: string; // for the case of using it as an field error
+	message: string;
+	statusCode: number;
+}
+
 export type RegisterFormSubmit = {
 	name: string;
 	username: string;

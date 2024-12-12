@@ -1,7 +1,7 @@
 import { Toast } from 'react-bootstrap';
 import { PopupErrorMessages } from '../Utils/Types';
 import { useEffect, useState } from 'react';
-import { EVENT_ERROR_EMITTER, TOAST_ERROR_MESSAGES } from '../Utils/Constants';
+import { AllErrors, EVENT_ERROR_EMITTER } from '../Utils/Constants';
 
 export default function PopupErrorMessage() {
 	const [errorMessages, setErrorMessages] = useState<PopupErrorMessages>([]);
@@ -10,7 +10,7 @@ export default function PopupErrorMessage() {
 		setErrorMessages((prev) => {
 			// only stack same message when the message is send message error, except ignores
 			if (
-				reason !== TOAST_ERROR_MESSAGES.SEND_MESSAGE_ERROR &&
+				reason !== AllErrors['SEND_MESSAGE_ERROR'].message.ptBr &&
 				prev.filter((e) => e[0] === reason).length != 0
 			) {
 				// ignores error message

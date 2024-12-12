@@ -1,13 +1,11 @@
 import { useForm } from 'react-hook-form';
 import {
+	AllErrors,
 	EVENT_ERROR_EMITTER,
-	FIELD_ERRORS,
 	FIELD_PATTERNS,
-	MODAL_ERRORS,
-	TOAST_ERROR_MESSAGES,
 } from '../Utils/Constants';
 import { useState } from 'react';
-import { BackendError, RegisterFormSubmit } from '../Utils/Types';
+import { ErrorEntry, RegisterFormSubmit } from '../Utils/Types';
 import { loginUser, registerUser } from '../Utils/Functions/User';
 import { useNavigate } from 'react-router-dom';
 import { Button, Card, Input, Link } from '@nextui-org/react';
@@ -25,10 +23,6 @@ function Register() {
 	} = useForm<RegisterFormSubmit>({
 		mode: 'onChange',
 	});
-
-	const [usernameErrorMessage, setUsernameErrorMessage] = useState<
-		string | undefined
-	>(undefined);
 	const navigate = useNavigate();
 	const [passwordVisible, setPasswordVisible] = useState(false);
 	return (
@@ -39,24 +33,32 @@ function Register() {
 					onSubmit={handleSubmit(async (data: RegisterFormSubmit) => {
 						try {
 							await registerUser({ ...data });
-							const result = await loginUser({
+							await loginUser({
 								username: data.username,
 								password: data.password,
 							});
 
 							navigate('/');
-						} catch (err: any) {
-							const errors_obj: BackendError[] = err.errors;
-							if (
-								errors_obj.find(
-									(error) => error.path === 'username',
-								)
-							)
-								setError('username', {});
+						} catch (response: any) {
+							const errorsObj = response.errors;
+
+							let containsUsername = errorsObj.find(
+								(e: ErrorEntry) =>
+									e.field?.includes('username') ||
+									e.code.toLowerCase().includes('username'),
+							);
+							if (containsUsername)
+								setError('username', {
+									message:
+										AllErrors[containsUsername.code].message
+											.ptBr,
+								});
 							else
-								EVENT_ERROR_EMITTER.emit(
-									'add-error',
-									TOAST_ERROR_MESSAGES.REGISTER_ERROR,
+								errorsObj.forEach((err: ErrorEntry) =>
+									EVENT_ERROR_EMITTER.emit(
+										'add-error',
+										AllErrors[err.code].message.ptBr,
+									),
 								);
 						}
 					})}
@@ -65,7 +67,11 @@ function Register() {
 						type="text"
 						isInvalid={!!errors.name}
 						label="Nome"
-						errorMessage={FIELD_ERRORS.INVALID_FULLNAME}
+						errorMessage={
+							errors.name && errors.name.message
+								? errors.name.message
+								: AllErrors['INVALID_FULLNAME'].message.ptBr
+						}
 						{...register('name', {
 							pattern: FIELD_PATTERNS.name,
 						})}
@@ -74,7 +80,11 @@ function Register() {
 						type="text"
 						isInvalid={!!errors.username}
 						label="Nome de usuário"
-						errorMessage={FIELD_ERRORS.USERNAME_ALREADY_EXISTS}
+						errorMessage={
+							errors.username && errors.username.message
+								? errors.username.message
+								: AllErrors['INVALID_USERNAME'].message.ptBr
+						}
 						{...register('username', {
 							pattern: FIELD_PATTERNS.username,
 						})}
@@ -99,7 +109,11 @@ function Register() {
 								)}
 							</button>
 						}
-						errorMessage={FIELD_ERRORS.INVALID_PASSWORD}
+						errorMessage={
+							errors.password && errors.password.message
+								? errors.password.message
+								: AllErrors['INVALID_PASSWORD'].message.ptBr
+						}
 						{...register('password', {
 							pattern: FIELD_PATTERNS.password,
 							onChange: () => trigger('confirmPassword'),
@@ -109,11 +123,17 @@ function Register() {
 						type={passwordVisible ? 'text' : 'password'}
 						isInvalid={!!errors.confirmPassword}
 						label="Confirmar Senha"
-						errorMessage={FIELD_ERRORS.PASSWORD_MISMATCH}
+						errorMessage={
+							errors.confirmPassword &&
+							errors.confirmPassword.message
+								? errors.confirmPassword.message
+								: AllErrors['PASSWORD_MISMATCH'].message.ptBr
+						}
 						{...register('confirmPassword', {
 							validate: (val) => {
 								if (watch('password') != val) {
-									return FIELD_ERRORS.PASSWORD_MISMATCH;
+									return AllErrors['PASSWORD_MISMATCH']
+										.message.ptBr;
 								}
 							},
 						})}

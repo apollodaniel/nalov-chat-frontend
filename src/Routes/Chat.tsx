@@ -12,10 +12,10 @@ import {
 	sendMessage,
 } from '../Utils/Functions/Chat';
 import {
+	AllErrors,
 	DATETIME_FORMATTER,
 	EVENT_EMITTER,
 	EVENT_ERROR_EMITTER,
-	TOAST_ERROR_MESSAGES,
 } from '../Utils/Constants';
 import {
 	convertAudio,
@@ -199,7 +199,7 @@ function Chat() {
 					() => {
 						EVENT_ERROR_EMITTER.emit(
 							'add-error',
-							TOAST_ERROR_MESSAGES.CANNOT_SEND_AUDIO_ERROR,
+							AllErrors['CANNOT_SEND_AUDIO_ERROR'].message.ptBr,
 						);
 					},
 				);

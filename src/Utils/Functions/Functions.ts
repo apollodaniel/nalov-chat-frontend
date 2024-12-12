@@ -1,11 +1,11 @@
 import {
+	AllErrors,
 	EVENT_EMITTER,
 	EVENT_ERROR_EMITTER,
 	RETRY_CONNECTION_TIMEOUT,
 	SHORT_TIME_FORMATTER,
-	TOAST_ERROR_MESSAGES,
 } from '../Constants';
-import { Attachment, BackendError, FieldError } from '../Types';
+import { Attachment, BackendError, ErrorEntry, FieldError } from '../Types';
 import { getAuthToken, refreshUserToken } from './User';
 import qs from 'qs';
 import { FFmpeg } from '@diffusion-studio/ffmpeg-js';
@@ -233,21 +233,13 @@ export async function uploadFiles(files: File[], messageId: string) {
 export async function execRequest(obj: {
 	endpoint: string;
 	method: 'POST' | 'DELETE' | 'PATCH' | 'GET' | 'PUT';
-	errorMessage?: string;
 	blob?: boolean;
 	onSucess: (data: any | Blob) => void;
 	options?: { content?: any; headers?: any };
 	customAuth?: string | null;
 	onFail?: (response: Response | undefined) => void;
 }): Promise<void> {
-	const {
-		endpoint,
-		blob = false,
-		method,
-		errorMessage,
-		onSucess,
-		onFail,
-	} = obj;
+	const { endpoint, blob = false, method, onSucess, onFail } = obj;
 
 	let url = getCurrentHost(endpoint);
 
@@ -281,16 +273,46 @@ export async function execRequest(obj: {
 			},
 			credentials: 'include',
 		});
+
+		// get json response if it's a json
 		const responseContent = await response.text();
-		let result;
+		let jsonResponse;
 		try {
-			result = JSON.parse(responseContent);
+			jsonResponse = JSON.parse(responseContent);
 		} catch (err) {}
+
+		// --- display errors on screen if errors is not field related
+		if (
+			jsonResponse &&
+			jsonResponse.error?.code &&
+			!jsonResponse.error?.field
+		) {
+			// single error
+			EVENT_ERROR_EMITTER.emit(
+				'add-error',
+				AllErrors[jsonResponse.error.code]?.message.ptBr ||
+					AllErrors['UNKNOWN_ERROR'].message.ptBr,
+			);
+		} else if (
+			jsonResponse &&
+			jsonResponse.errors instanceof Array &&
+			jsonResponse.errors.every((err: any) => err.code && !err.field)
+		) {
+			// multiple errors
+			jsonResponse.errors.forEach((err: ErrorEntry) => {
+				EVENT_ERROR_EMITTER.emit(
+					'add-error',
+					AllErrors[err.code]?.message.ptBr ||
+						AllErrors['UNKNOWN_ERROR'].message.ptBr,
+				);
+			});
+		}
+		// --- end of displaying errors
 
 		if (response.status >= 200 && response.status < 300) {
 			if (
-				!result ||
-				typeof result !== 'object' ||
+				!jsonResponse ||
+				typeof jsonResponse !== 'object' ||
 				responseContent.trim().length === 0
 			)
 				return onSucess(undefined);
@@ -304,30 +326,26 @@ export async function execRequest(obj: {
 			window.open(`${window.location.protocol}/login`, '_self');
 			if (onFail) onFail(response);
 		} else if (response.status === 401) {
-			if (errorMessage)
-				EVENT_ERROR_EMITTER.emit('add-error', errorMessage);
-
 			if (
-				result &&
-				typeof result === 'object' &&
-				result.error === 'no active session'
+				jsonResponse &&
+				typeof jsonResponse === 'object' &&
+				jsonResponse.error === 'no active session'
 			) {
 				window.open(window.location.href, '_self');
 			}
 
-			if (onFail && result && typeof result === 'object') onFail(result);
+			if (onFail && jsonResponse && typeof jsonResponse === 'object')
+				onFail(jsonResponse);
 			if (onFail) onFail(response);
 		} else {
-			console.log(response);
-			console.log('Got unknown error');
-
-			if (errorMessage)
-				EVENT_ERROR_EMITTER.emit('add-error', errorMessage);
-			if (onFail && result && typeof result === 'object') onFail(result);
+			if (onFail && jsonResponse && typeof jsonResponse === 'object')
+				onFail(jsonResponse);
 		}
 	} catch (err: any) {
-		console.log(`Got unknown error: ${err.message}`);
-		if (errorMessage) EVENT_ERROR_EMITTER.emit('add-error', errorMessage);
+		EVENT_ERROR_EMITTER.emit(
+			'add-error',
+			AllErrors['UNKNOWN_ERROR'].message.ptBr,
+		);
 		if (onFail) onFail(undefined);
 	}
 }
@@ -402,7 +420,7 @@ export async function listenEvents(obj: {
 				if (errorMessage)
 					EVENT_ERROR_EMITTER.emit(
 						'add-error',
-						TOAST_ERROR_MESSAGES.CONNECTION_INTERRUPTED,
+						AllErrors['CONNECTION_INTERRUPTED'].message.ptBr,
 					);
 			}
 		}

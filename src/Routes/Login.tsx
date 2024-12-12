@@ -1,12 +1,7 @@
 import { useState } from 'react';
-import {
-	EVENT_ERROR_EMITTER,
-	FIELD_ERRORS,
-	MODAL_ERRORS,
-	TOAST_ERROR_MESSAGES,
-} from '../Utils/Constants';
+import { AllErrors, EVENT_ERROR_EMITTER } from '../Utils/Constants';
 import { useForm } from 'react-hook-form';
-import { BackendError, LoginFormSubmit } from '../Utils/Types';
+import { ErrorEntry, LoginFormSubmit } from '../Utils/Types';
 import { useNavigate } from 'react-router-dom';
 import { loginUser } from '../Utils/Functions/User';
 import { Button, Card, Input, Link } from '@nextui-org/react';
@@ -35,39 +30,70 @@ function Login() {
 					className="flex flex-col h-100 w-100 justify-content-center gap-2 p-4"
 					onSubmit={handleSubmit(async (result: LoginFormSubmit) => {
 						loginUser({ ...result })
-							.then((data: any) => {
+							.then((_) => {
 								navigate('/');
 							})
-							.catch(async (errors: any) => {
-								// error from backend
-								const errorsObj: BackendError[] = errors.errors;
-								let containsUsername = errorsObj.find((e) =>
-									e.path.includes('username'),
-								);
-								let containsPassword = errorsObj.find((e) =>
-									e.path.includes('password'),
-								);
+							.catch(
+								async (response: { errors: ErrorEntry[] }) => {
+									// error from backend
+									const errorsObj = response.errors;
 
-								if (!containsUsername && !containsPassword) {
-									// uknown error
-									EVENT_ERROR_EMITTER.emit(
-										'add-error',
-										TOAST_ERROR_MESSAGES.UNKNOWN_ERROR,
+									let containsUsername = errorsObj.find(
+										(e) =>
+											e.field?.includes('username') ||
+											e.code
+												.toLowerCase()
+												.includes('username'),
 									);
-								}
+									let containsPassword = errorsObj.find(
+										(e) =>
+											e.field?.includes('password') ||
+											e.code
+												.toLowerCase()
+												.includes('password'),
+									);
 
-								if (containsUsername) setError('username', {});
-								else clearErrors('username');
-								if (containsPassword) setError('password', {});
-								else clearErrors('password');
-							});
+									if (
+										!containsUsername &&
+										!containsPassword
+									) {
+										// uknown error
+										errorsObj.forEach((element) => {
+											EVENT_ERROR_EMITTER.emit(
+												'add-error',
+												AllErrors[element.code].message
+													.ptBr,
+											);
+										});
+									}
+
+									if (containsUsername)
+										setError('username', {
+											message:
+												AllErrors[containsUsername.code]
+													.message.ptBr,
+										});
+									else clearErrors('username');
+									if (containsPassword)
+										setError('password', {
+											message:
+												AllErrors[containsPassword.code]
+													.message.ptBr,
+										});
+									else clearErrors('password');
+								},
+							);
 					})}
 				>
 					<Input
 						type="text"
 						label="Username"
 						isInvalid={!!errors.username}
-						errorMessage={FIELD_ERRORS.UNKNOWN_USERNAME}
+						errorMessage={
+							errors.username
+								? errors.username.message
+								: AllErrors['INVALID_USERNAME'].message.ptBr
+						}
 						{...register('username')}
 					/>
 
@@ -95,7 +121,11 @@ function Login() {
 							errorMessage: 'm-0 fs-6 text-danger',
 						}}
 						isInvalid={!!errors.password}
-						errorMessage={FIELD_ERRORS.WRONG_PASSWORD}
+						errorMessage={
+							errors.password
+								? errors.password.message
+								: AllErrors['INVALID_PASSWORD'].message.ptBr
+						}
 					/>
 					<Button
 						variant="solid"

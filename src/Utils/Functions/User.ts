@@ -1,6 +1,6 @@
 import { execRequest, getCurrentHost as getCurrentHost } from './Functions';
 import { RegisterFormSubmit, User, UserCredentials } from '../Types';
-import { TOAST_ERROR_MESSAGES } from '../Constants';
+import { AllErrors } from '../Constants';
 
 export const registerUser = (user: RegisterFormSubmit): Promise<void> =>
 	new Promise((r, _rj) =>
@@ -9,7 +9,6 @@ export const registerUser = (user: RegisterFormSubmit): Promise<void> =>
 			method: 'POST',
 			customAuth: null,
 			options: { content: user, headers: { Authorization: null } },
-			errorMessage: TOAST_ERROR_MESSAGES.REGISTER_ERROR,
 			onSucess: r,
 			onFail: _rj,
 		}),
@@ -22,7 +21,6 @@ export const loginUser = (user: UserCredentials): Promise<any> =>
 			method: 'POST',
 			options: { content: user },
 			customAuth: null,
-			errorMessage: TOAST_ERROR_MESSAGES.LOGIN_ERROR,
 			onSucess: r,
 			onFail: _rj,
 		}),
@@ -33,7 +31,6 @@ export const getAvailableUsers = (params?: string): Promise<User[]> =>
 		execRequest({
 			endpoint: `/api/users${params || ''}`,
 			method: 'GET',
-			errorMessage: TOAST_ERROR_MESSAGES.GET_USERS_ERROR,
 			onSucess: r,
 		}),
 	);
@@ -44,7 +41,6 @@ export const getUser = (id: string): Promise<User> =>
 			endpoint: `/api/users/${id}`,
 			method: 'GET',
 			onSucess: r,
-			errorMessage: TOAST_ERROR_MESSAGES.GET_USERS_ERROR,
 		}),
 	);
 
@@ -53,7 +49,6 @@ export const getCurrentUser = (): Promise<User> =>
 		execRequest({
 			endpoint: `/api/users/current`,
 			method: 'GET',
-			errorMessage: TOAST_ERROR_MESSAGES.GET_USERS_ERROR,
 			onSucess: r,
 		}),
 	);
@@ -121,7 +116,6 @@ export const deleteUser = (onFail: () => void) =>
 	execRequest({
 		endpoint: '/api/users/current',
 		method: 'DELETE',
-		errorMessage: TOAST_ERROR_MESSAGES.DELETE_ACCOUNT_ERROR,
 		onSucess: () => {
 			window.open(window.location.href, '_self');
 		},
