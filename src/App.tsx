@@ -2,10 +2,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { check_user_logged_in, get_auth_token } from './utils/functions/user';
-import LoadingBar from './components/loading_bar';
-import { EVENT_EMITTER } from './utils/constants';
-import PopupErrorMessage from './components/PopupErrorMessage';
+import { checkUserSession, getAuthToken } from './Utils/Functions/User';
+import LoadingBar from './Components/LoadingBar';
+import { EVENT_EMITTER } from './Utils/Constants';
+import PopupErrorMessage from './Components/PopupErrorMessage';
 
 function App() {
 	const [loading, setLoading] = useState(true);
@@ -16,7 +16,7 @@ function App() {
 
 	useEffect(() => {
 		if (firstTime.current) {
-			check_user_logged_in(
+			checkUserSession(
 				() => {
 					// on fail
 					if (
