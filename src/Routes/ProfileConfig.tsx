@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getCurrentUser, refreshUserToken } from '../Utils/Functions/User';
-import { RegisterFormSubmit, User } from '../Utils/Types';
+import { ErrorEntry, RegisterFormSubmit, User } from '../Utils/Types';
 import LoadingBar from '../Components/LoadingBar';
 import { getCurrentHost } from '../Utils/Functions/Functions';
 import ProfilePicture from '../Components/ProfilePicture';
@@ -32,6 +32,7 @@ function ProfileConfig() {
 	const {
 		register,
 		formState: { errors },
+		setError,
 	} = useForm<RegisterFormSubmit>({
 		mode: 'onChange',
 	});
@@ -94,8 +95,6 @@ function ProfileConfig() {
 							if (errors.name) return;
 							const execRequest = () => {
 								let formData = new FormData();
-								formData.append('userName', name!);
-
 								if (
 									profilePicture &&
 									profilePicture.length !== 0
@@ -105,7 +104,7 @@ function ProfileConfig() {
 										profilePicture[0],
 									); // Ensure it's a File object
 									formData.append(
-										'profile_picture',
+										'profilePicture',
 										profilePicture[0],
 									);
 								}
@@ -121,7 +120,9 @@ function ProfileConfig() {
 
 								request.open(
 									'PATCH',
-									getCurrentHost('/api/users/current'),
+									getCurrentHost(
+										`/api/users/current${name ? '?name=' + name : ''}`,
+									),
 									true,
 								);
 
@@ -155,12 +156,42 @@ function ProfileConfig() {
 														].message.ptBr,
 													);
 												});
-										else
-											console.error(
-												'Upload failed:',
-												request.status,
-												request.statusText,
-											);
+										else {
+											const errorsObj = JSON.parse(
+												request.responseText,
+											).errors;
+
+											let containsFullname =
+												errorsObj.find(
+													(e: ErrorEntry) =>
+														e.field?.includes(
+															'fullname',
+														) ||
+														e.code
+															.toLowerCase()
+															.includes(
+																'fullname',
+															),
+												);
+											console.log(containsFullname);
+											if (containsFullname)
+												setError('name', {
+													message:
+														AllErrors[
+															containsFullname
+																.code
+														].message.ptBr,
+												});
+											else
+												errorsObj.forEach(
+													(err: ErrorEntry) =>
+														EVENT_ERROR_EMITTER.emit(
+															'add-error',
+															AllErrors[err.code]
+																.message.ptBr,
+														),
+												);
+										}
 										setLoading(false);
 									}
 								};
@@ -180,11 +211,34 @@ function ProfileConfig() {
 												);
 											});
 									} else {
-										EVENT_ERROR_EMITTER.emit(
-											'add-error',
-											AllErrors['CONFIG_SAVE_ERROR']
-												.message.ptBr,
+										const errorsObj = JSON.parse(
+											request.responseText,
+										).errors;
+
+										let containsFullname = errorsObj.find(
+											(e: ErrorEntry) =>
+												e.field?.includes('fullname') ||
+												e.code
+													.toLowerCase()
+													.includes('fullname'),
 										);
+										console.log(containsFullname);
+										if (containsFullname)
+											setError('name', {
+												message:
+													AllErrors[
+														containsFullname.code
+													].message.ptBr,
+											});
+										else
+											errorsObj.forEach(
+												(err: ErrorEntry) =>
+													EVENT_ERROR_EMITTER.emit(
+														'add-error',
+														AllErrors[err.code]
+															.message.ptBr,
+													),
+											);
 									}
 								};
 								// Send the formData (automatically sets the proper content-type for multipart data)

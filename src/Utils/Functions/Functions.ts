@@ -207,7 +207,7 @@ export async function uploadFiles(files: File[], messageId: string) {
 
 		let request = new XMLHttpRequest();
 
-		const url = getCurrentHost(`/api/upload?message_id=${messageId}`);
+		const url = getCurrentHost(`/api/upload?messageId=${messageId}`);
 		console.log(url);
 		request.withCredentials = true;
 
@@ -357,10 +357,13 @@ export async function listenEvents(obj: {
 	tries: number;
 	errorMessage?: string;
 	onError?: (reason: number | string) => void;
+	authToken?: string;
 }) {
-	const { onData, endpoint, onError, errorMessage, tries, args } = obj;
+	const { onData, endpoint, onError, errorMessage, tries, args, authToken } =
+		obj;
 
-	const token = await getAuthToken();
+	const token = authToken || (await getAuthToken());
+
 	let socket = new WebSocket(
 		getCurrentHost(
 			`${endpoint}?token=${token}${args ? `&${args}` : ''}`,
@@ -398,7 +401,7 @@ export async function listenEvents(obj: {
 		);
 		if (tries > 0) {
 			setTimeout(() => {
-				listenEvents({ ...obj, tries: tries - 1 });
+				listenEvents({ ...obj, tries: tries - 1, authToken: token });
 			}, RETRY_CONNECTION_TIMEOUT);
 		} else {
 			if (errorMessage)
@@ -414,14 +417,17 @@ export async function listenEvents(obj: {
 		if (!forcedClose) {
 			if (tries > 0) {
 				setTimeout(() => {
-					listenEvents({ ...obj, tries: tries - 1 });
+					listenEvents({
+						...obj,
+						tries: tries - 1,
+						authToken: token,
+					});
 				}, RETRY_CONNECTION_TIMEOUT);
 			} else {
-				if (errorMessage)
-					EVENT_ERROR_EMITTER.emit(
-						'add-error',
-						AllErrors['CONNECTION_INTERRUPTED'].message.ptBr,
-					);
+				EVENT_ERROR_EMITTER.emit(
+					'add-error',
+					AllErrors['CONNECTION_INTERRUPTED'].message.ptBr,
+				);
 			}
 		}
 	};
