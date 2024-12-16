@@ -137,7 +137,9 @@ function Login() {
 						<LoginIcon className="text-lg" />
 					</Button>
 					<Link
-						href="/register"
+						onPress={() => {
+							navigate('/register');
+						}}
 						className="align-self-end text-[16px] mt-1"
 					>
 						não tem uma conta? Crie uma!

@@ -154,7 +154,12 @@ function Register() {
 							</button>
 						}
 					/>
-					<Link href="/login" className="align-self-end text-[16px]">
+					<Link
+						className="align-self-end text-[16px]"
+						onPress={() => {
+							navigate('/login');
+						}}
+					>
 						já possui uma conta? Entre já!
 					</Link>
 					<Button className="mt-3" color="primary" type="submit">
