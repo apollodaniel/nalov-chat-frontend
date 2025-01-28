@@ -10,12 +10,11 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
 
-//	build: {
-//		rollupOptions: {
-//			external: ["@emotion/react"]
-//		}
-//	},
-	plugins: [react(),
+	  resolve: {
+    alias: {
+      '~bootstrap': path.resolve(__dirname, 'node_modules/bootstrap'),
+    },
+  },plugins: [react(),
 
 
 	],
