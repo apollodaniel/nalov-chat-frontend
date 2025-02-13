@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import '../../node_modules/bootstrap/dist/css/bootstrap.min.css';
+import '~bootstrap/dist/css/bootstrap.min.css';
 import { delete_user, get_current_user } from '../utils/functions/user';
 import ConfirmationPopup from '../components/confirmation_popup';
 import { useNavigate } from 'react-router-dom';

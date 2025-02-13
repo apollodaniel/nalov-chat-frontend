@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { get_current_host } from '../utils/functions/functions';
 import { Attachment } from '../utils/types';
-import 'react-pdf/dist/Page/AnnotationLayer.css';
-import 'react-pdf/dist/Page/TextLayer.css';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { Card } from '@nextui-org/react';
 import AudioPlayer from './audio_player';
