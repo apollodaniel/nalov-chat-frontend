@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import '../node_modules/bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
+import '~bootstrap/dist/css/bootstrap.min.css';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { checkUserSession, getAuthToken } from './Utils/Functions/User';
 import LoadingBar from './Components/LoadingBar';
