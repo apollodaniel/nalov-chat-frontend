@@ -12,6 +12,9 @@ import { login_user, register_user } from '../utils/functions/user';
 import { parse_errors } from '../utils/functions/functions';
 import { useNavigate } from 'react-router-dom';
 import { isAxiosError } from 'axios';
+import { Button, Card, Input, Link } from '@nextui-org/react';
+import RevealPassIcon from '@mui/icons-material/Visibility';
+import RevealPassIconOff from '@mui/icons-material/VisibilityOff';
 
 function Register() {
 	const {
@@ -28,9 +31,10 @@ function Register() {
 		string | undefined
 	>(undefined);
 	const navigate = useNavigate();
+	const [passwordVisible, setPasswordVisible] = useState(false);
 	return (
 		<main className="d-flex flex-column w-100 h-100 justify-content-center align-items-center">
-			<div className="card w-100 py-5" style={{ maxWidth: '600px' }}>
+			<Card className="w-100 py-5" style={{ maxWidth: '600px' }}>
 				<form
 					className="d-flex flex-column h-100 w-100 justify-content-center gap-1 p-4"
 					onSubmit={handleSubmit(async (data: RegisterFormSubmit) => {
@@ -58,80 +62,88 @@ function Register() {
 						}
 					})}
 				>
-					<div className="form-floating m-0">
-						<input
-							className="form-control"
-							type="text"
-							{...register('name', {
-								pattern: field_patterns.name,
-							})}
-						/>
-						<label>Name</label>
-						{errors.name && (
-							<p className="m-0 fs-6 text-danger">
-								{field_errors.invalid_firstname_and_lastname}
-							</p>
-						)}
-					</div>
-					<div className="form-floating m-0">
-						<input
-							className="form-control"
-							type="text"
-							{...register('username', {
-								pattern: field_patterns.username,
-							})}
-						/>
-						<label>Username</label>
-						{(errors.username || usernameErrorMessage) && (
-							<p className="m-0 fs-6 text-danger">
-								{field_errors.username_exists}
-							</p>
-						)}
-					</div>
-					<div className="form-floating m-0">
-						<input
-							className="form-control"
-							type="password"
-							{...register('password', {
-								pattern: field_patterns.password,
-							})}
-						/>
-						<label>Password</label>
-						{errors.password && (
-							<p className="m-0 fs-6 text-danger">
-								{field_errors.invalid_password}
-							</p>
-						)}
-					</div>
-					<div className="form-floating m-0">
-						<input
-							className="form-control"
-							type="password"
-							{...register('confirm_password', {
-								validate: (val) => {
-									if (watch('password') != val) {
-										return field_errors.password_mismatch;
-									}
-								},
-							})}
-						/>
-						<label>Confirm password</label>
-						{errors.confirm_password && (
-							<p className="m-0 fs-6 text-danger">
-								{field_errors.password_mismatch}
-							</p>
-						)}
-					</div>
-					<a href="/login" className="align-self-end link-primary">
-						já possui uma conta? Entre já!
-					</a>
-					<input
-						className="mt-3 btn btn-primary"
-						type="submit"
-						value="Register"
+					<Input
+						type="text"
+						isInvalid={!!errors.name}
+						label="Nome"
+						errorMessage={
+							field_errors.invalid_firstname_and_lastname
+						}
+						{...register('name', {
+							pattern: field_patterns.name,
+						})}
 					/>
+					<Input
+						type="text"
+						isInvalid={!!errors.username}
+						label="Nome de usuário"
+						errorMessage={field_errors.username_exists}
+						{...register('username', {
+							pattern: field_patterns.username,
+						})}
+					/>
+					<Input
+						isInvalid={!!errors.password}
+						label="Senha"
+						type={passwordVisible ? 'text' : 'password'}
+						endContent={
+							<button
+								className="focus:outline-none"
+								type="button"
+								onClick={() =>
+									setPasswordVisible(!passwordVisible)
+								}
+								aria-label="toggle password visibility"
+							>
+								{passwordVisible ? (
+									<RevealPassIcon className="text-2xl text-default-400 pointer-events-none" />
+								) : (
+									<RevealPassIconOff className="text-2xl text-default-400 pointer-events-none" />
+								)}
+							</button>
+						}
+						errorMessage={field_errors.invalid_password}
+						{...register('password', {
+							pattern: field_patterns.username,
+						})}
+					/>
+					<Input
+						type={passwordVisible ? 'text' : 'password'}
+						isInvalid={!!errors.confirm_password}
+						label="Confirmar Senha"
+						errorMessage={field_errors.password_mismatch}
+						{...register('confirm_password', {
+							validate: (val) => {
+								if (watch('password') != val) {
+									return field_errors.password_mismatch;
+								}
+							},
+						})}
+						endContent={
+							<button
+								className="focus:outline-none"
+								type="button"
+								onClick={() =>
+									setPasswordVisible(!passwordVisible)
+								}
+								aria-label="toggle password visibility"
+							>
+								{passwordVisible ? (
+									<RevealPassIcon className="text-2xl text-default-400 pointer-events-none" />
+								) : (
+									<RevealPassIconOff className="text-2xl text-default-400 pointer-events-none" />
+								)}
+							</button>
+						}
+					/>
+					<Link href="/login" className="align-self-end text-[16px]">
+						já possui uma conta? Entre já!
+					</Link>
+					<Button className="mt-3" color="primary" type="submit">
+						Registrar-se
+					</Button>
 				</form>
-			</div>
+			</Card>
 		</main>
 	);
 }

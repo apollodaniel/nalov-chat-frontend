@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
 	--secondary-color: #373b3f;
 	--border-radius: 0.5rem;
@@ -49,4 +53,36 @@
 		border-radius: 12px;
 		background-color: var(--secondary-color);
 	}
+}
+
+.background-gradient {
+	background: rgb(28, 10, 46);
+	background: -moz-linear-gradient(
+		153deg,
+		rgba(28, 10, 46, 1) 0%,
+		rgba(16, 6, 26, 1) 12%,
+		rgba(0, 0, 0, 1) 46%,
+		rgba(3, 0, 1, 1) 62%,
+		rgba(14, 2, 6, 1) 94%,
+		rgba(25, 3, 10, 1) 100%
+	);
+	background: -webkit-linear-gradient(
+		153deg,
+		rgba(28, 10, 46, 1) 0%,
+		rgba(16, 6, 26, 1) 12%,
+		rgba(0, 0, 0, 1) 46%,
+		rgba(3, 0, 1, 1) 62%,
+		rgba(14, 2, 6, 1) 94%,
+		rgba(25, 3, 10, 1) 100%
+	);
+	background: linear-gradient(
+		153deg,
+		rgba(28, 10, 46, 1) 0%,
+		rgba(16, 6, 26, 1) 12%,
+		rgba(0, 0, 0, 1) 46%,
+		rgba(3, 0, 1, 1) 62%,
+		rgba(14, 2, 6, 1) 94%,
+		rgba(25, 3, 10, 1) 100%
+	);
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#1c0a2e",endColorstr="#19030a",GradientType=1);
 }

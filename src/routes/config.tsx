@@ -4,47 +4,53 @@ import { delete_user, get_current_user } from '../utils/functions/user';
 import ConfirmationPopup from '../components/confirmation_popup';
 import { useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { Button } from '@nextui-org/react';
 
 function Config() {
 	const [showDeleteAccountPopup, setShowDeleteAccountPopup] = useState(false);
 	const navigate = useNavigate();
 
 	return (
-		<div
-			className="m-3 my-4"
-			style={{ maxWidth: '800px', minWidth: '500px' }}
-		>
-			<button
-				className="btn btn-dark d-flex align-items-center justify-content-center align-self-start"
+		<div className="m-3 my-4 lg:w-[600px] lg:*:*:text-medium max-lg:*:*-text-small max-md:*:text-2xl  max-lg:w-[50%] max-sm:w-[80%]">
+			<Button
+				className="flex items-center justify-center self-start mb-3 max-lg:mb-15 max-md:absolute max-md:top-[5vh]"
 				style={{ height: '50px', width: '50px' }}
 				onClick={() => navigate('/')}
+				isIconOnly
+				variant="ghost"
 			>
 				<ArrowBackIcon />
-			</button>
-			<h3 className="my-5 text-center mx-4">Configurações</h3>
-			<ul className="list-group rounded-3 mx-3">
-				<li
-					className="list-group-item list-group-item-action d-flex align-items-center"
-					style={{ height: '60px' }}
+			</Button>
+			<h1 className="text-3xl text-center mb-10 max-md:mb-5 ">
+				Configurações
+			</h1>
+			<div className="flex flex-col gap-2 ">
+				<Button
+					key={'profile_config'}
+					className="flex items-center p-6 max-md:p-4"
 					onClick={() => {
 						navigate('/config/profile');
 					}}
+					variant="flat"
 				>
-					Configurações do perfil
-				</li>
-				<li
-					className="list-group-item list-group-item-danger list-group-item-action d-flex align-items-center"
-					style={{ height: '60px' }}
+					Perfil
+				</Button>
+
+				<Button
+					key={'delete_account'}
+					className="flex items-center p-6 max-md:p-4"
 					onClick={() => setShowDeleteAccountPopup(true)}
+					color="danger"
+					variant="flat"
 				>
 					Apagar minha conta
-				</li>
-			</ul>
+				</Button>
+			</div>
 
 			<ConfirmationPopup
 				visible={showDeleteAccountPopup}
 				title="Aviso!"
-				content="Você realmente deseja apagar sua conta? :/"
+				content="Você realmente deseja apagar sua conta? Essa é uma ação irreversivel e apagará todos os seus dados!"
 				onCancel={() => setShowDeleteAccountPopup(false)}
 				onConfirm={() =>
 					delete_user(() => setShowDeleteAccountPopup(false))

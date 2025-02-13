@@ -1,9 +1,5 @@
 import { useEffect, useState } from 'react';
-import {
-	get_auth_token,
-	get_current_user,
-	refresh_user_token,
-} from '../utils/functions/user';
+import { get_current_user, refresh_user_token } from '../utils/functions/user';
 import { User } from '../utils/types';
 import LoadingBar from '../components/loading_bar';
 import { execRequest, get_current_host } from '../utils/functions/functions';
@@ -12,6 +8,7 @@ import { useBlocker, useNavigate } from 'react-router-dom';
 import ConfirmationPopup from '../components/confirmation_popup';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { EVENT_ERROR_EMITTER, toast_error_messages } from '../utils/constants';
+import { Button, Input } from '@nextui-org/react';
 
 function ProfileConfig() {
 	const [user, setUser] = useState<User | undefined>();
@@ -54,13 +51,15 @@ function ProfileConfig() {
 			className="w-100 m-5 d-flex flex-column align-items-center justify-content-center"
 			style={{ maxWidth: '600px', minHeight: '400px' }}
 		>
-			<button
-				className="btn btn-dark d-flex align-items-center justify-content-center align-self-start"
+			<Button
+				className="flex items-center justify-center self-start mb-3 max-lg:mb-15 max-md:absolute max-md:top-[5vh]"
 				style={{ height: '50px', width: '50px' }}
 				onClick={() => navigate('/config')}
+				isIconOnly
+				variant="ghost"
 			>
 				<ArrowBackIcon />
-			</button>
+			</Button>
 			{loading ? (
 				<LoadingBar />
 			) : (
@@ -194,36 +193,30 @@ function ProfileConfig() {
 							/>
 						</div>
 
-						<div className="form-floating w-100">
-							<input
-								type="text"
-								className="form-control"
-								value={user!.username}
-								disabled={true}
-							/>
-							<label>Username</label>
-						</div>
-						<div className="form-floating w-100">
-							<input
-								type="text"
-								className="form-control"
-								value={name!}
-								onChange={(event) => {
-									setChanged(true);
-									setName(event.target.value);
-								}}
-							/>
-							<label htmlFor="name">Name</label>
-						</div>
-						<button
-							className={
-								'btn btn-primary mt-3 ' +
-								(changed ? '' : 'disabled')
-							}
+						<Input
+							type="text"
+							value={user!.username}
+							isDisabled={true}
+							label="Username"
+						/>
+						<Input
+							type="text"
+							value={name!}
+							maxLength={100}
+							onChange={(event) => {
+								setChanged(true);
+								setName(event.target.value);
+							}}
+							label="Name"
+						/>
+						<Button
+							className="mt-3"
+							isDisabled={!changed}
 							type="submit"
+							color={!changed ? 'default' : 'primary'}
 						>
 							Salvar
-						</button>
+						</Button>
 					</form>
 
 					{/* Unsaved changes popup */}
@@ -231,7 +224,7 @@ function ProfileConfig() {
 						visible={blocker.state === 'blocked'}
 						title="Aviso"
 						content={
-							'Você tem certeza que deseja deixar a página? Existem configurações não salvas'
+							'Você tem certeza que deseja deixar a página? Existem configurações não salvas!'
 						}
 						onCancel={() => blocker.reset && blocker.reset()}
 						onConfirm={() => blocker.proceed && blocker.proceed()}

@@ -8,12 +8,25 @@ import Home from './routes/home.tsx';
 import Chat from './routes/chat.tsx';
 import Config from './routes/config.tsx';
 import ProfileConfig from './routes/profile_config.tsx';
+import { NextUIProvider } from '@nextui-org/react';
 
 const router = createBrowserRouter([
 	{
 		path: '/',
-		errorElement: <NotFound />,
-		element: <App />,
+		errorElement: (
+			<NextUIProvider>
+				<main className="h-[100vh] w-[100vw] flex flex-column justify-center dark text-foreground bg-background">
+					<NotFound />
+				</main>
+			</NextUIProvider>
+		),
+		element: (
+			<NextUIProvider className="dark">
+				<main className="h-[100vh] w-[100vw] flex flex-column justify-center dark text-foreground background-gradient">
+					<App />
+				</main>
+			</NextUIProvider>
+		),
 		children: [
 			{
 				path: '/',

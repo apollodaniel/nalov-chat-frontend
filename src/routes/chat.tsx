@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Attachment, Message, PositionOffset, User } from '../utils/types';
+import { Message, User } from '../utils/types';
 import LoadingBar from '../components/loading_bar';
 import { get_user } from '../utils/functions/user';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -12,20 +12,23 @@ import {
 	send_message,
 } from '../utils/functions/chat';
 import { DATETIME_FORMATTER, EVENT_EMITTER } from '../utils/constants';
-import {
-	format_recording_audio_time,
-	get_current_host,
-	upload_files,
-} from '../utils/functions/functions';
+import { get_current_host, upload_files } from '../utils/functions/functions';
 import MessageContainer from '../components/message_container';
-import { Modal } from 'react-bootstrap';
-import MessageContextMenu from '../components/message_context_menu';
-import AttachFileIcon from '@mui/icons-material/AttachFile';
-import SendIcon from '@mui/icons-material/Send';
-import MicIcon from '@mui/icons-material/Mic';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import CloseIcon from '@mui/icons-material/Close';
+import {
+	Button,
+	Modal,
+	ModalBody,
+	ModalContent,
+	ModalFooter,
+	ModalHeader,
+	User as UserWrapper,
+} from '@nextui-org/react';
+import NormalMessageInput from '../components/message_input/normal';
+import RecordAudioInput from '../components/message_input/record_audio';
+import EditMessageInput from '../components/message_input/edit';
+import AttachmentDownloadPopup from '../components/attachment_download';
 
 function Chat() {
 	const [messages, setMessages] = useState<Message[]>([]);
@@ -51,10 +54,11 @@ function Chat() {
 	const [showMessageDeletePopup, setShowMessageDeletePopup] = useState<
 		Message | undefined
 	>(undefined);
+	const [
+		showMessageAttachmentDownloadPopup,
+		setShowMessageAttachmentDownloadPopup,
+	] = useState<Message | undefined>(undefined);
 
-	const [showContextMenu, setShowContextMenu] = useState<
-		[Message, PositionOffset] | undefined
-	>();
 	const getMessages = async () => {
 		try {
 			const messages = await get_messages(params['id']!);
@@ -107,7 +111,7 @@ function Chat() {
 		setSendMessageContent('');
 		setSelectedAttachments([]);
 	};
-	const editMessage = async () => {
+	const sendEditedMessage = async () => {
 		setEditingMessage(undefined);
 		setSendMessageContent('');
 		await patch_message(editingMessage!.id, {
@@ -121,6 +125,7 @@ function Chat() {
 	const cancelAudio = useRef(false);
 	const chunks = useRef<Blob[]>([]);
 	const time_interval = useRef<NodeJS.Timeout>();
+	const recordedAudioMimeType = useRef<string | undefined>(undefined);
 	const recordAudio = async () => {
 		try {
 			const stream = await navigator.mediaDevices.getUserMedia({
@@ -134,6 +139,9 @@ function Chat() {
 				);
 			};
 			mediaRecorder.current.ondataavailable = (blob_event: BlobEvent) => {
+				if (!recordedAudioMimeType.current) {
+					recordedAudioMimeType.current = blob_event.data.type;
+				}
 				if (blob_event.data.size > 0)
 					chunks.current.push(blob_event.data);
 			};
@@ -146,6 +154,7 @@ function Chat() {
 				if (cancelAudio.current) {
 					chunks.current = [];
 					cancelAudio.current = false;
+					recordedAudioMimeType.current = undefined;
 					return;
 				}
 
@@ -153,7 +162,7 @@ function Chat() {
 					chunks.current,
 					'audio_record.weba',
 					{
-						type: 'audio/webm',
+						type: recordedAudioMimeType.current,
 					},
 				);
 				const result = await send_message({
@@ -167,18 +176,20 @@ function Chat() {
 					],
 					receiver_id: params['id']!,
 				});
+
 				if (result && result.message_id) {
-					upload_files([audio_file], result.message_id);
+					await upload_files([audio_file], result.message_id);
 				}
 
 				chunks.current = [];
+				recordedAudioMimeType.current = undefined;
 			};
 
 			mediaRecorder.current.onerror = () => {
 				setRecording(undefined);
 			};
 
-			mediaRecorder.current.start();
+			mediaRecorder.current.start(1000);
 		} catch (err: any) {
 			try {
 				clearInterval(time_interval.current);
@@ -188,9 +199,19 @@ function Chat() {
 		}
 	};
 
+	const firstTime = useRef(true);
 	useEffect(() => {
 		getUser().then(() => {
-			getMessages();
+			getMessages().then(() => {
+				setTimeout(() => {
+					if (bottomRef.current) {
+						(bottomRef.current as any).scrollIntoView({
+							behavior: 'smooth',
+						});
+					}
+					firstTime.current = false;
+				}, 500);
+			});
 		});
 		EVENT_EMITTER.on('updated-attachments', () => {
 			if (bottomRef.current) {
@@ -202,7 +223,7 @@ function Chat() {
 	}, []);
 
 	useEffect(() => {
-		if (bottomRef.current) {
+		if (bottomRef.current && !firstTime.current) {
 			(bottomRef.current as any).scrollIntoView({ behavior: 'smooth' });
 		}
 	}, [messages]);
@@ -210,197 +231,136 @@ function Chat() {
 	return !user ? (
 		<LoadingBar />
 	) : (
-		<div
-			className="w-100 h-100 d-flex flex-column align-items-center justify-content-center"
-			onMouseDown={() => setShowContextMenu(undefined)}
-		>
+		<div className="w-100 h-100 d-flex flex-column align-items-center justify-content-center">
 			<div
-				className="w-100 h-100 d-flex flex-column "
+				className="w-100 h-100 flex flex-col gap-3"
 				style={{ maxHeight: '90vh', maxWidth: '800px' }}
 			>
-				<div
-					className="rounded-0 w-100 p-3 d-flex flex-row gap-3 rounded-top-3"
-					style={{ height: '100px' }}
-				>
-					<button
-						className="btn btn-dark d-flex align-items-center justify-content-center align-self-start"
+				<div className="rounded-0 w-100 flex flex-row gap-5 max-sm:gap-2 max-h-[100px] items-center justify-start rounded-top-3">
+					<Button
+						className="flex items-center justify-center"
 						style={{ height: '50px', width: '50px' }}
 						onClick={() => navigate('/')}
+						isIconOnly
+						variant="ghost"
 					>
 						<ArrowBackIcon />
-					</button>
-					<img
-						className="ratio-1x1 rounded-circle"
-						src={get_current_host(user.profile_picture)}
-						style={{
-							height: '50px',
-							aspectRatio: 1 / 1,
-							objectFit: 'cover',
+					</Button>
+					<UserWrapper
+						className="h-full m-0"
+						avatarProps={{
+							src: get_current_host(user.profile_picture),
+							alt: `${user.name} profile picture`,
+							className: 'h-[70px] max-sm:h-[50px] w-auto m-0',
 						}}
-						alt={`${user.name} profile picture`}
+						name={user.name}
+						description={user.username}
+						classNames={{
+							name: 'text-xl max-sm:text-medium m-0',
+							description: 'text-sm max-sm:text-xs m-0',
+						}}
 					/>
-					<div className="d-flex flex-column align-items-start justify-content-start">
-						<div className="fs-5 fw-bold">{user.name}</div>
-						{user.username}
-					</div>
 				</div>
-				<div
-					className="card w-100 h-100 d-flex flex-column-reverse gap-3 p-4 rounded-3"
-					style={{
-						overflowY: 'auto',
-					}}
-					onScroll={(event) => {
-						console.log(event.currentTarget.scrollTop);
-						if (Math.abs(event.currentTarget.scrollTop) > 700)
-							setShowBottomArrowButton(true);
-						else setShowBottomArrowButton(false);
-					}}
-				>
-					<div className="card-body d-flex flex-column gap-2">
-						{messages.map((msg) => {
-							return (
-								<MessageContainer
-									msg={msg}
-									chat_id={params['id']!}
-									onContextMenu={(msg, pos_offset) =>
-										setShowContextMenu([msg, pos_offset])
-									}
-								/>
-							);
-						})}
-						<div ref={bottomRef}></div>
+				<div className="w-full h-full rounded-2xl border bg-background bg-opacity-25 overflow-hidden chat-container">
+					<div
+						className="h-full w-full flex flex-col-reverse chat-scrollable-container"
+						style={{
+							overflowY: 'auto',
+						}}
+						onScroll={(event) => {
+							if (Math.abs(event.currentTarget.scrollTop) > 500)
+								setShowBottomArrowButton(true);
+							else setShowBottomArrowButton(false);
+						}}
+					>
+						<div className="flex flex-col gap-2 p-4 ">
+							{[
+								...messages.map((msg) => {
+									return (
+										<MessageContainer
+											msg={msg}
+											chat_id={params['id']!}
+											onShowInfo={(msg) => {
+												setShowMessageInfoPopup(msg);
+											}}
+											onDelete={(msg) => {
+												setShowMessageDeletePopup(msg);
+											}}
+											onDownloadAttachment={(msg) => {
+												setShowMessageAttachmentDownloadPopup(
+													msg,
+												);
+											}}
+											onEdit={(msg) => {
+												setEditingMessage(msg);
+												setSendMessageContent(
+													msg.content,
+												);
+											}}
+										/>
+									);
+								}),
+
+								<div
+									className="h-[8px] w-full"
+									ref={bottomRef}
+								></div>,
+							]}
+						</div>
 					</div>
 				</div>
 				{showBottomArrowButton && (
-					<button
-						className="btn btn-primary position-absolute rounded-circle d-flex flex-column justify-content-center align-items-center"
+					<Button
+						className="absolute size-[60px] left-0 right-0 mx-auto rounded-full z-50 "
+						color="default"
+						variant="solid"
 						style={{
-							width: '60px',
-							height: '60px',
-							right: '50%',
 							bottom: '20%',
-							zIndex: '10',
 						}}
 						onClick={() => {
 							(bottomRef.current as any).scrollIntoView({
 								behavior: 'smooth',
 							});
 						}}
+						isIconOnly
 					>
 						<ArrowDownwardIcon />
-					</button>
+					</Button>
 				)}
-				<div className="w-100 rounded-3">
+				<div className="w-full">
 					{editingMessage ? (
 						// editing message input
-						<div className="w-100 rounded-bottom d-flex flex-row gap-1 m-0">
-							<div className="form-floating w-100 h-100 my-1 rounded-3">
-								<input
-									className="form-control h-100 h-100 m-0"
-									type="text"
-									onChange={(event) => {
-										setSendMessageContent(
-											event.target.value,
-										);
-									}}
-									onKeyDownCapture={(event) => {
-										if (event.key == 'Enter') {
-											editMessage();
-										}
-									}}
-									value={sendMessageContent}
-								/>
-								<label>Editing message</label>
-							</div>
-							<button
-								className="btn btn-primary w-auto rounded-3 my-1"
-								onClick={() => {
-									setEditingMessage(undefined);
-									setSendMessageContent('');
-								}}
-								style={{
-									textWrap: 'nowrap',
-								}}
-							>
-								<CloseIcon />
-							</button>
-						</div>
+						<EditMessageInput
+							inputMessageContent={sendMessageContent}
+							setInputMessageContent={setSendMessageContent}
+							setEditingMessage={setEditingMessage}
+							sendEditedMessage={sendEditedMessage}
+						/>
 					) : !Object.is(recording, undefined) ? (
 						// recording audio input
-						<div
-							className="w-100 rounded-0 gap-1 rounded-bottom-3 d-flex flex-row align-items-center justify-content-end m-1"
-							style={{ height: '60px' }}
-						>
-							<p className="m-0 p-0 me-2">
-								{format_recording_audio_time(recording!)}
-							</p>
-							<button
-								className="btn btn-primary h-100 d-flex align-items-center justify-content-center rounded-3 my-1"
-								onClick={() => {
-									cancelAudio.current = true;
-									mediaRecorder.current?.stop();
-								}}
-								style={{ width: '60px' }}
-							>
-								<CloseIcon />
-							</button>
-							<button
-								className="btn btn-primary h-100 d-flex align-items-center justify-content-center rounded-3 my-1"
-								onClick={() => {
-									cancelAudio.current = false;
-									mediaRecorder.current?.stop();
-								}}
-								style={{ width: '60px' }}
-							>
-								<SendIcon />
-							</button>
-						</div>
+						<RecordAudioInput
+							onCancelRecording={() => {
+								cancelAudio.current = true;
+								mediaRecorder.current?.stop();
+							}}
+							onFinishRecording={() => {
+								// sucess
+								cancelAudio.current = false;
+								mediaRecorder.current?.stop();
+							}}
+							recordingTime={recording!}
+						/>
 					) : (
 						// sending message input
-						<div className="d-flex flex-row gap-1">
-							<div className="form-floating w-100 my-1 rounded-3">
-								<input
-									className="form-control"
-									type="text"
-									onChange={(event) => {
-										setSendMessageContent(
-											event.target.value,
-										);
-									}}
-									onKeyDownCapture={(event) => {
-										if (event.key == 'Enter') {
-											sendMessage();
-										}
-									}}
-									value={sendMessageContent}
-								/>
-								<label>
-									Message
-									{selectedAttachments.length > 0 &&
-										` + ${selectedAttachments.map((at) => at.name).join(' + ')}`}
-								</label>
-							</div>
-
-							{/* upload file button */}
-							<button
-								className="btn btn-primary rounded-3 my-1"
-								onClick={() =>
-									(
-										filePickerRef.current! as HTMLElement
-									).click()
-								}
-							>
-								<AttachFileIcon />
-							</button>
-
-							{/* record audio file button */}
-							<button
-								className="btn btn-primary rounded-3 my-1"
-								onClick={() => recordAudio()}
-							>
-								<MicIcon />
-							</button>
-						</div>
+						<NormalMessageInput
+							recordAudio={recordAudio}
+							filePicker={filePickerRef.current! as HTMLElement}
+							inputMessageContent={sendMessageContent}
+							setInputMessageContent={setSendMessageContent}
+							sendMessage={sendMessage}
+							selectedAttachments={selectedAttachments}
+							setSelectedAttachments={setSelectedAttachments}
+						/>
 					)}
 				</div>
 			</div>
@@ -419,138 +379,151 @@ function Chat() {
 				multiple={true}
 			/>
 
-			{showMessageDeletePopup && (
-				<Modal show={true}>
-					<Modal.Header>
-						<Modal.Title>Aviso!!</Modal.Title>
-						<input
-							type="button"
-							className="btn btn-close"
-							onClick={() => setShowMessageDeletePopup(undefined)}
-						/>
-					</Modal.Header>
-					<Modal.Body>
+			<Modal
+				isOpen={!!showMessageDeletePopup}
+				onOpenChange={(open) =>
+					setShowMessageDeletePopup(
+						open ? showMessageDeletePopup : undefined,
+					)
+				}
+				className="dark"
+			>
+				<ModalContent>
+					<ModalHeader>
+						<h1>Aviso!</h1>
+					</ModalHeader>
+					<ModalBody className="inline">
 						Você <b>realmente</b> deseja apagar esta mensagem?
-					</Modal.Body>
-					<Modal.Footer>
-						<button
-							className="btn btn-primary"
-							onClick={() => setShowMessageDeletePopup(undefined)}
-						>
-							Cancelar
-						</button>
-						<button
-							className="btn btn-secondary"
-							onClick={() => {
-								delete_message(showMessageDeletePopup.id);
-								setShowMessageDeletePopup(undefined);
-							}}
-						>
-							Confirmar
-						</button>
-					</Modal.Footer>
-				</Modal>
-			)}
+					</ModalBody>
+					{showMessageDeletePopup && (
+						<ModalFooter>
+							<Button
+								color="default"
+								onClick={() =>
+									setShowMessageDeletePopup(undefined)
+								}
+							>
+								Cancelar
+							</Button>
+							<Button
+								color="danger"
+								onClick={() => {
+									delete_message(showMessageDeletePopup!.id);
+									setShowMessageDeletePopup(undefined);
+								}}
+							>
+								Confirmar
+							</Button>
+						</ModalFooter>
+					)}
+				</ModalContent>
+			</Modal>
 
-			{showMessageInfoPopup && (
-				<Modal show={true}>
-					<Modal.Header>
-						<Modal.Title>Informações da mensagem</Modal.Title>
-						<input
-							type="button"
-							className="btn btn-close"
-							onClick={() => setShowMessageInfoPopup(undefined)}
-						/>
-					</Modal.Header>
-					<Modal.Body
-						className="d-flex flex-column gap-3 text-nowrap overflow-hidden"
-						style={{
-							overflow: 'hidden',
-							whiteSpace: 'nowrap',
-						}}
-					>
-						<div
-							className="mw-100 text-nowrap"
+			<AttachmentDownloadPopup
+				attachments={
+					showMessageAttachmentDownloadPopup
+						? showMessageAttachmentDownloadPopup.attachments
+						: []
+				}
+				isOpen={
+					!Object.is(showMessageAttachmentDownloadPopup, undefined)
+				}
+				onOpenChange={(open) =>
+					!open && setShowMessageAttachmentDownloadPopup(undefined)
+				}
+			/>
+			<Modal
+				isOpen={!!showMessageInfoPopup}
+				className="dark"
+				onOpenChange={(open) =>
+					setShowMessageInfoPopup(
+						open ? showMessageInfoPopup : undefined,
+					)
+				}
+			>
+				<ModalContent>
+					<ModalHeader>
+						<h2>informações da mensagem</h2>
+					</ModalHeader>
+
+					{showMessageInfoPopup && (
+						<ModalBody
+							className="flex flex-col gap-3 text-nowrap overflow-hidden"
 							style={{
 								overflow: 'hidden',
 								whiteSpace: 'nowrap',
-								textOverflow: 'ellipsis',
 							}}
 						>
-							<h6 className="m-0">Conteúdo</h6>
-							<small className="mw-100">
-								{showMessageInfoPopup?.content}
-							</small>
-						</div>
-						<div className="d-flex flex-row gap-1 align-items-center">
-							<h6 className="m-0 me-1">Enviado por</h6>
-							<p className="m-0 fw-bold">
-								{showMessageInfoPopup?.sender_id === user.id
-									? user.username
-									: 'Você'}
-							</p>
-							<h6 className="m-0 mx-1">para</h6>
-							<p className="m-0 fw-bold">
-								{showMessageInfoPopup?.receiver_id === user.id
-									? user.username
-									: 'Você'}
-							</p>
-						</div>
-						{showMessageInfoPopup!.creation_date <
-						showMessageInfoPopup!.last_modified_date ? (
+							<div
+								className="mw-100 text-nowrap"
+								style={{
+									overflow: 'hidden',
+									whiteSpace: 'nowrap',
+									textOverflow: 'ellipsis',
+								}}
+							>
+								<h5 className="m-0">Conteúdo</h5>
+								<small className="mw-100">
+									{showMessageInfoPopup?.content.length == 0
+										? 'Sem conteúdo'
+										: showMessageInfoPopup?.content}
+								</small>
+								<h5 className="m-0">Arquivos</h5>
+								<small className="mw-100">
+									{showMessageInfoPopup!.attachments.length ==
+									0
+										? 'Nenhum anexo enviado'
+										: showMessageInfoPopup?.attachments
+												.map((at) => at.filename)
+												.join(', ')}
+								</small>
+							</div>
+							<div className="d-flex flex-row gap-1 align-items-center">
+								<h6 className="m-0 me-1">
+									Enviado{' '}
+									{showMessageInfoPopup!.sender_id != user.id
+										? 'para'
+										: 'por'}{' '}
+									{user.username}
+								</h6>
+							</div>
+							{showMessageInfoPopup!.creation_date <
+							showMessageInfoPopup!.last_modified_date ? (
+								<div>
+									<h6 className="m-0">
+										Modificado por ultimo
+									</h6>
+									<small>
+										{DATETIME_FORMATTER.format(
+											showMessageInfoPopup?.last_modified_date,
+										)}
+									</small>
+								</div>
+							) : (
+								<div></div>
+							)}
 							<div>
-								<h6 className="m-0">Modificado por ultimo</h6>
+								<h6 className="m-0">Data de criação</h6>
 								<small>
 									{DATETIME_FORMATTER.format(
-										showMessageInfoPopup?.last_modified_date,
+										showMessageInfoPopup?.creation_date,
 									)}
 								</small>
 							</div>
-						) : (
-							<div></div>
-						)}
-						<div>
-							<h6 className="m-0">Data de criação</h6>
-							<small>
-								{DATETIME_FORMATTER.format(
-									showMessageInfoPopup?.creation_date,
-								)}
-							</small>
-						</div>
-						{showMessageInfoPopup.seen_date && (
-							<div>
-								<h6 className="m-0">Visualizado em</h6>
-								<small>
-									{DATETIME_FORMATTER.format(
-										showMessageInfoPopup?.seen_date,
-									)}
-								</small>
-							</div>
-						)}
-					</Modal.Body>
-				</Modal>
-			)}
-			{showContextMenu && (
-				<MessageContextMenu
-					msg={showContextMenu![0]}
-					chat_id={params['id']!}
-					onShowInfo={(msg) => {
-						setShowMessageInfoPopup(msg);
-						setShowContextMenu(undefined);
-					}}
-					onDelete={(msg) => {
-						setShowMessageDeletePopup(msg);
-						setShowContextMenu(undefined);
-					}}
-					onFocusExit={() => setShowContextMenu(undefined)}
-					onEdit={(msg) => {
-						setEditingMessage(msg);
-						setSendMessageContent(msg.content);
-						setShowContextMenu(undefined);
-					}}
-					position_offset={showContextMenu[1]}
-				/>
-			)}
+							{showMessageInfoPopup!.seen_date && (
+								<div>
+									<h6 className="m-0">Visualizado em</h6>
+									<small>
+										{DATETIME_FORMATTER.format(
+											showMessageInfoPopup?.seen_date,
+										)}
+									</small>
+								</div>
+							)}
+						</ModalBody>
+					)}
+				</ModalContent>
+			</Modal>
 		</div>
 	);
 }

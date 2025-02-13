@@ -4,11 +4,7 @@ import '~bootstrap/dist/css/bootstrap.min.css';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { check_user_logged_in, get_auth_token } from './utils/functions/user';
 import LoadingBar from './components/loading_bar';
-import {
-	abortControllerRef,
-	EVENT_EMITTER,
-	EVENT_ERROR_EMITTER,
-} from './utils/constants';
+import { EVENT_EMITTER } from './utils/constants';
 import PopupErrorMessage from './components/PopupErrorMessage';
 
 function App() {
@@ -19,8 +15,6 @@ function App() {
 	const firstTime = useRef(true);
 
 	useEffect(() => {
-		const lastLocation = location.pathname;
-		let currentLocation = location.pathname;
 		if (firstTime.current) {
 			check_user_logged_in(
 				() => {
@@ -53,10 +47,6 @@ function App() {
 			setLoading(true);
 		};
 	}, []);
-
-	// useCallback(() => {
-	//
-	// }, [location])
 
 	return (
 		<main className="d-flex flex-column w-100 h-100 px-4 justify-content-center align-items-center">
